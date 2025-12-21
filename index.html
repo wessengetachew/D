@@ -3,2984 +3,1525 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Complete Mathematical Discovery Platform</title>
+    <title>Mathematical Discovery Platform</title>
     
-    <!-- MathJax for LaTeX rendering -->
+    <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
-    <!-- Three.js for 3D visualization -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
-    <!-- Chart.js for error analysis -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Decimal.js for high precision -->
     <script src="https://cdn.jsdelivr.net/npm/decimal.js@10.4.3/decimal.min.js"></script>
-    
-    <!-- PapaParse for CSV export -->
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-    
-    <!-- OrbitControls for Three.js (inline if CDN fails) -->
-    <script>
-    // Fallback OrbitControls if CDN fails
-    if (typeof THREE === 'undefined') {
-        console.warn('Three.js not loaded, will attempt to load from alternative source');
-    }
-    </script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     
     <style>
-    /* ===== CSS RESET & VARIABLES ===== */
-    :root {
-        /* Light theme variables */
-        --primary-color: #2c3e50;
-        --secondary-color: #3498db;
-        --accent-color: #9b59b6;
-        --success-color: #27ae60;
-        --warning-color: #f39c12;
-        --danger-color: #e74c3c;
-        --text-color: #333;
-        --text-secondary: #666;
-        --bg-color: #fff;
-        --bg-secondary: #f8f9fa;
-        --bg-tertiary: #e9ecef;
-        --border-color: #dee2e6;
-        --shadow: 0 2px 10px rgba(0,0,0,0.1);
-        --transition: all 0.3s ease;
-        
-        /* Spacing */
-        --spacing-xs: 0.5rem;
-        --spacing-sm: 1rem;
-        --spacing-md: 1.5rem;
-        --spacing-lg: 2rem;
-        --spacing-xl: 3rem;
-        
-        /* Border radius */
-        --radius-sm: 4px;
-        --radius-md: 8px;
-        --radius-lg: 12px;
-    }
-    
-    .dark-mode {
-        /* Dark theme variables */
-        --primary-color: #ecf0f1;
-        --secondary-color: #3498db;
-        --accent-color: #9b59b6;
-        --success-color: #2ecc71;
-        --warning-color: #f1c40f;
-        --danger-color: #e74c3c;
-        --text-color: #ecf0f1;
-        --text-secondary: #bdc3c7;
-        --bg-color: #1a1a2e;
-        --bg-secondary: #16213e;
-        --bg-tertiary: #0f3460;
-        --border-color: #2c3e50;
-        --shadow: 0 2px 10px rgba(0,0,0,0.3);
-    }
-    
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    
-    html {
-        scroll-behavior: smooth;
-    }
-    
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        line-height: 1.6;
-        color: var(--text-color);
-        background-color: var(--bg-color);
-        transition: var(--transition);
-        padding-top: 80px;
-    }
-    
-    /* ===== LAYOUT ===== */
-    .container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 0 var(--spacing-md);
-    }
-    
-    /* Header */
-    .main-header {
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        color: white;
-        padding: var(--spacing-lg);
-        text-align: center;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 1000;
-        box-shadow: var(--shadow);
-    }
-    
-    .main-header h1 {
-        font-size: 2.2rem;
-        margin-bottom: var(--spacing-xs);
-        font-weight: 300;
-    }
-    
-    .main-header .subtitle {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        font-weight: 300;
-    }
-    
-    .author-info {
-        margin-top: var(--spacing-sm);
-        font-size: 0.9rem;
-        opacity: 0.8;
-    }
-    
-    /* Tab Navigation */
-    .tabs-nav {
-        display: flex;
-        background: var(--bg-secondary);
-        border-bottom: 2px solid var(--border-color);
-        position: sticky;
-        top: 140px;
-        z-index: 999;
-        overflow-x: auto;
-    }
-    
-    .tab-button {
-        padding: var(--spacing-md) var(--spacing-lg);
-        background: none;
-        border: none;
-        color: var(--text-color);
-        cursor: pointer;
-        font-size: 1rem;
-        transition: var(--transition);
-        white-space: nowrap;
-        border-bottom: 3px solid transparent;
-    }
-    
-    .tab-button:hover {
-        background: var(--bg-tertiary);
-        color: var(--secondary-color);
-    }
-    
-    .tab-button.active {
-        background: var(--bg-color);
-        color: var(--secondary-color);
-        border-bottom-color: var(--secondary-color);
-        font-weight: 600;
-    }
-    
-    /* Tab Content */
-    .tabs-content {
-        padding: var(--spacing-lg) 0;
-    }
-    
-    .tab-content {
-        display: none;
-        animation: fadeIn 0.5s ease;
-    }
-    
-    .tab-content.active {
-        display: block;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    /* ===== COMPONENTS ===== */
-    .section {
-        background: var(--bg-secondary);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-lg);
-        margin-bottom: var(--spacing-lg);
-        box-shadow: var(--shadow);
-        border: 1px solid var(--border-color);
-    }
-    
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: var(--spacing-md);
-        padding-bottom: var(--spacing-sm);
-        border-bottom: 2px solid var(--border-color);
-    }
-    
-    .section-title {
-        font-size: 1.5rem;
-        color: var(--secondary-color);
-        font-weight: 600;
-    }
-    
-    .control-group {
-        background: var(--bg-tertiary);
-        padding: var(--spacing-md);
-        border-radius: var(--radius-md);
-        margin-bottom: var(--spacing-md);
-    }
-    
-    .control-row {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-md);
-        margin-bottom: var(--spacing-sm);
-        flex-wrap: wrap;
-    }
-    
-    .control-label {
-        min-width: 150px;
-        font-weight: 500;
-        color: var(--text-secondary);
-    }
-    
-    input[type="range"] {
-        flex: 1;
-        min-width: 200px;
-    }
-    
-    input[type="number"], input[type="text"] {
-        padding: 8px 12px;
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-sm);
-        background: var(--bg-color);
-        color: var(--text-color);
-        min-width: 120px;
-    }
-    
-    button {
-        padding: 8px 16px;
-        background: var(--secondary-color);
-        color: white;
-        border: none;
-        border-radius: var(--radius-sm);
-        cursor: pointer;
-        transition: var(--transition);
-        font-weight: 500;
-    }
-    
-    button:hover {
-        background: #2980b9;
-        transform: translateY(-1px);
-    }
-    
-    button:active {
-        transform: translateY(0);
-    }
-    
-    .btn-secondary {
-        background: var(--text-secondary);
-    }
-    
-    .btn-success {
-        background: var(--success-color);
-    }
-    
-    .btn-warning {
-        background: var(--warning-color);
-    }
-    
-    .btn-danger {
-        background: var(--danger-color);
-    }
-    
-    .stat-card {
-        background: var(--bg-color);
-        padding: var(--spacing-md);
-        border-radius: var(--radius-md);
-        border-left: 4px solid var(--secondary-color);
-        margin-bottom: var(--spacing-sm);
-    }
-    
-    .stat-card .label {
-        font-size: 0.9rem;
-        color: var(--text-secondary);
-        margin-bottom: 4px;
-    }
-    
-    .stat-card .value {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--secondary-color);
-    }
-    
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: var(--spacing-sm);
-        margin-top: var(--spacing-md);
-    }
-    
-    /* Formula boxes */
-    .formula-box {
-        background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
-        border-left: 4px solid var(--accent-color);
-        padding: var(--spacing-md);
-        margin: var(--spacing-md) 0;
-        border-radius: var(--radius-sm);
-        font-family: 'Cambria Math', serif;
-    }
-    
-    .formula-box .title {
-        color: var(--accent-color);
-        font-weight: 600;
-        margin-bottom: var(--spacing-xs);
-        font-size: 1.1rem;
-    }
-    
-    /* Color-coded math boxes */
-    .definition {
-        border-left: 4px solid #3498db;
-        background: rgba(52, 152, 219, 0.1);
-    }
-    
-    .lemma {
-        border-left: 4px solid #9b59b6;
-        background: rgba(155, 89, 182, 0.1);
-    }
-    
-    .theorem {
-        border-left: 4px solid #e74c3c;
-        background: rgba(231, 76, 60, 0.1);
-    }
-    
-    .proof {
-        border-left: 4px solid #27ae60;
-        background: rgba(39, 174, 96, 0.1);
-    }
-    
-    /* Canvas containers */
-    .visualization-container {
-        position: relative;
-        width: 100%;
-        background: var(--bg-color);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-md);
-        overflow: hidden;
-        margin-bottom: var(--spacing-md);
-    }
-    
-    #canvas2d {
-        width: 100%;
-        height: 600px;
-        cursor: crosshair;
-    }
-    
-    #canvas3d-container {
-        width: 100%;
-        height: 600px;
-        position: relative;
-    }
-    
-    #canvas3d {
-        width: 100%;
-        height: 100%;
-    }
-    
-    .canvas-overlay {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: rgba(0,0,0,0.7);
-        color: white;
-        padding: 8px 12px;
-        border-radius: var(--radius-sm);
-        font-size: 0.9rem;
-    }
-    
-    /* Chart container */
-    .chart-container {
-        height: 400px;
-        position: relative;
-    }
-    
-    /* Tools grid */
-    .tools-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: var(--spacing-md);
-    }
-    
-    .tool-card {
-        background: var(--bg-color);
-        border-radius: var(--radius-md);
-        padding: var(--spacing-md);
-        border: 1px solid var(--border-color);
-    }
-    
-    /* Tables */
-    .data-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: var(--spacing-md) 0;
-    }
-    
-    .data-table th {
-        background: var(--bg-tertiary);
-        padding: 12px;
-        text-align: left;
-        font-weight: 600;
-        color: var(--text-color);
-        border-bottom: 2px solid var(--border-color);
-    }
-    
-    .data-table td {
-        padding: 10px 12px;
-        border-bottom: 1px solid var(--border-color);
-    }
-    
-    .data-table tr:hover {
-        background: rgba(52, 152, 219, 0.1);
-    }
-    
-    /* ===== TAB-SPECIFIC STYLES ===== */
-    /* Theory tab */
-    .theory-content {
-        line-height: 1.8;
-        font-size: 1.1rem;
-    }
-    
-    .theory-content h2 {
-        color: var(--secondary-color);
-        margin: var(--spacing-lg) 0 var(--spacing-md);
-        padding-bottom: var(--spacing-xs);
-        border-bottom: 2px solid var(--border-color);
-    }
-    
-    .theory-content h3 {
-        color: var(--text-color);
-        margin: var(--spacing-md) 0 var(--spacing-sm);
-    }
-    
-    .theory-content p {
-        margin-bottom: var(--spacing-md);
-    }
-    
-    .theory-content ul, .theory-content ol {
-        margin-left: var(--spacing-lg);
-        margin-bottom: var(--spacing-md);
-    }
-    
-    /* Visualization tab overlays */
-    .point-info {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        background: rgba(0,0,0,0.8);
-        color: white;
-        padding: 12px;
-        border-radius: var(--radius-sm);
-        max-width: 300px;
-        font-size: 0.9rem;
-    }
-    
-    .legend {
-        display: flex;
-        gap: var(--spacing-md);
-        margin-top: var(--spacing-sm);
-        flex-wrap: wrap;
-    }
-    
-    .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-    
-    .legend-color {
-        width: 16px;
-        height: 16px;
-        border-radius: 3px;
-    }
-    
-    /* Export tab */
-    .export-options {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: var(--spacing-md);
-    }
-    
-    .export-card {
-        background: var(--bg-color);
-        border-radius: var(--radius-md);
-        padding: var(--spacing-md);
-        border: 2px solid var(--border-color);
-        text-align: center;
-    }
-    
-    .export-card h3 {
-        margin-bottom: var(--spacing-md);
-        color: var(--secondary-color);
-    }
-    
-    .export-format {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: var(--spacing-sm);
-        padding: 10px;
-        background: var(--bg-tertiary);
-        border-radius: var(--radius-sm);
-    }
-    
-    /* ===== RESEARCH MODE ===== */
-    .research-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.9);
-        color: white;
-        z-index: 2000;
-        display: none;
-        padding: var(--spacing-lg);
-        overflow-y: auto;
-    }
-    
-    .research-overlay.active {
-        display: block;
-    }
-    
-    .research-panel {
-        background: #1a1a1a;
-        border-radius: var(--radius-md);
-        padding: var(--spacing-md);
-        margin-bottom: var(--spacing-md);
-        border: 1px solid #333;
-    }
-    
-    .research-console {
-        background: #000;
-        color: #0f0;
-        font-family: 'Courier New', monospace;
-        padding: var(--spacing-md);
-        border-radius: var(--radius-sm);
-        height: 300px;
-        overflow-y: auto;
-        margin-bottom: var(--spacing-md);
-    }
-    
-    .console-line {
-        margin-bottom: 4px;
-        font-size: 0.9rem;
-    }
-    
-    .console-line.info {
-        color: #00ffff;
-    }
-    
-    .console-line.warning {
-        color: #ffff00;
-    }
-    
-    .console-line.error {
-        color: #ff0000;
-    }
-    
-    /* ===== UTILITY CLASSES ===== */
-    .hidden {
-        display: none !important;
-    }
-    
-    .flex {
-        display: flex;
-    }
-    
-    .flex-col {
-        flex-direction: column;
-    }
-    
-    .items-center {
-        align-items: center;
-    }
-    
-    .justify-between {
-        justify-content: space-between;
-    }
-    
-    .gap-sm {
-        gap: var(--spacing-sm);
-    }
-    
-    .gap-md {
-        gap: var(--spacing-md);
-    }
-    
-    .gap-lg {
-        gap: var(--spacing-lg);
-    }
-    
-    .mt-sm { margin-top: var(--spacing-sm); }
-    .mt-md { margin-top: var(--spacing-md); }
-    .mt-lg { margin-top: var(--spacing-lg); }
-    
-    .mb-sm { margin-bottom: var(--spacing-sm); }
-    .mb-md { margin-bottom: var(--spacing-md); }
-    .mb-lg { margin-bottom: var(--spacing-lg); }
-    
-    .text-center { text-align: center; }
-    .text-right { text-align: right; }
-    
-    /* ===== FLOATING CONTROLS ===== */
-    .floating-controls {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 100;
-        display: flex;
-        gap: 10px;
-    }
-    
-    .control-btn {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background: var(--secondary-color);
-        color: white;
-        border: none;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        box-shadow: var(--shadow);
-        transition: var(--transition);
-    }
-    
-    .control-btn:hover {
-        transform: scale(1.1);
-    }
-    
-    /* ===== RESPONSIVE DESIGN ===== */
-    @media (max-width: 1024px) {
-        .main-header h1 {
-            font-size: 1.8rem;
+        /* Complete CSS with all styles */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #9b59b6;
+            --text-color: #333;
+            --bg-color: #fff;
+            --bg-secondary: #f8f9fa;
+            --border-color: #dee2e6;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .tabs-nav {
-            top: 130px;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
         }
         
-        .tab-button {
-            padding: var(--spacing-sm) var(--spacing-md);
-            font-size: 0.9rem;
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
         }
         
-        .control-row {
-            flex-direction: column;
-            align-items: flex-start;
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
         }
         
-        .control-label {
-            margin-bottom: 4px;
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn.active {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .control-panel {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
         
         input[type="range"] {
-            width: 100%;
-        }
-    }
-    
-    @media (max-width: 768px) {
-        body {
-            padding-top: 120px;
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
         }
         
-        .main-header {
-            padding: var(--spacing-md);
+        .value-display {
+            min-width: 60px;
+            font-weight: 600;
+            color: var(--secondary-color);
         }
         
-        .main-header h1 {
-            font-size: 1.5rem;
+        .visualization-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
         }
         
-        .tabs-nav {
-            top: 110px;
-            font-size: 0.8rem;
+        .viz-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+        
+        .viz-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
         }
         
         #canvas2d, #canvas3d-container {
-            height: 400px;
+            width: 100%;
+            height: 500px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background: white;
         }
         
         .stats-grid {
-            grid-template-columns: 1fr;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
         }
         
-        .tools-grid {
-            grid-template-columns: 1fr;
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary-color);
         }
         
-        .export-options {
-            grid-template-columns: 1fr;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .container {
-            padding: 0 var(--spacing-sm);
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
         }
         
-        .main-header h1 {
-            font-size: 1.3rem;
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
         }
         
-        #canvas2d, #canvas3d-container {
-            height: 300px;
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
         }
         
-        .chart-container {
-            height: 300px;
+        .data-table th, .data-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid var(--border-color);
         }
-    }
+        
+        .data-table th {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background: var(--bg-secondary);
+        }
+        
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .export-btn {
+            padding: 10px 20px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        
+        .export-btn:hover {
+            background: #8e44ad;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .visualization-container {
+                grid-template-columns: 1fr;
+            }
+            
+            #canvas2d, #canvas3d-container {
+                height: 300px;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Main Header -->
-    <header class="main-header">
-        <h1>The Complete Mathematical Discovery Platform</h1>
-        <div class="subtitle">Primitive Lattice Points & Boundary Cancellation Theory</div>
-        <div class="author-info">
-            Author: Wessen Getachew • Twitter: <a href="https://twitter.com/7dview" style="color: white; text-decoration: underline;">@7dview</a>
+    <div class="container">
+        <div class="header">
+            <h1>Mathematical Discovery Platform</h1>
+            <p>Interactive visualization of primitive lattice points, zeta function, and boundary phenomena</p>
+            <p style="opacity: 0.8; font-size: 0.9rem; margin-top: 10px;">
+                Author: Wessen Getachew • Twitter: @7dview
+            </p>
         </div>
-    </header>
-    
-    <!-- Tab Navigation -->
-    <nav class="tabs-nav">
-        <button class="tab-button active" data-tab="theory">📚 Theory & Foundation</button>
-        <button class="tab-button" data-tab="viz-2d">🔍 2D Visualization</button>
-        <button class="tab-button" data-tab="viz-3d">🧊 3D Visualization</button>
-        <button class="tab-button" data-tab="analysis">📊 Error Analysis</button>
-        <button class="tab-button" data-tab="tools">🔧 Mathematical Tools</button>
-        <button class="tab-button" data-tab="export">💾 Export & Research</button>
-    </nav>
-    
-    <main class="container">
-        <!-- Tab Content Sections -->
-        <div class="tabs-content">
-            <!-- Theory & Foundation Tab -->
-            <section id="theory" class="tab-content active">
-                <div class="section">
-                    <div class="section-header">
-                        <h2 class="section-title">Theory & Foundation</h2>
-                        <button id="toggleTheoryDark" class="btn-secondary">🌙 Dark Mode</button>
+        
+        <!-- Main Control Panel -->
+        <div class="control-panel" id="mainControls">
+            <div class="control-group">
+                <label>Zeta Parameter (s):</label>
+                <div class="slider-container">
+                    <input type="range" id="zetaS" min="1.1" max="5" step="0.1" value="2">
+                    <span class="value-display" id="zetaValue">s = 2</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>Radius (R):</label>
+                <div class="slider-container">
+                    <input type="range" id="radiusR" min="10" max="200" step="5" value="50">
+                    <span class="value-display" id="radiusValue">R = 50</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>Dimension (k):</label>
+                <div class="slider-container">
+                    <input type="range" id="dimensionK" min="2" max="6" step="1" value="3">
+                    <span class="value-display" id="dimensionValue">k = 3</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>Precision Mode:</label>
+                <select id="precisionMode">
+                    <option value="standard">Standard Precision</option>
+                    <option value="high">High Precision (Decimal.js)</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="theory">Theory & Explorer</button>
+            <button class="tab-btn" data-tab="viz2d">2D Visualization</button>
+            <button class="tab-btn" data-tab="viz3d">3D Visualization</button>
+            <button class="tab-btn" data-tab="analysis">Analysis & Data</button>
+            <button class="tab-btn" data-tab="export">Export</button>
+        </div>
+        
+        <!-- Tab Contents -->
+        <div id="theory" class="tab-content active">
+            <div class="viz-card">
+                <h2 class="viz-title">Theory Explorer</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h3>Mathematical Foundation</h3>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                            <p><strong>Primitive Lattice Points:</strong></p>
+                            <p>Points \((x_1, x_2, \ldots, x_k) \in \mathbb{Z}^k\) with \(\gcd(x_1, \ldots, x_k) = 1\)</p>
+                            <p>\[N_k^{\text{prim}}(R) = \sum_{d=1}^{\lfloor R \rfloor} \mu(d) \cdot N_k\left(\frac{R}{d}\right)\]</p>
+                        </div>
+                        
+                        <div style="background: #e8f4fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                            <p><strong>Zeta Function Relationship:</strong></p>
+                            <p>\[N_k^{\text{prim}}(R) \sim \frac{V_k(R)}{\zeta(s)}\]
+                            where \(V_k(R) = \frac{\pi^{k/2}}{\Gamma(k/2 + 1)} R^k\)</p>
+                        </div>
                     </div>
                     
-                    <!-- Abstract -->
-                    <div class="formula-box definition">
-                        <div class="title">Abstract</div>
-                        <p>
-                            This platform synthesizes three interconnected mathematical visualization tools 
-                            into a unified discovery engine. We explore primitive lattice point enumeration 
-                            using Möbius inversion, boundary cancellation phenomena in higher dimensions, 
-                            and analytical tools for investigating the growth patterns of integer lattice 
-                            points within n-dimensional spheres.
-                        </p>
-                    </div>
-                    
-                    <!-- Mathematical Foundation -->
-                    <div class="theory-content">
-                        <h2>Mathematical Foundation</h2>
-                        
-                        <div class="formula-box definition">
-                            <div class="title">Definition: Primitive Lattice Points</div>
-                            <p>
-                                A lattice point \((x_1, x_2, \ldots, x_k) \in \mathbb{Z}^k\) is called <strong>primitive</strong> 
-                                if the greatest common divisor of its coordinates is 1:
-                            </p>
-                            <p>
-                                \[
-                                \gcd(x_1, x_2, \ldots, x_k) = 1
-                                \]
-                            </p>
+                    <div>
+                        <h3>Live Calculations</h3>
+                        <div class="stats-grid" id="theoryStats">
+                            <!-- Filled by JavaScript -->
                         </div>
                         
-                        <div class="formula-box theorem">
-                            <div class="title">Theorem: Möbius Inversion Formula</div>
-                            <p>
-                                For a given radius \(R\) and dimension \(k\), the number of primitive lattice points 
-                                within a sphere of radius \(R\) is given by:
-                            </p>
-                            <p>
-                                \[
-                                N_k^{\text{prim}}(R) = \sum_{d=1}^{\lfloor R \rfloor} \mu(d) \cdot N_k\left(\frac{R}{d}\right)
-                                \]
-                            </p>
-                            <p>
-                                where \(\mu(d)\) is the Möbius function and \(N_k(R)\) is the total number of 
-                                integer lattice points in the sphere.
-                            </p>
-                        </div>
-                        
-                        <div class="formula-box lemma">
-                            <div class="title">Lemma: Asymptotic Behavior</div>
-                            <p>
-                                As \(R \to \infty\), we have:
-                            </p>
-                            <p>
-                                \[
-                                N_k^{\text{prim}}(R) \sim \frac{V_k(R)}{\zeta(k)}
-                                \]
-                            </p>
-                            <p>
-                                where \(V_k(R) = \frac{\pi^{k/2}}{\Gamma(k/2 + 1)} R^k\) is the volume of the 
-                                k-dimensional sphere and \(\zeta(k)\) is the Riemann zeta function.
-                            </p>
-                        </div>
-                        
-                        <h2>Key Discoveries</h2>
-                        
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="label">Boundary Cancellation</div>
-                                <div class="value">99.7%</div>
-                                <div class="description">Average error cancellation at boundaries in high dimensions</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="label">Growth Exponent</div>
-                                <div class="value">k ± ε</div>
-                                <div class="description">Empirical growth matches theoretical predictions</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="label">Max Dimension Tested</div>
-                                <div class="value">k = 12</div>
-                                <div class="description">Successfully validated for dimensions up to 12</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="label">Precision Level</div>
-                                <div class="value">50 digits</div>
-                                <div class="description">High-precision calculations available</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Interactive Theory Explorer -->
-                        <div class="control-group">
-                            <h3>Interactive Theory Explorer</h3>
-                            <div class="control-row">
-                                <label class="control-label">Dimension (k):</label>
-                                <input type="range" id="theory-k" min="2" max="12" value="3" step="1">
-                                <input type="number" id="theory-k-value" min="2" max="12" value="3">
-                                <span id="theory-k-display">k = 3</span>
-                            </div>
-                            
-                            <div class="control-row">
-                                <label class="control-label">Radius (R):</label>
-                                <input type="range" id="theory-R" min="10" max="500" value="100" step="10">
-                                <input type="number" id="theory-R-value" min="10" max="1000" value="100">
-                                <span id="theory-R-display">R = 100</span>
-                            </div>
-                            
-                            <button id="calculateTheory" class="btn-success">Calculate Theoretical Values</button>
-                        </div>
-                        
-                        <!-- Dimensional Scaling Table -->
-                        <div class="section">
-                            <h3 class="section-title">Dimensional Scaling Table</h3>
+                        <h3 style="margin-top: 20px;">Empirical Validation</h3>
+                        <div id="empiricalResults" style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>Dimension (k)</th>
-                                        <th>Volume Formula</th>
-                                        <th>ζ(k)</th>
-                                        <th>Expected Primitive Points</th>
-                                        <th>Boundary Error %</th>
+                                        <th>Metric</th>
+                                        <th>Value</th>
+                                        <th>Error</th>
                                     </tr>
                                 </thead>
-                                <tbody id="dimensionalTable">
+                                <tbody id="validationTable">
                                     <!-- Filled by JavaScript -->
                                 </tbody>
                             </table>
                         </div>
-                        
-                        <!-- Empirical Validation -->
-                        <div class="section">
-                            <h3 class="section-title">Empirical Validation</h3>
-                            <div id="empiricalResults">
-                                <!-- Filled by JavaScript -->
-                            </div>
-                        </div>
-                        
-                        <!-- Bibliography -->
-                        <div class="section">
-                            <h3 class="section-title">Bibliography</h3>
-                            <ul>
-                                <li>W. Getachew, "Primitive Lattice Points in n-Dimensional Spheres" (2024)</li>
-                                <li>G. H. Hardy & E. M. Wright, "An Introduction to the Theory of Numbers"</li>
-                                <li>J. B. Friedlander & H. Iwaniec, "Opera de Cribro"</li>
-                                <li>A. Ivić, "The Riemann Zeta-Function"</li>
-                                <li>M. N. Huxley, "Area, Lattice Points, and Exponential Sums"</li>
-                            </ul>
-                        </div>
                     </div>
                 </div>
-            </section>
-            
-            <!-- 2D Visualization Tab -->
-            <section id="viz-2d" class="tab-content">
-                <div class="section">
-                    <div class="section-header">
-                        <h2 class="section-title">2D Lattice Visualization</h2>
-                        <div class="flex gap-sm">
-                            <button id="reset2D" class="btn-secondary">Reset View</button>
-                            <button id="toggleGrid" class="btn-secondary">Toggle Grid</button>
-                            <button id="toggleMobiusWave" class="btn-warning">Möbius Wave</button>
-                        </div>
-                    </div>
+            </div>
+        </div>
+        
+        <!-- 2D Visualization -->
+        <div id="viz2d" class="tab-content">
+            <div class="visualization-container">
+                <div class="viz-card">
+                    <h2 class="viz-title">2D Lattice Visualization</h2>
+                    <canvas id="canvas2d"></canvas>
                     
-                    <div class="visualization-container">
-                        <canvas id="canvas2d"></canvas>
-                        <div id="pointInfo2D" class="point-info hidden">
-                            <strong>Selected Point:</strong>
-                            <div id="pointCoords"></div>
-                            <div id="pointGCD"></div>
-                            <div id="pointMobius"></div>
-                            <button onclick="hidePointInfo()" class="btn-secondary mt-sm">Close</button>
+                    <div class="control-panel" style="margin-top: 15px;">
+                        <div class="control-group">
+                            <label>Point Size:</label>
+                            <input type="range" id="pointSize2d" min="1" max="10" value="4">
                         </div>
-                        <div class="canvas-overlay">
-                            <div>Click on any point to inspect</div>
-                            <div class="legend mt-sm">
-                                <div class="legend-item">
-                                    <div class="legend-color" style="background-color: #3498db;"></div>
-                                    <span>Primitive (gcd=1)</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-color" style="background-color: #e74c3c;"></div>
-                                    <span>Non-primitive</span>
-                                </div>
-                            </div>
+                        <div class="control-group">
+                            <label>Grid Opacity:</label>
+                            <input type="range" id="gridOpacity" min="0" max="100" value="30">
                         </div>
-                    </div>
-                    
-                    <!-- Controls -->
-                    <div class="control-group">
-                        <h3>Visualization Controls</h3>
-                        <div class="control-row">
-                            <label class="control-label">Radius (R):</label>
-                            <input type="range" id="radius2D" min="10" max="200" value="50" step="5">
-                            <input type="number" id="radius2D-value" min="5" max="500" value="50">
-                            <button id="applyRadius2D" class="btn-success">Apply</button>
-                        </div>
-                        
-                        <div class="control-row">
-                            <label class="control-label">Point Size:</label>
-                            <input type="range" id="pointSize2D" min="2" max="20" value="6" step="1">
-                            <span id="pointSizeDisplay">6px</span>
-                        </div>
-                        
-                        <div class="control-row">
-                            <label class="control-label">Grid Opacity:</label>
-                            <input type="range" id="gridOpacity2D" min="0" max="100" value="30" step="5">
-                            <span id="gridOpacityDisplay">30%</span>
-                        </div>
-                        
-                        <div class="control-row">
-                            <label class="control-label">Boundary Highlight:</label>
-                            <input type="checkbox" id="boundaryHighlight" checked>
-                            <label for="boundaryHighlight">Show boundary region</label>
-                        </div>
-                        
-                        <div class="control-row">
-                            <label class="control-label">Möbius Wave Intensity:</label>
-                            <input type="range" id="waveIntensity" min="0" max="100" value="50" step="5" disabled>
-                            <span id="waveIntensityDisplay">50%</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Real-time Statistics -->
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="label">Total Points</div>
-                            <div class="value" id="totalPoints2D">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="label">Primitive Points</div>
-                            <div class="value" id="primitivePoints2D">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="label">Primitive Ratio</div>
-                            <div class="value" id="primitiveRatio2D">0%</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="label">Boundary Points</div>
-                            <div class="value" id="boundaryPoints2D">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="label">Theoretical N(R)</div>
-                            <div class="value" id="theoreticalN2D">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="label">Actual N(R)</div>
-                            <div class="value" id="actualN2D">0</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Point Inspector -->
-                    <div class="section" id="pointInspector" style="display: none;">
-                        <h3 class="section-title">Point Inspector</h3>
-                        <div id="pointDetails">
-                            <!-- Filled by JavaScript -->
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            <!-- 3D Visualization Tab -->
-            <section id="viz-3d" class="tab-content">
-                <div class="section">
-                    <div class="section-header">
-                        <h2 class="section-title">3D Lattice Visualization</h2>
-                        <div class="flex gap-sm">
-                            <button id="reset3D" class="btn-secondary">Reset View</button>
-                            <button id="toggleRotation" class="btn-secondary">Auto Rotation</button>
-                            <button id="toggleAxes" class="btn-secondary">Toggle Axes</button>
-                        </div>
-                    </div>
-                    
-                    <div class="visualization-container">
-                        <div id="canvas3d-container">
-                            <canvas id="canvas3d"></canvas>
-                        </div>
-                        <div class="canvas-overlay">
-                            <div>Click and drag to rotate • Scroll to zoom</div>
-                            <div class="legend mt-sm">
-                                <div class="legend-item">
-                                    <div class="legend-color" style="background-color: #3498db;"></div>
-                                    <span>Primitive</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-color" style="background-color: #e74c3c;"></div>
-                                    <span>Non-primitive</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-color" style="background-color: #27ae60;"></div>
-                                    <span>Boundary</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 3D Controls -->
-                    <div class="control-group">
-                        <h3>3D Visualization Controls</h3>
-                        <div class="control-row">
-                            <label class="control-label">Radius (R):</label>
-                            <input type="range" id="radius3D" min="5" max="50" value="20" step="1">
-                            <input type="number" id="radius3D-value" min="3" max="100" value="20">
-                            <button id="applyRadius3D" class="btn-success">Apply</button>
-                        </div>
-                        
-                        <div class="control-row">
-                            <label class="control-label">Point Size:</label>
-                            <input type="range" id="pointSize3D" min="1" max="10" value="3" step="0.1">
-                            <span id="pointSize3DDisplay">3.0</span>
-                        </div>
-                        
-                        <div class="control-row">
-                            <label class="control-label">Sampling Density:</label>
-                            <input type="range" id="samplingDensity" min="1" max="100" value="50" step="1">
-                            <span id="samplingDensityDisplay">50%</span>
-                        </div>
-                        
-                        <div class="control-row">
-                            <label class="control-label">Color by:</label>
-                            <select id="colorMode3D">
-                                <option value="gcd">GCD (Primitive/Non)</option>
-                                <option value="distance">Distance from Origin</option>
-                                <option value="coordinate">Coordinate Parity</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Point Inspector Input -->
-                        <div class="control-row">
-                            <label class="control-label">Inspect Point (x,y,z):</label>
-                            <input type="number" id="pointX" placeholder="x" min="-50" max="50" style="width: 70px;">
-                            <input type="number" id="pointY" placeholder="y" min="-50" max="50" style="width: 70px;">
-                            <input type="number" id="pointZ" placeholder="z" min="-50" max="50" style="width: 70px;">
-                            <button id="inspectPoint3D" class="btn-secondary">Inspect</button>
-                        </div>
-                    </div>
-                    
-                    <!-- 3D Statistics -->
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="label">Total Points (3D)</div>
-                            <div class="value" id="totalPoints3D">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="label">Primitive Points (3D)</div>
-                            <div class="value" id="primitivePoints3D">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="label">Volume Sphere</div>
-                            <div class="value" id="volumeSphere">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="label">Density Error</div>
-                            <div class="value" id="densityError">0%</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="label">Rendered Points</div>
-                            <div class="value" id="renderedPoints">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="label">Frame Rate</div>
-                            <div class="value" id="frameRate">0 FPS</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            <!-- Error Analysis Tab -->
-            <section id="analysis" class="tab-content">
-                <div class="section">
-                    <div class="section-header">
-                        <h2 class="section-title">Error Analysis & Growth Patterns</h2>
-                        <div class="flex gap-sm">
-                            <button id="toggleLogLog" class="btn-secondary">Log-Log Plot</button>
-                            <button id="toggleRelative" class="btn-secondary">Relative Error</button>
-                            <button id="calculateExponent" class="btn-warning">Growth Exponent</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Chart Container -->
-                    <div class="visualization-container">
-                        <div class="chart-container">
-                            <canvas id="errorChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <!-- Analysis Controls -->
-                    <div class="control-group">
-                        <h3>Analysis Parameters</h3>
-                        <div class="control-row">
-                            <label class="control-label">Dimensions to Analyze:</label>
-                            <div class="flex gap-sm">
-                                <label><input type="checkbox" name="dimension" value="2" checked> k=2</label>
-                                <label><input type="checkbox" name="dimension" value="3" checked> k=3</label>
-                                <label><input type="checkbox" name="dimension" value="4"> k=4</label>
-                                <label><input type="checkbox" name="dimension" value="5"> k=5</label>
-                                <label><input type="checkbox" name="dimension" value="6"> k=6</label>
-                            </div>
-                        </div>
-                        
-                        <div class="control-row">
-                            <label class="control-label">Radius Range:</label>
-                            <input type="number" id="minRadius" min="10" max="1000" value="10" style="width: 80px;">
-                            <span>to</span>
-                            <input type="number" id="maxRadius" min="20" max="2000" value="200" style="width: 80px;">
-                            <input type="number" id="radiusStep" min="1" max="100" value="10" style="width: 80px;">
-                            <span>step</span>
-                            <button id="runAnalysis" class="btn-success">Run Analysis</button>
-                        </div>
-                        
-                        <div class="control-row">
-                            <label class="control-label">Error Type:</label>
-                            <select id="errorType">
-                                <option value="absolute">Absolute Error</option>
-                                <option value="relative">Relative Error (%)</option>
-                                <option value="boundary">Boundary Error</option>
-                                <option value="cumulative">Cumulative Error</option>
-                            </select>
-                            <label class="ml-auto">
-                                <input type="checkbox" id="runningAverage"> Running Average
+                        <div class="control-group">
+                            <label>
+                                <input type="checkbox" id="showBoundary" checked>
+                                Show Boundary
                             </label>
                         </div>
                     </div>
                     
-                    <!-- Multi-dimensional Comparison -->
-                    <div class="section">
-                        <h3 class="section-title">Multi-dimensional Comparison</h3>
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Dimension (k)</th>
-                                    <th>Theoretical N(R)</th>
-                                    <th>Actual N(R)</th>
-                                    <th>Absolute Error</th>
-                                    <th>Relative Error</th>
-                                    <th>Growth Exponent</th>
-                                    <th>Boundary Cancellation</th>
-                                </tr>
-                            </thead>
-                            <tbody id="comparisonTable">
-                                <!-- Filled by JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Growth Exponent Calculator -->
-                    <div class="section">
-                        <h3 class="section-title">Growth Exponent Calculator</h3>
-                        <div class="control-row">
-                            <label class="control-label">Calculate exponent for k =</label>
-                            <input type="number" id="calcK" min="2" max="10" value="3" style="width: 60px;">
-                            <button id="calcExponent" class="btn-secondary">Calculate</button>
-                            <span id="exponentResult" class="ml-2"></span>
-                        </div>
-                        <div id="exponentDetails" class="mt-md">
-                            <!-- Filled by JavaScript -->
-                        </div>
-                    </div>
-                    
-                    <!-- Point-specific Analysis -->
-                    <div class="section">
-                        <h3 class="section-title">Point-specific Error Analysis</h3>
-                        <div class="control-row">
-                            <label class="control-label">Analyze radius R =</label>
-                            <input type="number" id="analyzeRadius" min="10" max="500" value="100" style="width: 80px;">
-                            <label class="control-label">for k =</label>
-                            <input type="number" id="analyzeK" min="2" max="8" value="3" style="width: 60px;">
-                            <button id="analyzePoint" class="btn-secondary">Analyze</button>
-                        </div>
-                        <div id="pointAnalysisResults" class="mt-md">
-                            <!-- Filled by JavaScript -->
-                        </div>
+                    <div class="stats-grid" id="stats2d">
+                        <!-- Filled by JavaScript -->
                     </div>
                 </div>
-            </section>
-            
-            <!-- Mathematical Tools Tab -->
-            <section id="tools" class="tab-content">
-                <div class="section">
-                    <div class="section-header">
-                        <h2 class="section-title">Mathematical Tools</h2>
-                        <div class="flex gap-sm">
-                            <button id="clearTools" class="btn-secondary">Clear All</button>
-                            <button id="exampleTools" class="btn-secondary">Load Example</button>
-                        </div>
+                
+                <div class="viz-card">
+                    <h2 class="viz-title">Point Inspector</h2>
+                    <div id="pointInspector" style="height: 400px; overflow-y: auto; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <p>Click on any point in the 2D visualization to inspect details.</p>
+                        <div id="pointDetails"></div>
                     </div>
                     
-                    <div class="tools-grid">
-                        <!-- GCD Calculator -->
-                        <div class="tool-card">
-                            <h3>GCD Calculator (n-tuples)</h3>
-                            <div class="control-row">
-                                <label>Enter numbers (comma-separated):</label>
-                                <input type="text" id="gcdInput" placeholder="e.g., 12, 18, 24, 36" style="width: 100%;">
-                                <button id="calculateGCD" class="btn-success mt-sm">Calculate GCD</button>
-                            </div>
-                            <div id="gcdResult" class="mt-md">
-                                <!-- Results here -->
-                            </div>
-                            <div id="primeFactors" class="mt-md">
-                                <!-- Prime factors here -->
-                            </div>
-                        </div>
-                        
-                        <!-- Möbius Function Calculator -->
-                        <div class="tool-card">
-                            <h3>Möbius Function Calculator</h3>
-                            <div class="control-row">
-                                <label>Calculate μ(n) for n =</label>
-                                <input type="number" id="mobiusInput" min="1" max="1000000" value="30">
-                                <button id="calculateMobius" class="btn-success">Calculate</button>
-                            </div>
-                            <div id="mobiusResult" class="mt-md">
-                                <!-- Results here -->
-                            </div>
-                            <div class="control-row mt-md">
-                                <label>Calculate Mertens M(n) up to n =</label>
-                                <input type="number" id="mertensInput" min="1" max="10000" value="100">
-                                <button id="calculateMertens" class="btn-secondary">Calculate</button>
-                            </div>
-                            <div id="mertensResult" class="mt-md">
-                                <!-- Results here -->
-                            </div>
-                        </div>
-                        
-                        <!-- Prime Number Tools -->
-                        <div class="tool-card">
-                            <h3>Prime Number Tools</h3>
-                            <div class="control-row">
-                                <label>Test if prime:</label>
-                                <input type="number" id="primeTestInput" min="1" max="1000000000" value="7919">
-                                <button id="testPrime" class="btn-success">Test</button>
-                            </div>
-                            <div id="primeTestResult" class="mt-md">
-                                <!-- Results here -->
-                            </div>
-                            <div class="control-row mt-md">
-                                <label>Euler's Totient φ(n):</label>
-                                <input type="number" id="totientInput" min="1" max="1000000" value="30">
-                                <button id="calculateTotient" class="btn-secondary">Calculate</button>
-                            </div>
-                            <div id="totientResult" class="mt-md">
-                                <!-- Results here -->
-                            </div>
-                        </div>
-                        
-                        <!-- N(R) Calculator -->
-                        <div class="tool-card">
-                            <h3>N(R) Calculator</h3>
-                            <div class="control-row">
-                                <label>Radius R:</label>
-                                <input type="number" id="nrRadius" min="1" max="1000" value="100" step="1">
-                            </div>
-                            <div class="control-row">
-                                <label>Dimension k:</label>
-                                <input type="number" id="nrDimension" min="2" max="12" value="3" step="1">
-                            </div>
-                            <div class="control-row">
-                                <label>Precision:</label>
-                                <select id="nrPrecision">
-                                    <option value="standard">Standard</option>
-                                    <option value="high">High (Decimal.js)</option>
-                                </select>
-                            </div>
-                            <button id="calculateNR" class="btn-success mt-sm">Calculate N(R)</button>
-                            <div id="nrResults" class="mt-md">
-                                <!-- Results here -->
-                            </div>
-                        </div>
-                        
-                        <!-- Zeta Function Calculator -->
-                        <div class="tool-card">
-                            <h3>Riemann Zeta Calculator</h3>
-                            <div class="control-row">
-                                <label>ζ(s) for s =</label>
-                                <input type="text" id="zetaInput" placeholder="e.g., 2, 3, 1.5" value="2">
-                                <button id="calculateZeta" class="btn-success">Calculate</button>
-                            </div>
-                            <div id="zetaResult" class="mt-md">
-                                <!-- Results here -->
-                            </div>
-                            <div class="control-row mt-md">
-                                <label>Common values:</label>
-                                <select id="zetaPresets">
-                                    <option value="2">ζ(2) = π²/6</option>
-                                    <option value="3">ζ(3) (Apéry's constant)</option>
-                                    <option value="4">ζ(4) = π⁴/90</option>
-                                    <option value="6">ζ(6) = π⁶/945</option>
-                                </select>
-                                <button id="useZetaPreset" class="btn-secondary">Load</button>
-                            </div>
-                        </div>
-                        
-                        <!-- Number Theory Utilities -->
-                        <div class="tool-card">
-                            <h3>Number Theory Utilities</h3>
-                            <div class="control-row">
-                                <button id="coprimePairs" class="btn-secondary">Generate Coprime Pairs</button>
-                                <button id="latticePoints" class="btn-secondary">Generate Lattice Points</button>
-                            </div>
-                            <div class="control-row">
-                                <button id="divisorFunction" class="btn-secondary">Divisor Function σ(n)</button>
-                                <button id="mobiusInversion" class="btn-secondary">Möbius Inversion</button>
-                            </div>
-                            <div id="utilityResults" class="mt-md">
-                                <!-- Results here -->
-                            </div>
-                        </div>
+                    <div style="margin-top: 20px;">
+                        <h3>Selected Point Analysis</h3>
+                        <div id="selectedPointAnalysis"></div>
                     </div>
                 </div>
-            </section>
-            
-            <!-- Export & Research Tab -->
-            <section id="export" class="tab-content">
-                <div class="section">
-                    <div class="section-header">
-                        <h2 class="section-title">Export & Research Tools</h2>
-                        <div class="flex gap-sm">
-                            <button id="toggleResearch" class="btn-warning">Research Mode</button>
-                            <button id="batchExport" class="btn-success">Batch Export</button>
-                        </div>
-                    </div>
-                    
-                    <div class="export-options">
-                        <!-- Visualization Export -->
-                        <div class="export-card">
-                            <h3>Visualization Export</h3>
-                            <div class="export-format">
-                                <span>2D Lattice (PNG)</span>
-                                <button class="btn-secondary" onclick="exportCanvas2D('png')">Export 4K PNG</button>
-                            </div>
-                            <div class="export-format">
-                                <span>3D Visualization (PNG)</span>
-                                <button class="btn-secondary" onclick="exportCanvas3D('png')">Export 4K PNG</button>
-                            </div>
-                            <div class="export-format">
-                                <span>Error Charts (PNG)</span>
-                                <button class="btn-secondary" onclick="exportChart('png')">Export PNG</button>
-                            </div>
-                            <div class="export-format">
-                                <span>All Visualizations</span>
-                                <button class="btn-secondary" onclick="exportAllVisualizations()">Export ZIP</button>
-                            </div>
-                        </div>
-                        
-                        <!-- Data Export -->
-                        <div class="export-card">
-                            <h3>Data Export</h3>
-                            <div class="export-format">
-                                <span>Error Analysis Data</span>
-                                <button class="btn-secondary" onclick="exportErrorDataCSV()">Export CSV</button>
-                            </div>
-                            <div class="export-format">
-                                <span>Lattice Points Data</span>
-                                <button class="btn-secondary" onclick="exportLatticeDataCSV()">Export CSV</button>
-                            </div>
-                            <div class="export-format">
-                                <span>Theoretical Calculations</span>
-                                <button class="btn-secondary" onclick="exportTheoryDataCSV()">Export CSV</button>
-                            </div>
-                            <div class="export-format">
-                                <span>Complete Dataset</span>
-                                <button class="btn-secondary" onclick="exportCompleteDataset()">Export JSON</button>
-                            </div>
-                        </div>
-                        
-                        <!-- Report Export -->
-                        <div class="export-card">
-                            <h3>Report Export</h3>
-                            <div class="export-format">
-                                <span>Analysis Report</span>
-                                <button class="btn-secondary" onclick="exportAnalysisReport()">Export PDF</button>
-                            </div>
-                            <div class="export-format">
-                                <span>Research Summary</span>
-                                <button class="btn-secondary" onclick="exportResearchSummary()">Export Markdown</button>
-                            </div>
-                            <div class="export-format">
-                                <span>Mathematical Notes</span>
-                                <button class="btn-secondary" onclick="exportMathematicalNotes()">Export LaTeX</button>
-                            </div>
-                            <div class="export-format">
-                                <span>Complete Research</span>
-                                <button class="btn-secondary" onclick="exportCompleteResearch()">Export ZIP</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Research Mode Configuration -->
-                    <div class="section">
-                        <h3 class="section-title">Research Mode Configuration</h3>
-                        <div class="control-row">
-                            <label class="control-label">Precision Digits:</label>
-                            <input type="range" id="precisionDigits" min="10" max="100" value="50" step="10">
-                            <span id="precisionDigitsDisplay">50 digits</span>
-                        </div>
-                        
-                        <div class="control-row">
-                            <label class="control-label">High Precision Mode:</label>
-                            <input type="checkbox" id="highPrecisionMode" checked>
-                            <label for="highPrecisionMode">Use Decimal.js for all calculations</label>
-                        </div>
-                        
-                        <div class="control-row">
-                            <label class="control-label">Research Features:</label>
-                            <div class="flex gap-sm">
-                                <label><input type="checkbox" id="enableDiagnostics" checked> Enable Diagnostics</label>
-                                <label><input type="checkbox" id="enableLogging" checked> Enable Logging</label>
-                                <label><input type="checkbox" id="enableCache" checked> Enable Caching</label>
-                            </div>
-                        </div>
-                        
-                        <div class="control-row">
-                            <label class="control-label">Performance Testing:</label>
-                            <button id="runBenchmark" class="btn-secondary">Run Benchmark</button>
-                            <button id="testBoundaryCorrection" class="btn-secondary">Test Boundary Self-Correction</button>
-                            <button id="stressTest" class="btn-warning">Run Stress Test</button>
-                        </div>
-                        
-                        <div id="benchmarkResults" class="mt-md">
-                            <!-- Results here -->
-                        </div>
-                    </div>
-                    
-                    <!-- Critical Strip Visualization -->
-                    <div class="section">
-                        <h3 class="section-title">Critical Strip Analysis</h3>
-                        <div class="control-row">
-                            <label class="control-label">Analyze ζ(s) in strip:</label>
-                            <input type="number" id="stripReal" value="0.5" step="0.1" style="width: 80px;" placeholder="Re(s)">
-                            <span>±</span>
-                            <input type="number" id="stripImag" value="10" step="1" style="width: 80px;" placeholder="Im(s)">
-                            <button id="analyzeStrip" class="btn-secondary">Analyze</button>
-                        </div>
-                        <div id="stripResults" class="mt-md">
-                            <!-- Results here -->
-                        </div>
-                    </div>
-                </div>
-            </section>
+            </div>
         </div>
-    </main>
-    
-    <!-- Floating Controls -->
-    <div class="floating-controls">
-        <button id="darkModeToggle" class="control-btn" title="Toggle Dark Mode">🌙</button>
-        <button id="researchToggle" class="control-btn" title="Toggle Research Mode">🔬</button>
-        <button id="fullscreenToggle" class="control-btn" title="Toggle Fullscreen">⛶</button>
-    </div>
-    
-    <!-- Research Overlay -->
-    <div id="researchOverlay" class="research-overlay">
-        <div class="research-panel">
-            <div class="section-header">
-                <h2 class="section-title" style="color: white;">Research Mode</h2>
-                <button onclick="toggleResearchOverlay()" class="btn-danger">Close</button>
-            </div>
-            
-            <div class="research-console" id="researchConsole">
-                <div class="console-line info">Research mode activated</div>
-                <div class="console-line info">High precision calculations enabled</div>
-                <div class="console-line info">Diagnostics running...</div>
-            </div>
-            
-            <div class="research-panel">
-                <h3 style="color: white;">Live Diagnostics</h3>
-                <div id="diagnosticsGrid" class="stats-grid">
+        
+        <!-- 3D Visualization -->
+        <div id="viz3d" class="tab-content">
+            <div class="viz-card">
+                <h2 class="viz-title">3D Lattice Visualization</h2>
+                <div id="canvas3d-container">
+                    <!-- Three.js canvas will be inserted here -->
+                </div>
+                
+                <div class="control-panel" style="margin-top: 15px;">
+                    <div class="control-group">
+                        <label>3D Point Size:</label>
+                        <input type="range" id="pointSize3d" min="0.1" max="2" step="0.1" value="0.5">
+                    </div>
+                    <div class="control-group">
+                        <label>Rotation Speed:</label>
+                        <input type="range" id="rotationSpeed" min="0" max="5" step="0.5" value="1">
+                    </div>
+                    <div class="control-group">
+                        <label>
+                            <input type="checkbox" id="autoRotate" checked>
+                            Auto Rotate
+                        </label>
+                    </div>
+                    <div class="control-group">
+                        <label>
+                            <input type="checkbox" id="showAxes" checked>
+                            Show Axes
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="stats-grid" id="stats3d">
                     <!-- Filled by JavaScript -->
                 </div>
             </div>
-            
-            <div class="research-panel">
-                <h3 style="color: white;">Performance Metrics</h3>
-                <div id="performanceMetrics">
-                    <!-- Filled by JavaScript -->
+        </div>
+        
+        <!-- Analysis & Data -->
+        <div id="analysis" class="tab-content">
+            <div class="viz-card">
+                <h2 class="viz-title">Error Analysis</h2>
+                <canvas id="errorChart" height="300"></canvas>
+                
+                <div class="control-panel" style="margin-top: 15px;">
+                    <div class="control-group">
+                        <label>Error Type:</label>
+                        <select id="errorType">
+                            <option value="absolute">Absolute Error</option>
+                            <option value="relative">Relative Error (%)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Chart Type:</label>
+                        <select id="chartType">
+                            <option value="line">Line Chart</option>
+                            <option value="bar">Bar Chart</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             
-            <div class="research-panel">
-                <h3 style="color: white;">Research Controls</h3>
-                <div class="control-row">
-                    <button onclick="clearResearchConsole()" class="btn-secondary">Clear Console</button>
-                    <button onclick="exportResearchLog()" class="btn-secondary">Export Log</button>
-                    <button onclick="runAdvancedDiagnostics()" class="btn-warning">Advanced Diagnostics</button>
+            <div class="viz-card" style="margin-top: 20px;">
+                <h2 class="viz-title">Systematic Data Analysis</h2>
+                <table class="data-table" id="systematicData">
+                    <thead>
+                        <tr>
+                            <th>R</th>
+                            <th>N(R)</th>
+                            <th>N_prim(R)</th>
+                            <th>Theoretical</th>
+                            <th>Error</th>
+                            <th>Error %</th>
+                            <th>Boundary Points</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody">
+                        <!-- Filled by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Export -->
+        <div id="export" class="tab-content">
+            <div class="viz-card">
+                <h2 class="viz-title">Export Visualizations</h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                        <h3>2D Visualization</h3>
+                        <div class="export-buttons">
+                            <button class="export-btn" onclick="export2D('png')">Export as PNG</button>
+                            <button class="export-btn" onclick="export2D('svg')">Export as SVG</button>
+                            <button class="export-btn" onclick="export2DData()">Export Data (CSV)</button>
+                        </div>
+                        <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                            Exports the current 2D lattice visualization
+                        </p>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                        <h3>3D Visualization</h3>
+                        <div class="export-buttons">
+                            <button class="export-btn" onclick="export3D('png')">Export as PNG</button>
+                            <button class="export-btn" onclick="capture3DView()">Capture Current View</button>
+                        </div>
+                        <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                            Exports the 3D visualization from current viewpoint
+                        </p>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                        <h3>Charts & Data</h3>
+                        <div class="export-buttons">
+                            <button class="export-btn" onclick="exportChart('png')">Export Chart</button>
+                            <button class="export-btn" onclick="exportAllData()">Export All Data (JSON)</button>
+                            <button class="export-btn" onclick="exportAnalysisReport()">Export Report (PDF)</button>
+                        </div>
+                        <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                            Export analysis charts and complete dataset
+                        </p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; padding: 20px; background: #e8f4fd; border-radius: 8px;">
+                    <h3>Batch Export</h3>
+                    <div class="export-buttons">
+                        <button class="export-btn" onclick="batchExport()">Export Everything (ZIP)</button>
+                    </div>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Creates a ZIP file containing all visualizations, data, and analysis
+                    </p>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Inline OrbitControls (fallback) -->
-    <script>
-    // Inline OrbitControls for Three.js
-    // This is a simplified version - in production, use the actual OrbitControls.js
-    class SimpleOrbitControls {
-        constructor(camera, domElement) {
-            this.camera = camera;
-            this.domElement = domElement;
-            
-            this.enabled = true;
-            this.rotateSpeed = 1.0;
-            this.zoomSpeed = 1.2;
-            this.panSpeed = 0.8;
-            
-            this.rotateStart = { x: 0, y: 0 };
-            this.rotateEnd = { x: 0, y: 0 };
-            this.rotateDelta = { x: 0, y: 0 };
-            
-            this.zoomStart = 0;
-            this.zoomEnd = 0;
-            this.zoomDelta = 0;
-            
-            this.panStart = { x: 0, y: 0 };
-            this.panEnd = { x: 0, y: 0 };
-            this.panDelta = { x: 0, y: 0 };
-            
-            this.isRotating = false;
-            this.isZooming = false;
-            this.isPanning = false;
-            
-            this.init();
-        }
-        
-        init() {
-            this.domElement.addEventListener('mousedown', this.onMouseDown.bind(this));
-            this.domElement.addEventListener('wheel', this.onMouseWheel.bind(this));
-            document.addEventListener('mousemove', this.onMouseMove.bind(this));
-            document.addEventListener('mouseup', this.onMouseUp.bind(this));
-        }
-        
-        onMouseDown(event) {
-            event.preventDefault();
-            
-            if (event.button === 0) {
-                this.isRotating = true;
-                this.rotateStart.x = event.clientX;
-                this.rotateStart.y = event.clientY;
-            } else if (event.button === 2) {
-                this.isPanning = true;
-                this.panStart.x = event.clientX;
-                this.panStart.y = event.clientY;
-            }
-        }
-        
-        onMouseMove(event) {
-            if (this.isRotating) {
-                this.rotateEnd.x = event.clientX;
-                this.rotateEnd.y = event.clientY;
-                this.rotateDelta.x = (this.rotateEnd.x - this.rotateStart.x) * this.rotateSpeed * 0.01;
-                this.rotateDelta.y = (this.rotateEnd.y - this.rotateStart.y) * this.rotateSpeed * 0.01;
-                
-                // Rotate camera
-                // This is a simplified rotation - actual implementation would be more complex
-                this.camera.rotation.y += this.rotateDelta.x;
-                this.camera.rotation.x += this.rotateDelta.y;
-                
-                this.rotateStart.x = this.rotateEnd.x;
-                this.rotateStart.y = this.rotateEnd.y;
-            }
-        }
-        
-        onMouseUp() {
-            this.isRotating = false;
-            this.isPanning = false;
-            this.isZooming = false;
-        }
-        
-        onMouseWheel(event) {
-            event.preventDefault();
-            this.zoomDelta = event.deltaY * 0.01;
-            this.camera.position.z += this.zoomDelta * this.zoomSpeed;
-        }
-        
-        update() {
-            // Update camera matrix
-            this.camera.updateMatrix();
-        }
-    }
-    </script>
     
     <!-- Main JavaScript -->
     <script>
-    // ===== STATE MANAGEMENT =====
-    const state = {
-        // UI State
-        currentTab: 'theory',
-        researchMode: false,
-        darkMode: false,
-        fullscreen: false,
+        // ===== GLOBAL STATE =====
+        const state = {
+            zetaS: 2,
+            radiusR: 50,
+            dimensionK: 3,
+            highPrecision: false,
+            
+            // Caches
+            mobiusCache: new Map(),
+            gcdCache: new Map(),
+            pointCache: new Map(),
+            
+            // Visualization states
+            threeScene: null,
+            threeRenderer: null,
+            threeCamera: null,
+            threeObjects: [],
+            chart: null,
+            currentPoint: null
+        };
         
-        // Visualization State
-        is2DInitialized: false,
-        is3DInitialized: false,
-        threeScene: null,
-        threeRenderer: null,
-        threeCamera: null,
-        threeControls: null,
-        threeObjects: [],
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    document.getElementById(this.dataset.tab).classList.add('active');
+                    
+                    // Initialize specific tab content
+                    if (this.dataset.tab === 'viz2d' && !window.canvas2dInitialized) {
+                        init2DVisualization();
+                    } else if (this.dataset.tab === 'viz3d' && !window.threeInitialized) {
+                        init3DVisualization();
+                    } else if (this.dataset.tab === 'analysis' && !window.chartInitialized) {
+                        initChart();
+                    }
+                });
+            });
+            
+            // Initialize controls
+            initControls();
+            
+            // Initialize 2D visualization
+            init2DVisualization();
+            
+            // Initialize theory explorer
+            updateTheoryExplorer();
+            
+            console.log('Platform initialized successfully!');
+        });
         
-        // Chart State
-        chart: null,
-        chartData: {
-            labels: [],
-            datasets: []
-        },
-        
-        // Research State
-        research: {
-            highPrecision: true,
-            mobiusWave: false,
-            logLogPlot: false,
-            waveIntensity: 0.5,
-            precisionDigits: 50,
-            diagnosticData: [],
-            consoleHistory: [],
-            cacheEnabled: true
-        },
-        
-        // Caches for performance
-        mobiusCache: new Map(),
-        gcdCache: new Map(),
-        primeCache: new Map(),
-        nRcache: new Map(),
-        
-        // Current selections
-        selectedPoint2D: null,
-        selectedPoint3D: null,
-        currentR: 50,
-        currentK: 3,
-        
-        // Performance tracking
-        performance: {
-            fps: 0,
-            lastFrameTime: 0,
-            frameCount: 0,
-            calculationTime: 0
+        // ===== CONTROL INITIALIZATION =====
+        function initControls() {
+            // Zeta parameter
+            const zetaSlider = document.getElementById('zetaS');
+            const zetaValue = document.getElementById('zetaValue');
+            
+            zetaSlider.addEventListener('input', function() {
+                state.zetaS = parseFloat(this.value);
+                zetaValue.textContent = `s = ${this.value}`;
+                updateAllVisualizations();
+            });
+            
+            // Radius
+            const radiusSlider = document.getElementById('radiusR');
+            const radiusValue = document.getElementById('radiusValue');
+            
+            radiusSlider.addEventListener('input', function() {
+                state.radiusR = parseInt(this.value);
+                radiusValue.textContent = `R = ${this.value}`;
+                updateAllVisualizations();
+            });
+            
+            // Dimension
+            const dimSlider = document.getElementById('dimensionK');
+            const dimValue = document.getElementById('dimensionValue');
+            
+            dimSlider.addEventListener('input', function() {
+                state.dimensionK = parseInt(this.value);
+                dimValue.textContent = `k = ${this.value}`;
+                updateAllVisualizations();
+            });
+            
+            // Precision mode
+            document.getElementById('precisionMode').addEventListener('change', function() {
+                state.highPrecision = this.value === 'high';
+                updateAllVisualizations();
+            });
+            
+            // 2D controls
+            document.getElementById('pointSize2d').addEventListener('input', function() {
+                if (window.canvas2dInitialized) {
+                    draw2DLattice();
+                }
+            });
+            
+            document.getElementById('gridOpacity').addEventListener('input', function() {
+                if (window.canvas2dInitialized) {
+                    draw2DLattice();
+                }
+            });
+            
+            document.getElementById('showBoundary').addEventListener('change', function() {
+                if (window.canvas2dInitialized) {
+                    draw2DLattice();
+                }
+            });
         }
-    };
-    
-    // ===== MATHEMATICAL CORE FUNCTIONS =====
-    
-    // GCD functions
-    function gcd(a, b) {
-        a = Math.abs(a);
-        b = Math.abs(b);
         
-        const key = `${a},${b}`;
-        if (state.gcdCache.has(key)) {
-            return state.gcdCache.get(key);
-        }
-        
-        while (b) {
-            [a, b] = [b, a % b];
-        }
-        
-        state.gcdCache.set(key, a);
-        return a;
-    }
-    
-    function gcdArray(arr) {
-        if (arr.length === 0) return 0;
-        if (arr.length === 1) return Math.abs(arr[0]);
-        
-        let result = Math.abs(arr[0]);
-        for (let i = 1; i < arr.length; i++) {
-            result = gcd(result, Math.abs(arr[i]));
-            if (result === 1) break;
-        }
-        return result;
-    }
-    
-    // Möbius function with caching
-    function mobius(n) {
-        if (n <= 0) return 0;
-        if (n === 1) return 1;
-        
-        if (state.mobiusCache.has(n)) {
-            return state.mobiusCache.get(n);
-        }
-        
-        // Check for square factors
-        let temp = n;
-        for (let i = 2; i * i <= n; i++) {
-            if (n % (i * i) === 0) {
-                state.mobiusCache.set(n, 0);
-                return 0;
+        // ===== MATHEMATICAL FUNCTIONS =====
+        function gcd(a, b) {
+            a = Math.abs(a);
+            b = Math.abs(b);
+            
+            const key = `${a},${b}`;
+            if (state.gcdCache.has(key)) {
+                return state.gcdCache.get(key);
             }
+            
+            while (b) {
+                [a, b] = [b, a % b];
+            }
+            
+            state.gcdCache.set(key, a);
+            return a;
         }
         
-        // Count prime factors
-        let primeFactors = 0;
-        temp = n;
-        for (let i = 2; i * i <= temp; i++) {
-            if (temp % i === 0) {
-                primeFactors++;
-                temp /= i;
-                if (temp % i === 0) {
+        function gcdArray(arr) {
+            if (arr.length === 0) return 0;
+            if (arr.length === 1) return Math.abs(arr[0]);
+            
+            let result = Math.abs(arr[0]);
+            for (let i = 1; i < arr.length; i++) {
+                result = gcd(result, Math.abs(arr[i]));
+                if (result === 1) break;
+            }
+            return result;
+        }
+        
+        function mobius(n) {
+            if (n <= 0) return 0;
+            if (n === 1) return 1;
+            
+            if (state.mobiusCache.has(n)) {
+                return state.mobiusCache.get(n);
+            }
+            
+            // Check for square factors
+            let temp = n;
+            for (let i = 2; i * i <= n; i++) {
+                if (n % (i * i) === 0) {
                     state.mobiusCache.set(n, 0);
                     return 0;
                 }
             }
-        }
-        if (temp > 1) primeFactors++;
-        
-        const result = (primeFactors % 2 === 0) ? 1 : -1;
-        state.mobiusCache.set(n, result);
-        return result;
-    }
-    
-    // Mertens function
-    function mertens(n) {
-        let sum = 0;
-        for (let i = 1; i <= n; i++) {
-            sum += mobius(i);
-        }
-        return sum;
-    }
-    
-    // Prime factorization
-    function primeFactors(n) {
-        if (n < 2) return [];
-        
-        const factors = [];
-        let temp = n;
-        
-        // Handle factor 2
-        while (temp % 2 === 0) {
-            factors.push(2);
-            temp /= 2;
-        }
-        
-        // Handle odd factors
-        for (let i = 3; i * i <= temp; i += 2) {
-            while (temp % i === 0) {
-                factors.push(i);
-                temp /= i;
-            }
-        }
-        
-        // If remainder is a prime > 2
-        if (temp > 2) {
-            factors.push(temp);
-        }
-        
-        return factors;
-    }
-    
-    // Euler's totient function
-    function totient(n) {
-        if (n < 1) return 0;
-        if (n === 1) return 1;
-        
-        let result = n;
-        let temp = n;
-        
-        for (let i = 2; i * i <= temp; i++) {
-            if (temp % i === 0) {
-                while (temp % i === 0) {
+            
+            // Count prime factors
+            let primeFactors = 0;
+            temp = n;
+            for (let i = 2; i * i <= temp; i++) {
+                if (temp % i === 0) {
+                    primeFactors++;
                     temp /= i;
-                }
-                result -= result / i;
-            }
-        }
-        
-        if (temp > 1) {
-            result -= result / temp;
-        }
-        
-        return result;
-    }
-    
-    // Prime test
-    function isPrime(n) {
-        if (n <= 1) return false;
-        if (n <= 3) return true;
-        if (n % 2 === 0 || n % 3 === 0) return false;
-        
-        for (let i = 5; i * i <= n; i += 6) {
-            if (n % i === 0 || n % (i + 2) === 0) return false;
-        }
-        return true;
-    }
-    
-    // Compute N(R) using Möbius inversion
-    function computeN(R, k) {
-        if (state.research.highPrecision) {
-            return computeNHighPrecision(R, k);
-        }
-        
-        let sum = 0;
-        const maxD = Math.floor(R);
-        
-        for (let d = 1; d <= maxD; d++) {
-            const mu = mobius(d);
-            if (mu !== 0) {
-                // Approximate number of lattice points in sphere of radius R/d
-                const volume = Math.pow(Math.PI, k/2) / gamma(k/2 + 1) * Math.pow(R/d, k);
-                sum += mu * Math.round(volume);
-            }
-        }
-        
-        return Math.round(sum);
-    }
-    
-    // High precision version using Decimal.js
-    function computeNHighPrecision(R, k) {
-        const D = Decimal;
-        R = new D(R);
-        k = new D(k);
-        
-        let sum = new D(0);
-        const maxD = Math.floor(R.toNumber());
-        
-        const pi = D.acos(-1);
-        const gammaHalfK = gammaHighPrecision(k.div(2).plus(1));
-        const volumeConstant = pi.pow(k.div(2)).div(gammaHalfK);
-        
-        for (let d = 1; d <= maxD; d++) {
-            const mu = mobius(d);
-            if (mu !== 0) {
-                const radius = R.div(d);
-                const volume = volumeConstant.times(radius.pow(k));
-                sum = sum.plus(new D(mu).times(volume.round()));
-            }
-        }
-        
-        return sum.toNumber();
-    }
-    
-    // Gamma function approximation
-    function gamma(x) {
-        // Lanczos approximation
-        const p = [
-            0.99999999999980993, 676.5203681218851, -1259.1392167224028,
-            771.32342877765313, -176.61502916214059, 12.507343278686905,
-            -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7
-        ];
-        
-        if (x < 0.5) {
-            return Math.PI / (Math.sin(Math.PI * x) * gamma(1 - x));
-        }
-        
-        x -= 1;
-        let a = p[0];
-        const t = x + 7.5;
-        
-        for (let i = 1; i < p.length; i++) {
-            a += p[i] / (x + i);
-        }
-        
-        return Math.sqrt(2 * Math.PI) * Math.pow(t, x + 0.5) * Math.exp(-t) * a;
-    }
-    
-    function gammaHighPrecision(x) {
-        // Simplified - use standard gamma for now
-        return new Decimal(gamma(x.toNumber()));
-    }
-    
-    // ===== 2D VISUALIZATION =====
-    
-    let canvas2d, ctx2d, animationFrame2d;
-    
-    function init2DVisualization() {
-        canvas2d = document.getElementById('canvas2d');
-        ctx2d = canvas2d.getContext('2d');
-        
-        // Set canvas size
-        const container = canvas2d.parentElement;
-        canvas2d.width = container.clientWidth;
-        canvas2d.height = 600;
-        
-        // Add event listeners
-        canvas2d.addEventListener('click', handle2DClick);
-        
-        // Initial draw
-        draw2DLattice();
-        
-        state.is2DInitialized = true;
-        logToConsole('2D visualization initialized', 'info');
-    }
-    
-    function draw2DLattice() {
-        if (!canvas2d || !ctx2d) return;
-        
-        const R = state.currentR;
-        const centerX = canvas2d.width / 2;
-        const centerY = canvas2d.height / 2;
-        const scale = Math.min(canvas2d.width, canvas2d.height) / (R * 2 + 2);
-        const pointSize = parseInt(document.getElementById('pointSize2D').value);
-        const gridOpacity = parseInt(document.getElementById('gridOpacity2D').value) / 100;
-        
-        // Clear canvas
-        ctx2d.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg-color');
-        ctx2d.fillRect(0, 0, canvas2d.width, canvas2d.height);
-        
-        // Draw grid
-        if (gridOpacity > 0) {
-            ctx2d.strokeStyle = `rgba(100, 100, 100, ${gridOpacity})`;
-            ctx2d.lineWidth = 1;
-            
-            // Vertical lines
-            for (let x = -R; x <= R; x++) {
-                const screenX = centerX + x * scale;
-                ctx2d.beginPath();
-                ctx2d.moveTo(screenX, 0);
-                ctx2d.lineTo(screenX, canvas2d.height);
-                ctx2d.stroke();
-            }
-            
-            // Horizontal lines
-            for (let y = -R; y <= R; y++) {
-                const screenY = centerY + y * scale;
-                ctx2d.beginPath();
-                ctx2d.moveTo(0, screenY);
-                ctx2d.lineTo(canvas2d.width, screenY);
-                ctx2d.stroke();
-            }
-        }
-        
-        // Draw axes
-        ctx2d.strokeStyle = '#666';
-        ctx2d.lineWidth = 2;
-        
-        ctx2d.beginPath();
-        ctx2d.moveTo(centerX, 0);
-        ctx2d.lineTo(centerX, canvas2d.height);
-        ctx2d.stroke();
-        
-        ctx2d.beginPath();
-        ctx2d.moveTo(0, centerY);
-        ctx2d.lineTo(canvas2d.width, centerY);
-        ctx2d.stroke();
-        
-        // Draw circle boundary
-        ctx2d.strokeStyle = '#3498db';
-        ctx2d.lineWidth = 2;
-        ctx2d.beginPath();
-        ctx2d.arc(centerX, centerY, R * scale, 0, Math.PI * 2);
-        ctx2d.stroke();
-        
-        // Draw points and count statistics
-        let totalPoints = 0;
-        let primitivePoints = 0;
-        let boundaryPoints = 0;
-        
-        for (let x = -R; x <= R; x++) {
-            for (let y = -R; y <= R; y++) {
-                const distance = Math.sqrt(x*x + y*y);
-                if (distance <= R) {
-                    totalPoints++;
-                    
-                    const screenX = centerX + x * scale;
-                    const screenY = centerY + y * scale;
-                    
-                    // Check if primitive
-                    const g = gcd(Math.abs(x), Math.abs(y));
-                    const isPrimitive = g === 1;
-                    const isBoundary = Math.abs(distance - R) < 1;
-                    
-                    if (isPrimitive) primitivePoints++;
-                    if (isBoundary) boundaryPoints++;
-                    
-                    // Set color based on gcd
-                    ctx2d.fillStyle = isPrimitive ? '#3498db' : '#e74c3c';
-                    
-                    // Draw point
-                    ctx2d.beginPath();
-                    ctx2d.arc(screenX, screenY, pointSize / 2, 0, Math.PI * 2);
-                    ctx2d.fill();
-                    
-                    // Highlight boundary if enabled
-                    if (document.getElementById('boundaryHighlight').checked && isBoundary) {
-                        ctx2d.strokeStyle = '#27ae60';
-                        ctx2d.lineWidth = 2;
-                        ctx2d.beginPath();
-                        ctx2d.arc(screenX, screenY, pointSize / 2 + 2, 0, Math.PI * 2);
-                        ctx2d.stroke();
+                    if (temp % i === 0) {
+                        state.mobiusCache.set(n, 0);
+                        return 0;
                     }
                 }
             }
+            if (temp > 1) primeFactors++;
+            
+            const result = (primeFactors % 2 === 0) ? 1 : -1;
+            state.mobiusCache.set(n, result);
+            return result;
         }
         
-        // Update statistics
-        document.getElementById('totalPoints2D').textContent = totalPoints;
-        document.getElementById('primitivePoints2D').textContent = primitivePoints;
-        document.getElementById('primitiveRatio2D').textContent = totalPoints > 0 ? 
-            ((primitivePoints / totalPoints * 100).toFixed(1) + '%') : '0%';
-        document.getElementById('boundaryPoints2D').textContent = boundaryPoints;
-        
-        // Calculate theoretical values
-        const theoreticalN = computeN(R, 2);
-        document.getElementById('theoreticalN2D').textContent = theoreticalN;
-        document.getElementById('actualN2D').textContent = primitivePoints;
-        
-        // Draw Möbius wave if enabled
-        if (state.research.mobiusWave) {
-            drawMobiusWave();
+        function computeZeta(s) {
+            // Approximate Riemann zeta function
+            if (s === 2) return Math.PI * Math.PI / 6;
+            if (s === 4) return Math.pow(Math.PI, 4) / 90;
+            if (s === 6) return Math.pow(Math.PI, 6) / 945;
+            
+            let sum = 0;
+            const terms = 1000;
+            for (let n = 1; n <= terms; n++) {
+                sum += 1 / Math.pow(n, s);
+            }
+            return sum;
         }
-    }
-    
-    function handle2DClick(event) {
-        const rect = canvas2d.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
         
-        const R = state.currentR;
-        const centerX = canvas2d.width / 2;
-        const centerY = canvas2d.height / 2;
-        const scale = Math.min(canvas2d.width, canvas2d.height) / (R * 2 + 2);
+        function computeVolume(k, R) {
+            // Volume of k-dimensional sphere
+            const pi = Math.PI;
+            const gamma = gammaFunction(k/2 + 1);
+            return Math.pow(pi, k/2) / gamma * Math.pow(R, k);
+        }
         
-        // Convert screen coordinates to lattice coordinates
-        const latticeX = Math.round((x - centerX) / scale);
-        const latticeY = Math.round((y - centerY) / scale);
+        function gammaFunction(x) {
+            // Lanczos approximation
+            const p = [
+                0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+                771.32342877765313, -176.61502916214059, 12.507343278686905,
+                -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7
+            ];
+            
+            if (x < 0.5) {
+                return Math.PI / (Math.sin(Math.PI * x) * gammaFunction(1 - x));
+            }
+            
+            x -= 1;
+            let a = p[0];
+            const t = x + 7.5;
+            
+            for (let i = 1; i < p.length; i++) {
+                a += p[i] / (x + i);
+            }
+            
+            return Math.sqrt(2 * Math.PI) * Math.pow(t, x + 0.5) * Math.exp(-t) * a;
+        }
         
-        // Show point info
-        showPointDetails(latticeX, latticeY);
-    }
-    
-    function showPointDetails(x, y) {
-        const distance = Math.sqrt(x*x + y*y);
-        const g = gcd(Math.abs(x), Math.abs(y));
-        const isPrimitive = g === 1;
-        const mu = mobius(g);
+        function computeNPrimitive(k, R) {
+            // Count primitive lattice points using Möbius inversion
+            let sum = 0;
+            const maxD = Math.floor(R);
+            
+            for (let d = 1; d <= maxD; d++) {
+                const mu = mobius(d);
+                if (mu !== 0) {
+                    // Approximate number of lattice points in sphere of radius R/d
+                    const Nk = Math.round(computeVolume(k, R/d));
+                    sum += mu * Nk;
+                }
+            }
+            
+            return Math.round(sum);
+        }
         
-        const infoDiv = document.getElementById('pointInfo2D');
-        document.getElementById('pointCoords').textContent = `(${x}, ${y})`;
-        document.getElementById('pointGCD').textContent = `GCD = ${g} ${isPrimitive ? '(Primitive)' : '(Non-primitive)'}`;
-        document.getElementById('pointMobius').textContent = `μ(${g}) = ${mu}`;
+        function countActualPrimitivePoints(k, R) {
+            // For 2D and 3D, we can actually count
+            if (k === 2) {
+                let count = 0;
+                for (let x = -R; x <= R; x++) {
+                    for (let y = -R; y <= R; y++) {
+                        if (x*x + y*y <= R*R) {
+                            if (gcd(Math.abs(x), Math.abs(y)) === 1) {
+                                count++;
+                            }
+                        }
+                    }
+                }
+                return count;
+            } else if (k === 3) {
+                let count = 0;
+                const R2 = R*R;
+                for (let x = -R; x <= R; x++) {
+                    for (let y = -R; y <= R; y++) {
+                        for (let z = -R; z <= R; z++) {
+                            if (x*x + y*y + z*z <= R2) {
+                                if (gcdArray([Math.abs(x), Math.abs(y), Math.abs(z)]) === 1) {
+                                    count++;
+                                }
+                            }
+                        }
+                    }
+                }
+                return count;
+            }
+            
+            // For higher dimensions, use approximation
+            return Math.round(computeVolume(k, R) / computeZeta(k));
+        }
         
-        infoDiv.classList.remove('hidden');
-        state.selectedPoint2D = {x, y};
-    }
-    
-    function hidePointInfo() {
-        document.getElementById('pointInfo2D').classList.add('hidden');
-        state.selectedPoint2D = null;
-    }
-    
-    function drawMobiusWave() {
-        // Draw Möbius wave visualization
-        const R = state.currentR;
-        const centerX = canvas2d.width / 2;
-        const centerY = canvas2d.height / 2;
-        const scale = Math.min(canvas2d.width, canvas2d.height) / (R * 2 + 2);
-        const intensity = state.research.waveIntensity;
+        // ===== THEORY EXPLORER =====
+        function updateTheoryExplorer() {
+            const k = state.dimensionK;
+            const R = state.radiusR;
+            const s = state.zetaS;
+            
+            // Calculate values
+            const volume = computeVolume(k, R);
+            const zetaValue = computeZeta(s);
+            const theoretical = volume / zetaValue;
+            const actual = countActualPrimitivePoints(k, R);
+            const error = Math.abs(theoretical - actual);
+            const errorPercent = (error / theoretical * 100).toFixed(3);
+            
+            // Update theory stats
+            const statsGrid = document.getElementById('theoryStats');
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">Volume V_${k}(R)</div>
+                    <div class="stat-value">${volume.toFixed(2)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">ζ(${s})</div>
+                    <div class="stat-value">${zetaValue.toFixed(6)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Theoretical N</div>
+                    <div class="stat-value">${Math.round(theoretical)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Actual N</div>
+                    <div class="stat-value">${actual}</div>
+                </div>
+            `;
+            
+            // Update empirical validation table
+            const validationTable = document.getElementById('validationTable');
+            validationTable.innerHTML = `
+                <tr>
+                    <td>Theoretical Prediction</td>
+                    <td>${Math.round(theoretical)}</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Actual Count</td>
+                    <td>${actual}</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Absolute Error</td>
+                    <td>${error.toFixed(2)}</td>
+                    <td>${errorPercent}%</td>
+                </tr>
+                <tr>
+                    <td>Volume Ratio</td>
+                    <td>${(actual / volume * 100).toFixed(3)}%</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>ζ(s) Effect</td>
+                    <td>${(1/zetaValue * 100).toFixed(3)}%</td>
+                    <td>-</td>
+                </tr>
+            `;
+        }
         
-        ctx2d.strokeStyle = `rgba(155, 89, 182, ${intensity * 0.5})`;
-        ctx2d.lineWidth = 1;
+        // ===== 2D VISUALIZATION =====
+        let canvas2d, ctx2d;
         
-        // Draw wave pattern based on Möbius function values
-        for (let r = 1; r <= R; r++) {
-            const mu = mobius(r);
-            if (mu !== 0) {
-                const radius = r * scale;
-                const amplitude = mu * 10 * intensity;
+        function init2DVisualization() {
+            canvas2d = document.getElementById('canvas2d');
+            if (!canvas2d) return;
+            
+            ctx2d = canvas2d.getContext('2d');
+            canvas2d.width = canvas2d.clientWidth;
+            canvas2d.height = 500;
+            
+            // Add click handler
+            canvas2d.addEventListener('click', handle2DClick);
+            
+            draw2DLattice();
+            window.canvas2dInitialized = true;
+        }
+        
+        function draw2DLattice() {
+            if (!ctx2d) return;
+            
+            const R = state.radiusR;
+            const centerX = canvas2d.width / 2;
+            const centerY = canvas2d.height / 2;
+            const scale = Math.min(canvas2d.width, canvas2d.height) / (R * 2 + 2);
+            const pointSize = parseInt(document.getElementById('pointSize2d').value);
+            const gridOpacity = parseInt(document.getElementById('gridOpacity').value) / 100;
+            const showBoundary = document.getElementById('showBoundary').checked;
+            
+            // Clear canvas
+            ctx2d.fillStyle = 'white';
+            ctx2d.fillRect(0, 0, canvas2d.width, canvas2d.height);
+            
+            // Draw grid
+            if (gridOpacity > 0) {
+                ctx2d.strokeStyle = `rgba(200, 200, 200, ${gridOpacity})`;
+                ctx2d.lineWidth = 1;
                 
-                ctx2d.beginPath();
-                for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
-                    const waveRadius = radius + Math.sin(angle * 3) * amplitude;
-                    const x = centerX + Math.cos(angle) * waveRadius;
-                    const y = centerY + Math.sin(angle) * waveRadius;
-                    
-                    if (angle === 0) {
-                        ctx2d.moveTo(x, y);
-                    } else {
-                        ctx2d.lineTo(x, y);
-                    }
+                // Vertical lines
+                for (let x = -R; x <= R; x++) {
+                    const screenX = centerX + x * scale;
+                    ctx2d.beginPath();
+                    ctx2d.moveTo(screenX, 0);
+                    ctx2d.lineTo(screenX, canvas2d.height);
+                    ctx2d.stroke();
                 }
-                ctx2d.closePath();
-                ctx2d.stroke();
+                
+                // Horizontal lines
+                for (let y = -R; y <= R; y++) {
+                    const screenY = centerY + y * scale;
+                    ctx2d.beginPath();
+                    ctx2d.moveTo(0, screenY);
+                    ctx2d.lineTo(canvas2d.width, screenY);
+                    ctx2d.stroke();
+                }
             }
-        }
-    }
-    
-    // ===== 3D VISUALIZATION =====
-    
-    function init3DVisualization() {
-        const container = document.getElementById('canvas3d-container');
-        const canvas = document.getElementById('canvas3d');
-        
-        // Create scene
-        state.threeScene = new THREE.Scene();
-        state.threeScene.background = new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--bg-color'));
-        
-        // Create camera
-        state.threeCamera = new THREE.PerspectiveCamera(
-            75,
-            container.clientWidth / 600,
-            0.1,
-            1000
-        );
-        state.threeCamera.position.z = 50;
-        
-        // Create renderer
-        state.threeRenderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-        state.threeRenderer.setSize(container.clientWidth, 600);
-        state.threeRenderer.setPixelRatio(window.devicePixelRatio);
-        
-        // Add lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        state.threeScene.add(ambientLight);
-        
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(10, 10, 10);
-        state.threeScene.add(directionalLight);
-        
-        // Add axes helper
-        const axesHelper = new THREE.AxesHelper(20);
-        state.threeScene.add(axesHelper);
-        
-        // Create orbit controls
-        try {
-            state.threeControls = new SimpleOrbitControls(state.threeCamera, canvas);
-        } catch (e) {
-            console.warn('Could not load OrbitControls, using simple controls');
-            state.threeControls = null;
-        }
-        
-        // Initial draw
-        draw3DLattice();
-        
-        // Start animation loop
-        animate3D();
-        
-        state.is3DInitialized = true;
-        logToConsole('3D visualization initialized', 'info');
-    }
-    
-    function draw3DLattice() {
-        // Clear previous points
-        state.threeObjects.forEach(obj => state.threeScene.remove(obj));
-        state.threeObjects = [];
-        
-        const R = parseInt(document.getElementById('radius3D-value').value);
-        const pointSize = parseFloat(document.getElementById('pointSize3D').value);
-        const sampling = parseInt(document.getElementById('samplingDensity').value) / 100;
-        
-        // Create material
-        const primitiveMaterial = new THREE.MeshBasicMaterial({ color: 0x3498db });
-        const nonPrimitiveMaterial = new THREE.MeshBasicMaterial({ color: 0xe74c3c });
-        const boundaryMaterial = new THREE.MeshBasicMaterial({ color: 0x27ae60 });
-        
-        let totalPoints = 0;
-        let primitivePoints = 0;
-        
-        // Create points
-        for (let x = -R; x <= R; x++) {
-            for (let y = -R; y <= R; y++) {
-                for (let z = -R; z <= R; z++) {
-                    // Apply sampling
-                    if (Math.random() > sampling) continue;
-                    
-                    const distance = Math.sqrt(x*x + y*y + z*z);
+            
+            // Draw axes
+            ctx2d.strokeStyle = '#666';
+            ctx2d.lineWidth = 2;
+            ctx2d.beginPath();
+            ctx2d.moveTo(centerX, 0);
+            ctx2d.lineTo(centerX, canvas2d.height);
+            ctx2d.stroke();
+            ctx2d.beginPath();
+            ctx2d.moveTo(0, centerY);
+            ctx2d.lineTo(canvas2d.width, centerY);
+            ctx2d.stroke();
+            
+            // Draw circle boundary
+            ctx2d.strokeStyle = '#3498db';
+            ctx2d.lineWidth = 2;
+            ctx2d.beginPath();
+            ctx2d.arc(centerX, centerY, R * scale, 0, Math.PI * 2);
+            ctx2d.stroke();
+            
+            // Count and draw points
+            let totalPoints = 0;
+            let primitivePoints = 0;
+            let boundaryPoints = 0;
+            
+            for (let x = -R; x <= R; x++) {
+                for (let y = -R; y <= R; y++) {
+                    const distance = Math.sqrt(x*x + y*y);
                     if (distance <= R) {
                         totalPoints++;
                         
-                        const g = gcdArray([Math.abs(x), Math.abs(y), Math.abs(z)]);
-                        const isPrimitive = g === 1;
-                        const isBoundary = Math.abs(distance - R) < 1.5;
+                        const screenX = centerX + x * scale;
+                        const screenY = centerY + y * scale;
+                        const isPrimitive = gcd(Math.abs(x), Math.abs(y)) === 1;
+                        const isBoundary = showBoundary && Math.abs(distance - R) < 1;
                         
                         if (isPrimitive) primitivePoints++;
+                        if (isBoundary) boundaryPoints++;
                         
-                        // Choose material
-                        let material;
+                        // Set color
+                        ctx2d.fillStyle = isPrimitive ? '#3498db' : '#e74c3c';
+                        
+                        // Draw point
+                        ctx2d.beginPath();
+                        ctx2d.arc(screenX, screenY, pointSize / 2, 0, Math.PI * 2);
+                        ctx2d.fill();
+                        
+                        // Highlight boundary
                         if (isBoundary) {
-                            material = boundaryMaterial;
-                        } else {
-                            material = isPrimitive ? primitiveMaterial : nonPrimitiveMaterial;
-                        }
-                        
-                        // Create sphere
-                        const geometry = new THREE.SphereGeometry(pointSize / 10, 8, 8);
-                        const sphere = new THREE.Mesh(geometry, material);
-                        sphere.position.set(x, y, z);
-                        
-                        state.threeScene.add(sphere);
-                        state.threeObjects.push(sphere);
-                    }
-                }
-            }
-        }
-        
-        // Update statistics
-        document.getElementById('totalPoints3D').textContent = totalPoints;
-        document.getElementById('primitivePoints3D').textContent = primitivePoints;
-        document.getElementById('renderedPoints').textContent = state.threeObjects.length;
-        
-        // Calculate volume
-        const volume = (4/3) * Math.PI * Math.pow(R, 3);
-        document.getElementById('volumeSphere').textContent = volume.toFixed(1);
-        
-        // Calculate density error
-        const density = totalPoints / volume;
-        const theoreticalDensity = 1; // For unit cube
-        const error = Math.abs(density - theoreticalDensity) / theoreticalDensity * 100;
-        document.getElementById('densityError').textContent = error.toFixed(2) + '%';
-    }
-    
-    function animate3D() {
-        requestAnimationFrame(animate3D);
-        
-        // Update controls if they exist
-        if (state.threeControls) {
-            state.threeControls.update();
-        }
-        
-        // Auto rotation if enabled
-        if (document.getElementById('toggleRotation').classList.contains('active')) {
-            state.threeScene.rotation.y += 0.005;
-            state.threeScene.rotation.x += 0.002;
-        }
-        
-        // Render scene
-        state.threeRenderer.render(state.threeScene, state.threeCamera);
-        
-        // Calculate FPS
-        updateFPS();
-    }
-    
-    function updateFPS() {
-        const now = performance.now();
-        state.performance.frameCount++;
-        
-        if (now >= state.performance.lastFrameTime + 1000) {
-            state.performance.fps = Math.round((state.performance.frameCount * 1000) / (now - state.performance.lastFrameTime));
-            state.performance.lastFrameTime = now;
-            state.performance.frameCount = 0;
-            
-            document.getElementById('frameRate').textContent = state.performance.fps + ' FPS';
-        }
-    }
-    
-    // ===== ERROR ANALYSIS & CHARTS =====
-    
-    function initChart() {
-        const ctx = document.getElementById('errorChart').getContext('2d');
-        
-        state.chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: []
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Error Analysis Across Dimensions'
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false
-                    }
-                },
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Radius (R)'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Error'
+                            ctx2d.strokeStyle = '#27ae60';
+                            ctx2d.lineWidth = 2;
+                            ctx2d.beginPath();
+                            ctx2d.arc(screenX, screenY, pointSize / 2 + 2, 0, Math.PI * 2);
+                            ctx2d.stroke();
                         }
                     }
                 }
             }
-        });
-    }
-    
-    function updateChart() {
-        // This would be populated with actual data
-        // For now, create sample data
-        const labels = Array.from({length: 20}, (_, i) => 10 + i * 10);
-        
-        state.chart.data.labels = labels;
-        
-        // Clear existing datasets
-        state.chart.data.datasets = [];
-        
-        // Add datasets for selected dimensions
-        const dimensions = Array.from(document.querySelectorAll('input[name="dimension"]:checked'))
-            .map(input => parseInt(input.value));
-        
-        dimensions.forEach(k => {
-            const dataset = {
-                label: `k = ${k}`,
-                data: labels.map(R => {
-                    const theoretical = computeN(R, k);
-                    const actual = estimateActualN(R, k);
-                    const error = Math.abs(theoretical - actual);
-                    return state.research.logLogPlot ? Math.log10(error + 1) : error;
-                }),
-                borderColor: getColorForDimension(k),
-                backgroundColor: getColorForDimension(k, 0.1),
-                borderWidth: 2,
-                fill: true,
-                tension: 0.4
-            };
             
-            state.chart.data.datasets.push(dataset);
-        });
-        
-        // Update chart type based on settings
-        state.chart.config.type = state.research.logLogPlot ? 'scatter' : 'line';
-        
-        // Update axis labels
-        state.chart.options.scales.y.title.text = state.research.logLogPlot ? 
-            'log₁₀(Error)' : 'Absolute Error';
-        
-        state.chart.update();
-    }
-    
-    function estimateActualN(R, k) {
-        // Simplified estimation - in real implementation, would compute actual lattice points
-        const volume = Math.pow(Math.PI, k/2) / gamma(k/2 + 1) * Math.pow(R, k);
-        const noise = (Math.random() - 0.5) * volume * 0.01; // 1% noise
-        return Math.round(volume / Math.pow(Math.PI, k/2)) + noise;
-    }
-    
-    function getColorForDimension(k, alpha = 1) {
-        const colors = [
-            `rgba(52, 152, 219, ${alpha})`,  // k=2
-            `rgba(155, 89, 182, ${alpha})`,  // k=3
-            `rgba(231, 76, 60, ${alpha})`,   // k=4
-            `rgba(46, 204, 113, ${alpha})`,  // k=5
-            `rgba(241, 196, 15, ${alpha})`,  // k=6
-            `rgba(230, 126, 34, ${alpha})`,  // k=7
-            `rgba(149, 165, 166, ${alpha})`  // k=8
-        ];
-        return colors[(k - 2) % colors.length];
-    }
-    
-    // ===== RESEARCH TOOLS =====
-    
-    function calculateGrowthExponent() {
-        const k = parseInt(document.getElementById('calcK').value);
-        const Rmin = 10;
-        const Rmax = 200;
-        const steps = 10;
-        
-        const radii = [];
-        const counts = [];
-        
-        for (let R = Rmin; R <= Rmax; R += (Rmax - Rmin) / steps) {
-            const N = computeN(R, k);
-            radii.push(R);
-            counts.push(N);
-        }
-        
-        // Fit to power law N ~ R^α
-        const logR = radii.map(r => Math.log(r));
-        const logN = counts.map(n => Math.log(n));
-        
-        // Simple linear regression for slope (exponent)
-        const n = radii.length;
-        const sumX = logR.reduce((a, b) => a + b, 0);
-        const sumY = logN.reduce((a, b) => a + b, 0);
-        const sumXY = logR.reduce((sum, x, i) => sum + x * logN[i], 0);
-        const sumX2 = logR.reduce((sum, x) => sum + x * x, 0);
-        
-        const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-        
-        document.getElementById('exponentResult').innerHTML = 
-            `<strong>Growth exponent α ≈ ${slope.toFixed(3)}</strong> (theoretical: ${k.toFixed(1)})`;
-        
-        // Show details
-        const details = document.getElementById('exponentDetails');
-        details.innerHTML = `
-            <div class="stat-card">
-                <div class="label">Calculated Exponent</div>
-                <div class="value">${slope.toFixed(4)}</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">Theoretical Exponent</div>
-                <div class="value">${k.toFixed(4)}</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">Difference</div>
-                <div class="value">${Math.abs(slope - k).toFixed(4)}</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">R² Value</div>
-                <div class="value">${calculateRSquared(logR, logN, slope).toFixed(4)}</div>
-            </div>
-        `;
-    }
-    
-    function calculateRSquared(x, y, slope) {
-        const n = x.length;
-        const meanY = y.reduce((a, b) => a + b, 0) / n;
-        
-        let ssTot = 0;
-        let ssRes = 0;
-        
-        for (let i = 0; i < n; i++) {
-            const predicted = slope * x[i];
-            ssTot += Math.pow(y[i] - meanY, 2);
-            ssRes += Math.pow(y[i] - predicted, 2);
-        }
-        
-        return 1 - (ssRes / ssTot);
-    }
-    
-    // ===== EXPORT FUNCTIONS =====
-    
-    function exportCanvas2D(format) {
-        const link = document.createElement('a');
-        link.download = `lattice-2d-${Date.now()}.${format}`;
-        link.href = canvas2d.toDataURL(`image/${format}`);
-        link.click();
-        logToConsole(`Exported 2D visualization as ${format.toUpperCase()}`, 'info');
-    }
-    
-    function exportCanvas3D(format) {
-        // Capture current 3D view
-        const dataURL = state.threeRenderer.domElement.toDataURL(`image/${format}`);
-        const link = document.createElement('a');
-        link.download = `lattice-3d-${Date.now()}.${format}`;
-        link.href = dataURL;
-        link.click();
-        logToConsole(`Exported 3D visualization as ${format.toUpperCase()}`, 'info');
-    }
-    
-    function exportErrorDataCSV() {
-        const csv = 'Radius,k,Theoretical,Actual,Error\n';
-        // Add actual data here
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `error-analysis-${Date.now()}.csv`;
-        a.click();
-        logToConsole('Exported error analysis data as CSV', 'info');
-    }
-    
-    // ===== UI MANAGEMENT =====
-    
-    function initTabs() {
-        const tabButtons = document.querySelectorAll('.tab-button');
-        const tabContents = document.querySelectorAll('.tab-content');
-        
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const tabId = button.getAttribute('data-tab');
-                
-                // Update active button
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                
-                // Update active content
-                tabContents.forEach(content => {
-                    content.classList.remove('active');
-                    if (content.id === tabId) {
-                        content.classList.add('active');
-                        state.currentTab = tabId;
-                        
-                        // Initialize tab-specific features
-                        switch(tabId) {
-                            case 'viz-2d':
-                                if (!state.is2DInitialized) init2DVisualization();
-                                break;
-                            case 'viz-3d':
-                                if (!state.is3DInitialized) init3DVisualization();
-                                break;
-                            case 'analysis':
-                                if (!state.chart) initChart();
-                                updateChart();
-                                break;
-                        }
-                    }
-                });
-            });
-        });
-    }
-    
-    function setup2DControls() {
-        // Radius control
-        const radiusSlider = document.getElementById('radius2D');
-        const radiusValue = document.getElementById('radius2D-value');
-        const applyBtn = document.getElementById('applyRadius2D');
-        
-        function updateRadius() {
-            const value = parseInt(radiusSlider.value);
-            radiusValue.value = value;
-            state.currentR = value;
-            document.getElementById('radius2D-value').value = value;
-            
-            if (state.is2DInitialized) {
-                draw2DLattice();
-            }
-        }
-        
-        radiusSlider.addEventListener('input', updateRadius);
-        radiusValue.addEventListener('change', function() {
-            radiusSlider.value = this.value;
-            updateRadius();
-        });
-        applyBtn.addEventListener('click', updateRadius);
-        
-        // Point size control
-        const pointSizeSlider = document.getElementById('pointSize2D');
-        pointSizeSlider.addEventListener('input', function() {
-            document.getElementById('pointSizeDisplay').textContent = this.value + 'px';
-            if (state.is2DInitialized) {
-                draw2DLattice();
-            }
-        });
-        
-        // Grid opacity control
-        const gridOpacitySlider = document.getElementById('gridOpacity2D');
-        gridOpacitySlider.addEventListener('input', function() {
-            document.getElementById('gridOpacityDisplay').textContent = this.value + '%';
-            if (state.is2DInitialized) {
-                draw2DLattice();
-            }
-        });
-        
-        // Möbius wave toggle
-        const mobiusWaveBtn = document.getElementById('toggleMobiusWave');
-        mobiusWaveBtn.addEventListener('click', function() {
-            state.research.mobiusWave = !state.research.mobiusWave;
-            this.classList.toggle('active', state.research.mobiusWave);
-            document.getElementById('waveIntensity').disabled = !state.research.mobiusWave;
-            
-            if (state.research.mobiusWave) {
-                this.textContent = 'Möbius Wave (ON)';
-            } else {
-                this.textContent = 'Möbius Wave (OFF)';
-            }
-            
-            if (state.is2DInitialized) {
-                draw2DLattice();
-            }
-        });
-        
-        // Wave intensity control
-        const waveIntensitySlider = document.getElementById('waveIntensity');
-        waveIntensitySlider.addEventListener('input', function() {
-            const value = parseInt(this.value) / 100;
-            state.research.waveIntensity = value;
-            document.getElementById('waveIntensityDisplay').textContent = this.value + '%';
-            
-            if (state.research.mobiusWave && state.is2DInitialized) {
-                draw2DLattice();
-            }
-        });
-    }
-    
-    function setup3DControls() {
-        // Radius control
-        const radiusSlider = document.getElementById('radius3D');
-        const radiusValue = document.getElementById('radius3D-value');
-        const applyBtn = document.getElementById('applyRadius3D');
-        
-        function update3DRadius() {
-            const value = parseInt(radiusSlider.value);
-            radiusValue.value = value;
-            
-            if (state.is3DInitialized) {
-                draw3DLattice();
-            }
-        }
-        
-        radiusSlider.addEventListener('input', update3DRadius);
-        radiusValue.addEventListener('change', function() {
-            radiusSlider.value = this.value;
-            update3DRadius();
-        });
-        applyBtn.addEventListener('click', update3DRadius);
-        
-        // Point size control
-        const pointSizeSlider = document.getElementById('pointSize3D');
-        pointSizeSlider.addEventListener('input', function() {
-            document.getElementById('pointSize3DDisplay').textContent = this.value;
-            if (state.is3DInitialized) {
-                draw3DLattice();
-            }
-        });
-        
-        // Sampling density control
-        const samplingSlider = document.getElementById('samplingDensity');
-        samplingSlider.addEventListener('input', function() {
-            document.getElementById('samplingDensityDisplay').textContent = this.value + '%';
-            if (state.is3DInitialized) {
-                draw3DLattice();
-            }
-        });
-        
-        // Auto rotation toggle
-        const rotationBtn = document.getElementById('toggleRotation');
-        rotationBtn.addEventListener('click', function() {
-            this.classList.toggle('active');
-        });
-    }
-    
-    function initResearchMode() {
-        const researchToggle = document.getElementById('researchToggle');
-        const floatingResearchToggle = document.getElementById('researchToggle');
-        
-        function toggleResearch() {
-            state.researchMode = !state.researchMode;
-            document.getElementById('researchOverlay').classList.toggle('active', state.researchMode);
-            
-            const buttons = [researchToggle, floatingResearchToggle];
-            buttons.forEach(btn => {
-                if (btn) {
-                    if (state.researchMode) {
-                        btn.classList.add('active');
-                        btn.style.backgroundColor = 'var(--warning-color)';
-                    } else {
-                        btn.classList.remove('active');
-                        btn.style.backgroundColor = '';
-                    }
-                }
-            });
-            
-            logToConsole(`Research mode ${state.researchMode ? 'activated' : 'deactivated'}`, 'info');
-        }
-        
-        researchToggle.addEventListener('click', toggleResearch);
-        floatingResearchToggle.addEventListener('click', toggleResearch);
-    }
-    
-    function logToConsole(message, type = 'info') {
-        const consoleElement = document.getElementById('researchConsole');
-        if (!consoleElement) return;
-        
-        const line = document.createElement('div');
-        line.className = `console-line ${type}`;
-        line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-        
-        consoleElement.appendChild(line);
-        consoleElement.scrollTop = consoleElement.scrollHeight;
-        
-        // Keep only last 100 lines
-        const lines = consoleElement.querySelectorAll('.console-line');
-        if (lines.length > 100) {
-            lines[0].remove();
-        }
-        
-        // Also add to state
-        state.research.consoleHistory.push({timestamp: Date.now(), type, message});
-    }
-    
-    function clearResearchConsole() {
-        const consoleElement = document.getElementById('researchConsole');
-        if (consoleElement) {
-            consoleElement.innerHTML = '';
-        }
-        state.research.consoleHistory = [];
-        logToConsole('Console cleared', 'info');
-    }
-    
-    function toggleResearchOverlay() {
-        document.getElementById('researchOverlay').classList.remove('active');
-        state.researchMode = false;
-        document.getElementById('researchToggle').classList.remove('active');
-    }
-    
-    function updateDiagnostics() {
-        const grid = document.getElementById('diagnosticsGrid');
-        if (!grid) return;
-        
-        grid.innerHTML = `
-            <div class="stat-card">
-                <div class="label">Cache Hit Rate</div>
-                <div class="value">${calculateCacheHitRate()}%</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">Memory Usage</div>
-                <div class="value">${formatBytes(performance.memory ? performance.memory.usedJSHeapSize : 0)}</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">Möbius Cache</div>
-                <div class="value">${state.mobiusCache.size}</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">GCD Cache</div>
-                <div class="value">${state.gcdCache.size}</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">Frame Rate</div>
-                <div class="value">${state.performance.fps} FPS</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">Precision Mode</div>
-                <div class="value">${state.research.highPrecision ? 'High' : 'Standard'}</div>
-            </div>
-        `;
-    }
-    
-    function calculateCacheHitRate() {
-        // Simplified cache hit rate calculation
-        const totalAccesses = state.mobiusCache.size + state.gcdCache.size + state.primeCache.size;
-        const hits = Math.floor(totalAccesses * 0.8); // Simulated 80% hit rate
-        return totalAccesses > 0 ? Math.round((hits / totalAccesses) * 100) : 0;
-    }
-    
-    function formatBytes(bytes) {
-        if (bytes === 0) return '0 B';
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-    
-    // ===== INITIALIZATION =====
-    
-    function initialize() {
-        // Initialize UI components
-        initTabs();
-        setup2DControls();
-        setup3DControls();
-        initResearchMode();
-        
-        // Initialize dark mode
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        darkModeToggle.addEventListener('click', function() {
-            state.darkMode = !state.darkMode;
-            document.body.classList.toggle('dark-mode', state.darkMode);
-            
-            // Update 3D scene background
-            if (state.threeScene) {
-                state.threeScene.background = new THREE.Color(
-                    getComputedStyle(document.documentElement).getPropertyValue('--bg-color')
-                );
-            }
-            
-            this.textContent = state.darkMode ? '☀️' : '🌙';
-            logToConsole(`Dark mode ${state.darkMode ? 'enabled' : 'disabled'}`, 'info');
-        });
-        
-        // Initialize theory controls
-        const theoryKSlider = document.getElementById('theory-k');
-        const theoryKValue = document.getElementById('theory-k-value');
-        theoryKSlider.addEventListener('input', function() {
-            theoryKValue.value = this.value;
-            document.getElementById('theory-k-display').textContent = `k = ${this.value}`;
-        });
-        theoryKValue.addEventListener('change', function() {
-            theoryKSlider.value = this.value;
-            document.getElementById('theory-k-display').textContent = `k = ${this.value}`;
-        });
-        
-        const theoryRSlider = document.getElementById('theory-R');
-        const theoryRValue = document.getElementById('theory-R-value');
-        theoryRSlider.addEventListener('input', function() {
-            theoryRValue.value = this.value;
-            document.getElementById('theory-R-display').textContent = `R = ${this.value}`;
-        });
-        theoryRValue.addEventListener('change', function() {
-            theoryRSlider.value = this.value;
-            document.getElementById('theory-R-display').textContent = `R = ${this.value}`;
-        });
-        
-        // Initialize chart
-        initChart();
-        
-        // Populate dimensional table
-        populateDimensionalTable();
-        
-        // Set up periodic diagnostics update
-        setInterval(updateDiagnostics, 2000);
-        
-        // Initial log
-        logToConsole('Mathematical Discovery Platform initialized', 'info');
-        logToConsole('High precision calculations enabled', 'info');
-        
-        console.log('Platform initialized successfully');
-    }
-    
-    function populateDimensionalTable() {
-        const tableBody = document.getElementById('dimensionalTable');
-        if (!tableBody) return;
-        
-        const dimensions = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-        const R = 100;
-        
-        let html = '';
-        dimensions.forEach(k => {
-            const volume = Math.pow(Math.PI, k/2) / gamma(k/2 + 1) * Math.pow(R, k);
-            const zeta = computeZeta(k);
-            const expected = volume / zeta;
-            const error = 0.3 + Math.random() * 0.4; // Simulated error
-            
-            html += `
-                <tr>
-                    <td>${k}</td>
-                    <td>V_${k}(R) = π^${k/2}/Γ(${k/2}+1) R^${k}</td>
-                    <td>${zeta.toFixed(6)}</td>
-                    <td>${Math.round(expected).toLocaleString()}</td>
-                    <td>${error.toFixed(2)}%</td>
-                </tr>
-            `;
-        });
-        
-        tableBody.innerHTML = html;
-    }
-    
-    function computeZeta(s) {
-        // Approximate zeta function for integer s >= 2
-        if (s === 2) return Math.PI * Math.PI / 6;
-        if (s === 4) return Math.pow(Math.PI, 4) / 90;
-        if (s === 6) return Math.pow(Math.PI, 6) / 945;
-        
-        // Approximation for other values
-        let sum = 0;
-        for (let n = 1; n <= 1000; n++) {
-            sum += 1 / Math.pow(n, s);
-        }
-        return sum;
-    }
-    
-    // ===== EVENT LISTENERS =====
-    
-    // Add additional event listeners for various buttons
-    document.addEventListener('DOMContentLoaded', function() {
-        initialize();
-        
-        // Fullscreen toggle
-        document.getElementById('fullscreenToggle').addEventListener('click', function() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        });
-        
-        // Batch export
-        document.getElementById('batchExport').addEventListener('click', function() {
-            logToConsole('Starting batch export...', 'info');
-            setTimeout(() => {
-                logToConsole('Batch export completed successfully', 'info');
-                alert('Batch export completed! All files have been generated.');
-            }, 2000);
-        });
-        
-        // Run analysis
-        document.getElementById('runAnalysis').addEventListener('click', function() {
-            updateChart();
-            logToConsole('Error analysis completed', 'info');
-        });
-        
-        // Calculate growth exponent
-        document.getElementById('calculateExponent').addEventListener('click', function() {
-            calculateGrowthExponent();
-        });
-        
-        // Run benchmark
-        document.getElementById('runBenchmark').addEventListener('click', function() {
-            logToConsole('Running performance benchmark...', 'info');
-            setTimeout(() => {
-                const results = document.getElementById('benchmarkResults');
-                results.innerHTML = `
+            // Update statistics
+            const stats2d = document.getElementById('stats2d');
+            if (stats2d) {
+                stats2d.innerHTML = `
                     <div class="stat-card">
-                        <div class="label">GCD Calculation</div>
-                        <div class="value">1.2 ms avg</div>
+                        <div class="stat-label">Total Points</div>
+                        <div class="stat-value">${totalPoints}</div>
                     </div>
                     <div class="stat-card">
-                        <div class="label">Möbius Function</div>
-                        <div class="value">0.8 ms avg</div>
+                        <div class="stat-label">Primitive Points</div>
+                        <div class="stat-value">${primitivePoints}</div>
                     </div>
                     <div class="stat-card">
-                        <div class="label">N(R) Calculation</div>
-                        <div class="value">15.3 ms avg</div>
+                        <div class="stat-label">Primitive Ratio</div>
+                        <div class="stat-value">${((primitivePoints/totalPoints)*100).toFixed(1)}%</div>
                     </div>
                     <div class="stat-card">
-                        <div class="label">Cache Performance</div>
-                        <div class="value">87% hit rate</div>
+                        <div class="stat-label">Boundary Points</div>
+                        <div class="stat-value">${boundaryPoints}</div>
                     </div>
                 `;
-                logToConsole('Performance benchmark completed', 'info');
-            }, 1000);
-        });
+            }
+        }
         
-        // MathJax configuration
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']]
-            },
-            startup: {
-                pageReady: () => {
-                    return MathJax.startup.defaultPageReady().then(() => {
-                        console.log('MathJax initialized');
-                    });
+        function handle2DClick(event) {
+            const rect = canvas2d.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            const R = state.radiusR;
+            const centerX = canvas2d.width / 2;
+            const centerY = canvas2d.height / 2;
+            const scale = Math.min(canvas2d.width, canvas2d.height) / (R * 2 + 2);
+            
+            // Convert to lattice coordinates
+            const latticeX = Math.round((x - centerX) / scale);
+            const latticeY = Math.round((y - centerY) / scale);
+            const distance = Math.sqrt(latticeX*latticeX + latticeY*latticeY);
+            
+            if (distance <= R) {
+                state.currentPoint = {x: latticeX, y: latticeY};
+                
+                // Show point details
+                const detailsDiv = document.getElementById('pointDetails');
+                const analysisDiv = document.getElementById('selectedPointAnalysis');
+                
+                if (detailsDiv) {
+                    const g = gcd(Math.abs(latticeX), Math.abs(latticeY));
+                    const mu = mobius(g);
+                    const isPrimitive = g === 1;
+                    
+                    detailsDiv.innerHTML = `
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                            <h4>Point Coordinates: (${latticeX}, ${latticeY})</h4>
+                            <p>Distance from origin: ${distance.toFixed(2)}</p>
+                            <p>GCD: ${g} ${isPrimitive ? '(Primitive)' : '(Non-primitive)'}</p>
+                            <p>Möbius μ(${g}): ${mu}</p>
+                            <p>Within radius: ${distance <= R ? 'Yes' : 'No'}</p>
+                        </div>
+                    `;
+                }
+                
+                if (analysisDiv) {
+                    // Analyze this point's contribution
+                    analysisDiv.innerHTML = `
+                        <div style="background: #e8f4fd; padding: 15px; border-radius: 8px;">
+                            <h4>Point Analysis</h4>
+                            <p>This point contributes to the count of ${isPrimitive ? 'primitive' : 'non-primitive'} points.</p>
+                            <p>Möbius weight: ${mu}</p>
+                            <p>Inverse Möbius contribution: ${mu !== 0 ? 'Non-zero' : 'Zero (square factor)'}</p>
+                        </div>
+                    `;
                 }
             }
-        };
-    });
-    
-    // Handle window resize
-    window.addEventListener('resize', function() {
-        if (state.is2DInitialized && canvas2d) {
-            const container = canvas2d.parentElement;
-            canvas2d.width = container.clientWidth;
-            draw2DLattice();
         }
         
-        if (state.is3DInitialized && state.threeRenderer) {
+        // ===== 3D VISUALIZATION =====
+        function init3DVisualization() {
             const container = document.getElementById('canvas3d-container');
-            state.threeCamera.aspect = container.clientWidth / 600;
-            state.threeCamera.updateProjectionMatrix();
-            state.threeRenderer.setSize(container.clientWidth, 600);
+            if (!container) return;
+            
+            // Create scene
+            state.threeScene = new THREE.Scene();
+            state.threeScene.background = new THREE.Color(0xf8f9fa);
+            
+            // Create camera
+            state.threeCamera = new THREE.PerspectiveCamera(
+                75,
+                container.clientWidth / 500,
+                0.1,
+                1000
+            );
+            state.threeCamera.position.z = state.radiusR * 1.5;
+            
+            // Create renderer
+            state.threeRenderer = new THREE.WebGLRenderer({ antialias: true });
+            state.threeRenderer.setSize(container.clientWidth, 500);
+            container.appendChild(state.threeRenderer.domElement);
+            
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            state.threeScene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 10, 10);
+            state.threeScene.add(directionalLight);
+            
+            // Add axes
+            const axesHelper = new THREE.AxesHelper(state.radiusR * 1.2);
+            state.threeScene.add(axesHelper);
+            
+            draw3DLattice();
+            animate3D();
+            window.threeInitialized = true;
         }
-    });
-    
-    // Fullscreen change event
-    document.addEventListener('fullscreenchange', function() {
-        state.fullscreen = !!document.fullscreenElement;
-    });
+        
+        function draw3DLattice() {
+            // Clear previous objects
+            state.threeObjects.forEach(obj => state.threeScene.remove(obj));
+            state.threeObjects = [];
+            
+            const R = state.radiusR;
+            const pointSize = parseFloat(document.getElementById('pointSize3d').value);
+            const showAxes = document.getElementById('showAxes').checked;
+            
+            // Update axes visibility
+            const axes = state.threeScene.getObjectByProperty('type', 'AxesHelper');
+            if (axes) axes.visible = showAxes;
+            
+            // Create materials
+            const primitiveMat = new THREE.MeshBasicMaterial({ color: 0x3498db });
+            const nonPrimitiveMat = new THREE.MeshBasicMaterial({ color: 0xe74c3c });
+            const boundaryMat = new THREE.MeshBasicMaterial({ color: 0x27ae60 });
+            
+            let totalPoints = 0;
+            let primitivePoints = 0;
+            
+            // Create points (sampled for performance)
+            const sampling = Math.max(1, Math.floor(50 / R));
+            
+            for (let x = -R; x <= R; x += sampling) {
+                for (let y = -R; y <= R; y += sampling) {
+                    for (let z = -R; z <= R; z += sampling) {
+                        const distance = Math.sqrt(x*x + y*y + z*z);
+                        if (distance <= R) {
+                            totalPoints++;
+                            
+                            const isPrimitive = gcdArray([Math.abs(x), Math.abs(y), Math.abs(z)]) === 1;
+                            const isBoundary = Math.abs(distance - R) < 1.5;
+                            
+                            if (isPrimitive) primitivePoints++;
+                            
+                            // Choose material
+                            const material = isBoundary ? boundaryMat : 
+                                           (isPrimitive ? primitiveMat : nonPrimitiveMat);
+                            
+                            // Create sphere
+                            const geometry = new THREE.SphereGeometry(pointSize, 8, 8);
+                            const sphere = new THREE.Mesh(geometry, material);
+                            sphere.position.set(x, y, z);
+                            
+                            state.threeScene.add(sphere);
+                            state.threeObjects.push(sphere);
+                        }
+                    }
+                }
+            }
+            
+            // Update statistics
+            const stats3d = document.getElementById('stats3d');
+            if (stats3d) {
+                const volume = (4/3) * Math.PI * Math.pow(R, 3);
+                const density = totalPoints / volume;
+                
+                stats3d.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-label">Total Points (3D)</div>
+                        <div class="stat-value">${totalPoints}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Primitive Points</div>
+                        <div class="stat-value">${primitivePoints}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Volume</div>
+                        <div class="stat-value">${volume.toFixed(1)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Point Density</div>
+                        <div class="stat-value">${density.toFixed(3)}</div>
+                    </div>
+                `;
+            }
+        }
+        
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            
+            // Auto rotation
+            if (document.getElementById('autoRotate').checked) {
+                const speed = parseFloat(document.getElementById('rotationSpeed').value);
+                state.threeScene.rotation.y += 0.01 * speed;
+                state.threeScene.rotation.x += 0.005 * speed;
+            }
+            
+            state.threeRenderer.render(state.threeScene, state.threeCamera);
+        }
+        
+        // ===== CHART INITIALIZATION =====
+        function initChart() {
+            const ctx = document.getElementById('errorChart').getContext('2d');
+            
+            state.chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Absolute Error',
+                        data: [],
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 2,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Error Analysis Over Different Radii'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Radius (R)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Error'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            updateChartData();
+            window.chartInitialized = true;
+        }
+        
+        function updateChartData() {
+            if (!state.chart) return;
+            
+            // Generate data for different radii
+            const k = state.dimensionK;
+            const s = state.zetaS;
+            const radii = [];
+            const errors = [];
+            
+            for (let r = 10; r <= 100; r += 10) {
+                const theoretical = computeVolume(k, r) / computeZeta(s);
+                const actual = countActualPrimitivePoints(k, r);
+                const error = Math.abs(theoretical - actual);
+                
+                radii.push(r);
+                errors.push(error);
+            }
+            
+            state.chart.data.labels = radii;
+            state.chart.data.datasets[0].data = errors;
+            state.chart.update();
+            
+            // Update systematic data table
+            updateSystematicDataTable();
+        }
+        
+        function updateSystematicDataTable() {
+            const tableBody = document.getElementById('dataTableBody');
+            if (!tableBody) return;
+            
+            const k = state.dimensionK;
+            const s = state.zetaS;
+            let html = '';
+            
+            // Generate systematic data
+            for (let r = 10; r <= 100; r += 10) {
+                const volume = computeVolume(k, r);
+                const theoretical = Math.round(volume / computeZeta(s));
+                const actual = countActualPrimitivePoints(k, r);
+                const error = Math.abs(theoretical - actual);
+                const errorPercent = (error / theoretical * 100).toFixed(2);
+                
+                // Count boundary points (approximation)
+                const boundaryPoints = Math.round(2 * Math.PI * r); // Approximation
+                
+                html += `
+                    <tr>
+                        <td>${r}</td>
+                        <td>${Math.round(volume)}</td>
+                        <td>${actual}</td>
+                        <td>${theoretical}</td>
+                        <td>${error.toFixed(1)}</td>
+                        <td>${errorPercent}%</td>
+                        <td>${boundaryPoints}</td>
+                    </tr>
+                `;
+            }
+            
+            tableBody.innerHTML = html;
+        }
+        
+        // ===== EXPORT FUNCTIONS =====
+        function export2D(format) {
+            if (!canvas2d) return;
+            
+            const link = document.createElement('a');
+            
+            if (format === 'svg') {
+                // Create SVG from canvas
+                const svgData = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="${canvas2d.width}" height="${canvas2d.height}">
+                        <foreignObject width="100%" height="100%">
+                            <div xmlns="http://www.w3.org/1999/xhtml">
+                                <img src="${canvas2d.toDataURL('image/png')}" width="${canvas2d.width}" height="${canvas2d.height}"/>
+                            </div>
+                        </foreignObject>
+                    </svg>
+                `;
+                
+                const blob = new Blob([svgData], { type: 'image/svg+xml' });
+                link.href = URL.createObjectURL(blob);
+                link.download = `lattice-2d-${Date.now()}.svg`;
+            } else {
+                // PNG export
+                link.href = canvas2d.toDataURL('image/png');
+                link.download = `lattice-2d-${Date.now()}.png`;
+            }
+            
+            link.click();
+            alert(`2D visualization exported as ${format.toUpperCase()}!`);
+        }
+        
+        function export2DData() {
+            const R = state.radiusR;
+            let csv = 'x,y,gcd,is_primitive,distance\n';
+            
+            for (let x = -R; x <= R; x++) {
+                for (let y = -R; y <= R; y++) {
+                    const distance = Math.sqrt(x*x + y*y);
+                    if (distance <= R) {
+                        const g = gcd(Math.abs(x), Math.abs(y));
+                        csv += `${x},${y},${g},${g === 1 ? 'true' : 'false'},${distance.toFixed(2)}\n`;
+                    }
+                }
+            }
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `lattice-data-${Date.now()}.csv`;
+            link.click();
+            alert('2D data exported as CSV!');
+        }
+        
+        function export3D(format) {
+            if (!state.threeRenderer) return;
+            
+            const link = document.createElement('a');
+            const dataURL = state.threeRenderer.domElement.toDataURL('image/png');
+            
+            link.href = dataURL;
+            link.download = `lattice-3d-${Date.now()}.png`;
+            link.click();
+            alert('3D visualization exported as PNG!');
+        }
+        
+        function capture3DView() {
+            if (!state.threeRenderer) return;
+            
+            // Capture current view
+            const dataURL = state.threeRenderer.domElement.toDataURL('image/png');
+            
+            // Show preview
+            const preview = window.open();
+            preview.document.write(`
+                <html>
+                    <body style="margin: 0; padding: 20px; background: #f8f9fa;">
+                        <h2>3D View Capture</h2>
+                        <img src="${dataURL}" style="max-width: 90%; border: 1px solid #ddd;">
+                        <p style="margin-top: 20px;">
+                            <button onclick="window.location.href='${dataURL}'" 
+                                    style="padding: 10px 20px; background: #3498db; color: white; border: none; cursor: pointer;">
+                                Download Image
+                            </button>
+                        </p>
+                    </body>
+                </html>
+            `);
+        }
+        
+        function exportChart(format) {
+            if (!state.chart) return;
+            
+            const link = document.createElement('a');
+            link.href = state.chart.toBase64Image();
+            link.download = `error-chart-${Date.now()}.png`;
+            link.click();
+            alert('Chart exported as PNG!');
+        }
+        
+        function exportAllData() {
+            const data = {
+                parameters: {
+                    zetaS: state.zetaS,
+                    radiusR: state.radiusR,
+                    dimensionK: state.dimensionK,
+                    timestamp: new Date().toISOString()
+                },
+                calculations: {
+                    volume: computeVolume(state.dimensionK, state.radiusR),
+                    zetaValue: computeZeta(state.zetaS),
+                    theoretical: computeVolume(state.dimensionK, state.radiusR) / computeZeta(state.zetaS),
+                    actual: countActualPrimitivePoints(state.dimensionK, state.radiusR)
+                },
+                systematicData: []
+            };
+            
+            // Add systematic data
+            for (let r = 10; r <= 100; r += 10) {
+                data.systematicData.push({
+                    radius: r,
+                    volume: computeVolume(state.dimensionK, r),
+                    actual: countActualPrimitivePoints(state.dimensionK, r),
+                    theoretical: computeVolume(state.dimensionK, r) / computeZeta(state.zetaS)
+                });
+            }
+            
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `math-data-${Date.now()}.json`;
+            link.click();
+            alert('All data exported as JSON!');
+        }
+        
+        function exportAnalysisReport() {
+            // Create a simple HTML report
+            const report = `
+                <html>
+                <head>
+                    <title>Mathematical Analysis Report</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h1 { color: #2c3e50; }
+                        .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; }
+                        .stat { display: inline-block; margin: 10px; padding: 10px; background: #f8f9fa; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Mathematical Analysis Report</h1>
+                    <p>Generated: ${new Date().toLocaleString()}</p>
+                    
+                    <div class="section">
+                        <h2>Parameters</h2>
+                        <p>Zeta(s): s = ${state.zetaS}</p>
+                        <p>Radius: R = ${state.radiusR}</p>
+                        <p>Dimension: k = ${state.dimensionK}</p>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>Results</h2>
+                        <div class="stat">Volume: ${computeVolume(state.dimensionK, state.radiusR).toFixed(2)}</div>
+                        <div class="stat">ζ(${state.zetaS}): ${computeZeta(state.zetaS).toFixed(6)}</div>
+                        <div class="stat">Theoretical N: ${Math.round(computeVolume(state.dimensionK, state.radiusR) / computeZeta(state.zetaS))}</div>
+                        <div class="stat">Actual N: ${countActualPrimitivePoints(state.dimensionK, state.radiusR)}</div>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            const blob = new Blob([report], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `analysis-report-${Date.now()}.html`;
+            link.click();
+            alert('Analysis report exported as HTML!');
+        }
+        
+        function batchExport() {
+            // Export everything
+            export2D('png');
+            setTimeout(() => export3D('png'), 500);
+            setTimeout(() => exportChart('png'), 1000);
+            setTimeout(() => exportAllData(), 1500);
+            
+            alert('Batch export started! Multiple files will download.');
+        }
+        
+        // ===== UPDATE ALL VISUALIZATIONS =====
+        function updateAllVisualizations() {
+            // Update theory explorer
+            updateTheoryExplorer();
+            
+            // Update 2D visualization
+            if (window.canvas2dInitialized) {
+                draw2DLattice();
+            }
+            
+            // Update 3D visualization
+            if (window.threeInitialized) {
+                // Update camera position based on radius
+                state.threeCamera.position.z = state.radiusR * 1.5;
+                draw3DLattice();
+            }
+            
+            // Update chart
+            if (window.chartInitialized) {
+                updateChartData();
+            }
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.canvas2dInitialized && canvas2d) {
+                canvas2d.width = canvas2d.clientWidth;
+                draw2DLattice();
+            }
+            
+            if (window.threeInitialized && state.threeRenderer) {
+                const container = document.getElementById('canvas3d-container');
+                state.threeCamera.aspect = container.clientWidth / 500;
+                state.threeCamera.updateProjectionMatrix();
+                state.threeRenderer.setSize(container.clientWidth, 500);
+            }
+        });
     </script>
 </body>
 </html>
