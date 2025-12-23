@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mathematical Discovery Platform</title>
+    <title>Primitive Lattice Point Distribution Analysis</title>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -24,42 +24,38 @@
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
         .header h1 { font-size: 2.5rem; margin-bottom: 10px; position: relative; z-index: 1; }
         .header p { position: relative; z-index: 1; }
+        .precision-control { background: var(--bg2); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .precision-control select { padding: 8px 12px; border-radius: 6px; background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
         .tabs { display: flex; gap: 5px; margin-bottom: 30px; background: var(--bg2); padding: 10px; border-radius: 12px; flex-wrap: wrap; }
         .tab-btn { flex: 1; min-width: 120px; padding: 12px 20px; border: none; background: var(--bg3); color: var(--text);
             cursor: pointer; border-radius: 8px; font-weight: 600; transition: all 0.3s; }
         .tab-btn:hover { background: var(--blue); color: white; transform: translateY(-2px); }
         .tab-btn.active { background: var(--blue); color: white; box-shadow: 0 4px 12px rgba(0,102,204,0.3); }
-        .controls button.active { background: var(--purple); }
         .panel { display: none; animation: fadeIn 0.5s; }
         .panel.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .section { background: var(--bg2); padding: 30px; border-radius: 12px; margin-bottom: 30px; transition: all 0.3s; }
         .section:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
         .section h2 { color: var(--blue); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .help-icon { display: inline-block; width: 20px; height: 20px; background: var(--blue); color: white;
-            border-radius: 50%; text-align: center; line-height: 20px; font-size: 12px; cursor: help; }
-        .tooltip { position: relative; }
-        .tooltip:hover::after { content: attr(data-tip); position: absolute; bottom: 125%; left: 50%;
-            transform: translateX(-50%); padding: 8px 12px; background: var(--text); color: var(--bg);
-            border-radius: 6px; white-space: nowrap; z-index: 1000; font-size: 12px; }
+        .section h3 { color: var(--blue); margin: 20px 0 10px 0; }
         .controls { margin: 20px 0; padding: 20px; background: var(--bg3); border-radius: 8px; }
         .controls label { display: block; margin: 10px 0; font-weight: 600; }
         .controls input[type="range"] { width: 100%; }
         .controls button { padding: 10px 20px; background: var(--blue); color: white; border: none;
             border-radius: 6px; cursor: pointer; margin: 5px; transition: all 0.3s; }
         .controls button:hover { background: var(--purple); transform: scale(1.05); }
-        .controls button:disabled { background: var(--text2); cursor: not-allowed; transform: none; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+        .controls button.active { background: var(--purple); }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin: 20px 0; }
         .stat { background: var(--bg3); padding: 20px; border-radius: 8px; text-align: center; transition: all 0.3s; }
         .stat:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .stat .val { font-size: 2rem; font-weight: bold; color: var(--blue); transition: all 0.5s; }
-        .stat .lbl { font-size: 0.9rem; color: var(--text2); }
+        .stat .val { font-size: 2rem; font-weight: bold; color: var(--blue); }
+        .stat .lbl { font-size: 0.9rem; color: var(--text2); margin-top: 5px; }
         canvas { border: 2px solid var(--border); border-radius: 8px; display: block; margin: 20px auto; max-width: 100%; }
-        #canvas3d { width: 100%; height: 600px; cursor: grab; }
-        #canvas3d:active { cursor: grabbing; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; overflow-x: auto; display: block; }
+        #c3d { width: 100%; height: 600px; cursor: grab; }
+        #c3d:active { cursor: grabbing; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
-        th { background: var(--bg3); color: var(--blue); font-weight: 600; position: sticky; top: 0; }
+        th { background: var(--bg3); color: var(--blue); font-weight: 600; }
         .btn-fixed { position: fixed; bottom: 20px; padding: 12px 24px; border: none; border-radius: 25px;
             cursor: pointer; font-weight: 600; z-index: 1000; color: white; transition: all 0.3s; }
         .btn-fixed:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
@@ -81,59 +77,223 @@
         .modal-content { background: var(--bg); padding: 30px; border-radius: 12px; max-width: 600px; max-height: 80vh;
             overflow-y: auto; position: relative; }
         .modal-close { position: absolute; top: 10px; right: 10px; font-size: 24px; cursor: pointer; color: var(--text2); }
-        .export-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
-        .data-table-container { max-height: 400px; overflow-y: auto; }
         @media (max-width: 768px) {
             .header h1 { font-size: 1.8rem; }
             .tabs { flex-direction: column; }
             .tab-btn { min-width: 100%; }
-            #canvas3d { height: 400px; }
-            .btn-fixed { padding: 10px 16px; font-size: 14px; }
-            #helpBtn { right: 20px; bottom: 70px; }
+            #c3d { height: 400px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>Mathematical Discovery Platform</h1>
-            <p>Primitive Lattice Points & Boundary Cancellation</p>
+            <h1>Primitive Lattice Point Distribution Analysis</h1>
+            <p>Boundary Cancellation Principle & Asymptotic Enumeration Theory</p>
             <p style="margin-top:10px; font-size:0.9rem">By Wessen Getachew | <a href="https://twitter.com/7dview" style="color:white">@7dview</a></p>
         </header>
 
+        <div class="precision-control">
+            <label style="font-weight: 600; margin: 0;">Decimal Precision:</label>
+            <select id="decimalPrecision" onchange="updateAllDisplays()">
+                <option value="2">2 decimals</option>
+                <option value="3">3 decimals</option>
+                <option value="4" selected>4 decimals</option>
+                <option value="5">5 decimals</option>
+                <option value="6">6 decimals</option>
+                <option value="8">8 decimals</option>
+                <option value="10">10 decimals</option>
+            </select>
+            <span style="color: var(--text2); font-size: 0.9em;">Controls numerical precision across all calculations</span>
+        </div>
+
         <nav class="tabs">
             <button class="tab-btn active" onclick="showTab('theory')">Theory</button>
-            <button class="tab-btn" onclick="showTab('applications')">Applications</button>
+            <button class="tab-btn" onclick="showTab('discovery')">Discovery Tools</button>
             <button class="tab-btn" onclick="showTab('viz2d')">2D Viz</button>
             <button class="tab-btn" onclick="showTab('viz3d')">3D Viz</button>
             <button class="tab-btn" onclick="showTab('comparison')">Compare</button>
-            <button class="tab-btn" onclick="showTab('analysis')">Analysis</button>
-            <button class="tab-btn" onclick="showTab('tools')">Tools</button>
+            <button class="tab-btn" onclick="showTab('analysis')">Error Analysis</button>
             <button class="tab-btn" onclick="showTab('derivation')">Derivation</button>
         </nav>
 
         <div id="theory" class="panel active">
             <div class="section">
-                <h2>Abstract <span class="help-icon tooltip" data-tip="Core theoretical framework">?</span></h2>
-                <p>We present a framework for counting primitive lattice points in k-dimensional spheres. Points (x₁, x₂, ..., xₖ) with gcd(x₁, x₂, ..., xₖ) = 1 follow the asymptotic formula:</p>
+                <h2>Abstract</h2>
+                <p>We develop a comprehensive study of primitive lattice points in ℤⁿ, generalizing the classical 2-dimensional coprime lattice problem. Using geometric decomposition into primitive rays and the Möbius inversion formula, we rigorously derive the asymptotic density of coprime points in any dimension. The framework connects number theory, geometry of numbers, and classical constants like the Riemann zeta function.</p>
                 <div class="formula">$$N_k(R) = \frac{V_k R^k}{\zeta(k)} + O(R^{k-1})$$</div>
                 <p style="margin-top:15px">Where V_k is the volume of the unit k-sphere and ζ(k) is the Riemann zeta function. The density of primitive points approaches 1/ζ(k) as R → ∞.</p>
+            </div>
+
+            <div class="section">
+                <h2>Introduction</h2>
+                <p>Counting lattice points inside a ball is a classical problem in number theory. Restricting to <b>primitive points</b> (points with coordinates coprime) leads to deep insights in analytic number theory and the geometry of numbers.</p>
+                <p style="margin-top:10px;">In two dimensions, this relates to the Basel problem (ζ(2) = π²/6) and "visible points" from the origin. We extend the problem to arbitrary dimensions k ≥ 2, developing both geometric intuition and rigorous algebraic derivation.</p>
+            </div>
+            
+            <div class="section">
+                <h2>Formal Definitions</h2>
+                
+                <h3>Definition: Primitive Vector</h3>
+                <p>A vector <b>v</b> = (a₁, ..., aₖ) ∈ ℤᵏ \ {0} is called <b>primitive</b> if:</p>
+                <div class="formula">$$\gcd(a_1, a_2, \ldots, a_k) = 1$$</div>
+                
+                <h3>Lemma: Unique Ray Decomposition</h3>
+                <p>Every nonzero lattice point <b>v</b> ∈ ℤᵏ lies on a unique primitive ray:</p>
+                <div class="formula">$$\mathbf{v} = d \cdot \mathbf{u}, \quad d \in \mathbb{N}, \quad \mathbf{u} \text{ primitive}$$</div>
+                <p><b>Proof:</b> Let d = gcd(a₁, ..., aₖ). Then <b>v</b> = d·<b>u</b> where <b>u</b> is primitive. Uniqueness follows from the uniqueness of the gcd. □</p>
+                
+                <p style="margin-top:15px;">Each primitive vector acts as the "gatekeeper" for the entire ray of lattice points extending from the origin.</p>
+            </div>
+
+            <div class="section">
+                <h2>Counting Formula</h2>
+                <p>Let Cₖ(R) denote the number of primitive points inside the k-dimensional ball of radius R:</p>
+                <div class="formula">$$C_k(R) = \#\{\mathbf{v} \in \mathbb{Z}^k : \|\mathbf{v}\|_2 \le R, \; \gcd(v_1,\ldots,v_k)=1\}$$</div>
+                
+                <h3>Geometric Consideration</h3>
+                <p>For a primitive vector <b>u</b>, the lattice points along its ray are:</p>
+                <div class="formula">$$\mathbf{v} = d \cdot \mathbf{u}, \quad 1 \le d \le \left\lfloor \frac{R}{\|\mathbf{u}\|_2} \right\rfloor$$</div>
+                <p>Counting only the first point on each ray yields exactly Cₖ(R).</p>
+                
+                <h3>Asymptotic Density</h3>
+                <p>The density of primitive points in ℤᵏ equals the probability that k integers are coprime:</p>
+                <div class="formula">$$\mathbb{P}(\gcd(a_1,\ldots,a_k) = 1) = \frac{1}{\zeta(k)}$$</div>
+                <p>Thus, the leading term for Cₖ(R) is:</p>
+                <div class="formula">$$C_k(R) \sim \frac{\text{Vol}(B_k(R))}{\zeta(k)}$$</div>
+                <p>where the k-dimensional ball volume is:</p>
+                <div class="formula">$$\text{Vol}(B_k(R)) = \frac{\pi^{k/2}}{\Gamma(k/2+1)} R^k$$</div>
+                <p>The error term arises from the boundary: O(R^(k-1)).</p>
             </div>
             
             <div class="section">
                 <h2>Boundary Cancellation Principle</h2>
-                <p>The key insight is that non-primitive points (those sharing a common factor d > 1) can be expressed as d·(primitive point). Through Möbius inversion, we show that boundary contributions from non-primitive points cancel systematically, leaving only the volume term divided by ζ(k).</p>
-                <div class="formula">$$N_k(R) = \sum_{d=1}^{R} \mu(d) \cdot |\{(x_1,...,x_k) : \sum x_i^2 \leq (R/d)^2\}|$$</div>
+                <p>The key insight is that non-primitive points (those sharing a common factor d > 1) can be expressed as d·(primitive point). Through Möbius inversion, boundary contributions from non-primitive points cancel systematically:</p>
+                <div class="formula">$$N_k(R) = \sum_{d=1}^{R} \mu(d) \cdot \left|\{(x_1,\ldots,x_k) : \sum x_i^2 \leq (R/d)^2\}\right|$$</div>
                 <p style="margin-top:15px">The Möbius function μ(d) = (-1)^ω(d) for square-free d (where ω counts distinct prime factors) ensures alternating cancellation of boundary terms.</p>
+                
+                <h3>Boundary Truncation Mechanism</h3>
+                <p>For divisors d ≈ R, the floor function truncates:</p>
+                <div class="formula">$$\text{For } d \approx R: \quad \left\lfloor \frac{R}{d} \right\rfloor = 1 \Rightarrow \mu(d) \cdot 1^k = \mu(d)$$</div>
+                <p>The cancellation engine fails to reach equilibrium at boundary divisors, creating the deterministic error term Δ(R).</p>
             </div>
 
             <div class="section">
-                <h2>Interactive Explorer <span class="help-icon tooltip" data-tip="Adjust parameters to see predictions">?</span></h2>
+                <h2>Special Cases by Dimension</h2>
+                
+                <div style="background: var(--bg3); padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h3 style="color: var(--blue); margin-top: 0;">k = 1 (One Dimension)</h3>
+                    <p>Only primitive points are ±1. Since ζ(1) diverges, density is zero.</p>
+                    <p><b>Primitive density:</b> 0 (only 2 primitive points total)</p>
+                </div>
+                
+                <div style="background: var(--bg3); padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h3 style="color: var(--blue); margin-top: 0;">k = 2 (Two Dimensions - Classical Case)</h3>
+                    <p><b>Density:</b> 1/ζ(2) = 6/π² ≈ 0.6079 (60.79%)</p>
+                    <p>Corresponds to "visible" points in the plane. Related to Farey sequences and the Basel problem.</p>
+                    <p><b>Error bound:</b> Δ(R) = O(R log R)</p>
+                    <p><b>Connection:</b> ζ(2) = π²/6 (Euler's solution to the Basel problem)</p>
+                </div>
+                
+                <div style="background: var(--bg3); padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h3 style="color: var(--blue); margin-top: 0;">k = 3 (Three Dimensions)</h3>
+                    <p><b>Density:</b> 1/ζ(3) ≈ 0.8319 (83.19%)</p>
+                    <p>Visualization: "particles in space" - about 83% are visible from the origin.</p>
+                    <p><b>Error bound:</b> Δ(R) = O(R²)</p>
+                    <p><b>Connection:</b> ζ(3) ≈ 1.2020569 (Apéry's constant)</p>
+                </div>
+                
+                <div style="background: var(--bg3); padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h3 style="color: var(--blue); margin-top: 0;">k = 4 (Four Dimensions)</h3>
+                    <p><b>Density:</b> 1/ζ(4) = 90/π⁴ ≈ 0.9239 (92.39%)</p>
+                    <p><b>Error bound:</b> Δ(R) = O(R³)</p>
+                    <p><b>Connection:</b> ζ(4) = π⁴/90</p>
+                </div>
+                
+                <div style="background: var(--bg3); padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h3 style="color: var(--blue); margin-top: 0;">k → ∞ (High Dimensions)</h3>
+                    <p>As k → ∞, ζ(k) → 1, so <b>almost all points are primitive</b>.</p>
+                    <p>The relative error Δ(R)/R^k → 0 rapidly as dimension increases.</p>
+                    <p>For k ≥ 10, more than 99% of lattice points are primitive.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Geometric Interpretation</h2>
+                <ul style="margin-left: 25px; margin-top: 10px;">
+                    <li><b>Primitive points</b> correspond to points "visible" from the origin (no point blocks the line of sight)</li>
+                    <li><b>Non-primitive points</b> are hidden behind their corresponding primitive vector</li>
+                    <li>This generalizes the 2D "light ray" visualization to arbitrary dimensions</li>
+                    <li>Each primitive vector generates an infinite ray: {d·<b>u</b> : d ∈ ℕ}</li>
+                    <li>The density 1/ζ(k) represents the "transparency" of the lattice in k dimensions</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Error Term Analysis</h2>
+                <p>The error term Δ(R) is formally defined as:</p>
+                <div class="formula">$$\Delta(R) = N_k(R) - \frac{R^k}{\zeta(k)}$$</div>
+                
+                <p style="margin-top:15px;"><b>Classical error bounds:</b></p>
+                <div class="formula">$$\begin{aligned}
+&\text{For } k=2: \quad \Delta(R) = O(R \log R) \\
+&\text{For } k > 2: \quad \Delta(R) = O(R^{k-1})
+\end{aligned}$$</div>
+                
+                <p style="margin-top:15px;">The error arises because:</p>
+                <ul style="margin-left: 25px; margin-top: 10px;">
+                    <li>The Möbius sum is truncated at d = R</li>
+                    <li>For large divisors d ≈ R, the floor function ⌊R/d⌋ = 1</li>
+                    <li>The cancellation cycle cannot complete at the boundary</li>
+                    <li>This creates a deterministic geometric residue, not random noise</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Connection to Riemann Zeta Function</h2>
+                <p>The Riemann zeta function is central to this theory:</p>
+                <div class="formula">$$\zeta(k) = \sum_{n=1}^{\infty} \frac{1}{n^k} = \prod_{p \text{ prime}} \frac{1}{1 - p^{-k}}$$</div>
+                
+                <p style="margin-top:15px;"><b>Key values:</b></p>
+                <ul style="margin-left: 25px; margin-top: 10px;">
+                    <li>ζ(2) = π²/6 ≈ 1.6449 (Basel problem, solved by Euler)</li>
+                    <li>ζ(3) ≈ 1.2021 (Apéry's constant - proven irrational by Roger Apéry)</li>
+                    <li>ζ(4) = π⁴/90 ≈ 1.0823</li>
+                    <li>ζ(2n) has closed form involving π^(2n) for even arguments</li>
+                    <li>ζ(k) → 1 as k → ∞</li>
+                </ul>
+                
+                <p style="margin-top:15px;">The Euler product formula connects primes to coprimality:</p>
+                <div class="formula">$$\frac{1}{\zeta(k)} = \prod_{p \text{ prime}} \left(1 - \frac{1}{p^k}\right)$$</div>
+                <p>This is precisely the probability that k random integers are coprime, as no prime divides all of them.</p>
+            </div>
+
+            <div class="section">
+                <h2>Interactive Explorer</h2>
+                <p>Explore how the predicted count and density change with dimension and radius:</p>
                 <div class="controls">
                     <label>Dimension k: <span id="tk">3</span></label>
-                    <input type="range" id="tks" min="2" max="12" value="3" oninput="updateTheory()">
+                    <input type="range" id="tks" min="2" max="12" value="3" step="1" oninput="updateTheory()">
+                    
                     <label>Radius R: <span id="tr">50</span></label>
-                    <input type="range" id="trs" min="10" max="200" value="50" step="10" oninput="updateTheory()">
+                    <div style="display:flex; gap:10px; align-items:center; margin-bottom:15px;">
+                        <input type="range" id="trs" min="1" max="1000" value="50" step="1" oninput="updateTheoryRadius(this.value)" style="flex:1;">
+                        <input type="number" id="trInput" min="1" max="10000" value="50" step="1" style="width:120px; padding:8px; background:var(--bg3); color:var(--text); border:1px solid var(--border); border-radius:6px;" oninput="updateTheoryRadius(this.value)">
+                    </div>
+                    
+                    <div style="background: var(--bg3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <label style="font-weight: 600; margin-bottom: 10px; display: block;">Quick Presets:</label>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <button onclick="setTheoryPreset(1)">R=1</button>
+                            <button onclick="setTheoryPreset(10)">R=10</button>
+                            <button onclick="setTheoryPreset(50)">R=50</button>
+                            <button onclick="setTheoryPreset(100)">R=100</button>
+                            <button onclick="setTheoryPreset(200)">R=200</button>
+                            <button onclick="setTheoryPreset(500)">R=500</button>
+                            <button onclick="setTheoryPreset(1000)">R=1000</button>
+                        </div>
+                    </div>
+                    
                     <button onclick="exportTheoryData()">Export Data</button>
                 </div>
                 <div class="stats">
@@ -142,134 +302,190 @@
                     <div class="stat"><div class="val" id="sd">0.832</div><div class="lbl">Density (1/ζ(k))</div></div>
                     <div class="stat"><div class="val" id="svol">523.6</div><div class="lbl">Sphere Volume</div></div>
                 </div>
-                <div class="data-table-container">
-                    <table><thead><tr><th>k</th><th>ζ(k)</th><th>1/ζ(k)</th><th>V_k (unit sphere)</th></tr></thead><tbody id="tbl"></tbody></table>
+                
+                <div class="formula" style="margin-top: 20px;">
+                    <h3 style="color: var(--blue); margin-bottom: 10px;">Current Calculation</h3>
+                    <p><b>For k = <span id="currentK">3</span>, R = <span id="currentR">50</span>:</b></p>
+                    <p>Volume formula: V_<span id="vk">3</span>(R) = <span id="volFormula">4πR³/3</span></p>
+                    <p>Predicted: N_<span id="nk">3</span>(<span id="nr">50</span>) = V_<span id="nk2">3</span>(<span id="nr2">50</span>) / ζ(<span id="nk3">3</span>) ≈ <span id="predCalc">4,186</span></p>
+                    <p>Expected density: <span id="densCalc">83.19%</span> of all lattice points are primitive</p>
                 </div>
+                
+                <h3 style="margin-top: 30px;">Complete Dimensional Table</h3>
+                <p>Reference table showing exact values for ζ(k), density, and unit sphere volume:</p>
+                <table><thead><tr><th>k</th><th>ζ(k)</th><th>1/ζ(k)</th><th>V_k (unit)</th><th>Notes</th></tr></thead><tbody id="tbl"></tbody></table>
+            </div>
+
+            <div class="section">
+                <h2>Summary: The Grand Result</h2>
+                <div class="formula" style="background: linear-gradient(135deg, var(--blue), var(--purple)); color: white; border-left: none;">
+                    $$C_k(R) = \frac{\text{Vol}(B_k(R))}{\zeta(k)} + O(R^{k-1}), \quad k \ge 2$$
+                </div>
+                <p style="margin-top:15px;">This elegant formula combines:</p>
+                <ul style="margin-left: 25px; margin-top: 10px;">
+                    <li><b>Geometric intuition:</b> Volume of the k-sphere</li>
+                    <li><b>Number theory:</b> Riemann zeta function and prime distribution</li>
+                    <li><b>Multi-dimensional generalization:</b> Works for all k ≥ 2</li>
+                    <li><b>Asymptotic accuracy:</b> Error term O(R^(k-1)) is negligible for large R</li>
+                </ul>
+                
+                <p style="margin-top:15px;">This framework also links to:</p>
+                <ul style="margin-left: 25px; margin-top: 5px;">
+                    <li>Farey sequences (k=2)</li>
+                    <li>Visible point problems (all k)</li>
+                    <li>Lattice point counting (Gauss circle problem)</li>
+                    <li>Analytic number theory and the Riemann Hypothesis</li>
+                </ul>
             </div>
         </div>
 
-        <div id="applications" class="panel">
+        <div id="discovery" class="panel">
             <div class="section">
-                <h2>Real-World Applications</h2>
-                <h3>1. Cryptography & Number Theory</h3>
-                <p>Primitive lattice points correspond to coprime integers, essential for:</p>
-                <ul style="margin-left: 25px; margin-top: 10px;">
-                    <li><b>RSA Key Generation:</b> Finding large coprime numbers for secure encryption</li>
-                    <li><b>Lattice-Based Cryptography:</b> Post-quantum security relies on hard lattice problems</li>
-                    <li><b>Random Number Generation:</b> Coprime sequences provide high-quality randomness</li>
-                </ul>
+                <h2>Dimensional Scaling Explorer</h2>
+                <p>Analyze how the error term Δ(R) scales with dimension. As k increases, the main term R^k grows much faster than the boundary term R^(k-1).</p>
+                <div class="controls">
+                    <label>Dimension k: <span id="dimScaleK">3</span></label>
+                    <input type="range" id="dimScaleKSlider" min="2" max="12" value="3" oninput="updateDimScale()">
+                    <label>Radius R: <span id="dimScaleR">100</span></label>
+                    <input type="range" id="dimScaleRSlider" min="10" max="1000" value="100" step="10" oninput="updateDimScale()">
+                </div>
+                <div class="stats">
+                    <div class="stat"><div class="val" id="mainTerm">1000000</div><div class="lbl">Main Term (R^k)</div></div>
+                    <div class="stat"><div class="val" id="boundTerm">10000</div><div class="lbl">Boundary Term (R^(k-1))</div></div>
+                    <div class="stat"><div class="val" id="relErr">1.00%</div><div class="lbl">Relative Error</div></div>
+                    <div class="stat"><div class="val" id="dimDens">0.8319</div><div class="lbl">Density 1/ζ(k)</div></div>
+                </div>
+                <div class="formula">
+                    <p><b>For k = <span id="dimK2">3</span>, R = <span id="dimR2">100</span>:</b></p>
+                    <p>Main term: R^k = <span id="mainCalc">100^3 = 1,000,000</span></p>
+                    <p>Boundary term: R^(k-1) = <span id="boundCalc">100^2 = 10,000</span></p>
+                    <p>Relative error: <span id="relCalc">10,000 / 1,000,000 = 1.00%</span></p>
+                </div>
+            </div>
 
-                <h3 style="margin-top: 25px;">2. Physics & Crystallography</h3>
-                <p>Lattice structures appear throughout nature:</p>
-                <ul style="margin-left: 25px; margin-top: 10px;">
-                    <li><b>Crystal Structures:</b> Atoms arrange in primitive lattice configurations</li>
-                    <li><b>X-ray Diffraction:</b> Scattering patterns reveal lattice spacing</li>
-                    <li><b>Quantum Mechanics:</b> Particle states in periodic potentials</li>
-                </ul>
+            <div class="section">
+                <h2>Number Theory Toolkit</h2>
+                
+                <h3>Möbius Function Calculator</h3>
+                <div class="controls">
+                    <input type="number" id="mobiusInput" placeholder="Enter n" min="1" style="width:100%; padding:10px; background:var(--bg3); color:var(--text); border:1px solid var(--border);">
+                    <button onclick="calcMobiusFunction()">Calculate μ(n)</button>
+                    <div id="mobiusResult" style="margin-top:15px;"></div>
+                </div>
 
-                <h3 style="margin-top: 25px;">3. Computer Graphics & Gaming</h3>
-                <ul style="margin-left: 25px; margin-top: 10px;">
-                    <li><b>Procedural Generation:</b> Creating diverse, non-repeating patterns</li>
-                    <li><b>Collision Detection:</b> Efficient spatial partitioning using lattice grids</li>
-                    <li><b>Texture Synthesis:</b> Generating natural-looking patterns</li>
-                </ul>
+                <h3>Prime Test</h3>
+                <div class="controls">
+                    <input type="number" id="primeInput" placeholder="Enter n" min="2" style="width:100%; padding:10px; background:var(--bg3); color:var(--text); border:1px solid var(--border);">
+                    <button onclick="testPrime()">Test Primality</button>
+                    <div id="primeResult" style="margin-top:15px;"></div>
+                </div>
 
-                <h3 style="margin-top: 25px;">4. Data Science & Optimization</h3>
-                <ul style="margin-left: 25px; margin-top: 10px;">
-                    <li><b>Sampling Theory:</b> Optimal point distributions for numerical integration</li>
-                    <li><b>Sphere Packing:</b> Information theory and error-correcting codes</li>
-                    <li><b>High-Dimensional Statistics:</b> Understanding point distributions in many dimensions</li>
-                </ul>
+                <h3>Euler's Totient Function</h3>
+                <div class="controls">
+                    <input type="number" id="totientInput" placeholder="Enter n" min="1" style="width:100%; padding:10px; background:var(--bg3); color:var(--text); border:1px solid var(--border);">
+                    <button onclick="calcTotient()">Calculate φ(n)</button>
+                    <div id="totientResult" style="margin-top:15px;"></div>
+                </div>
             </div>
         </div>
 
         <div id="viz2d" class="panel">
             <div class="section">
-                <h2>2D Lattice Visualization <span class="help-icon tooltip" data-tip="Explore primitive lattice points">?</span></h2>
+                <h2>2D Lattice Visualization</h2>
                 <div class="controls">
                     <div style="background: var(--bg3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                         <label style="font-size: 1.1em; color: var(--blue); margin-bottom: 10px; display: block;"><b>View Mode:</b></label>
                         <div style="display:flex; gap:10px; flex-wrap:wrap;">
                             <button id="viewPrimitive" class="active" onclick="set2DView('primitive')" style="flex:1; min-width:150px; padding: 12px;">Colored by Mode</button>
-                            <button id="viewGauss" onclick="set2DView('gauss')" style="flex:1; min-width:150px; padding: 12px;">Circle Problem (All Points)</button>
+                            <button id="viewGauss" onclick="set2DView('gauss')" style="flex:1; min-width:150px; padding: 12px;">Gauss Circle Problem</button>
                         </div>
                     </div>
                     
                     <div style="background: var(--bg3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                         <label style="font-size: 1.1em; color: var(--blue); margin-bottom: 10px; display: block;"><b>Coloring Mode:</b></label>
                         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:8px;">
-                            <button id="color2DPrimitive" class="active" onclick="set2DColorMode('primitive')" style="padding:10px 12px; font-size:0.85em;">GCD=1 vs GCD>1</button>
-                            <button id="color2DGCD" onclick="set2DColorMode('gcd')" style="padding:10px 12px; font-size:0.85em;">By GCD Value</button>
-                            <button id="color2DMod" onclick="set2DColorMode('mod')" style="padding:10px 12px; font-size:0.85em;">By Mod m</button>
-                            <button id="color2DQuadrant" onclick="set2DColorMode('quadrant')" style="padding:10px 12px; font-size:0.85em;">By Quadrant</button>
-                            <button id="color2DAngular" onclick="set2DColorMode('angular')" style="padding:10px 12px; font-size:0.85em;">By Angular Sector</button>
-                            <button id="color2DGCDQuad" onclick="set2DColorMode('gcdquad')" style="padding:10px 12px; font-size:0.85em;">GCD × Quadrant</button>
-                            <button id="color2DGCDMod" onclick="set2DColorMode('gcdmod')" style="padding:10px 12px; font-size:0.85em;">GCD × Mod</button>
+                            <button id="color2DPrimitive" class="active" onclick="set2DColorMode('primitive')">GCD=1 vs GCD>1</button>
+                            <button id="color2DGCD" onclick="set2DColorMode('gcd')">By GCD Value</button>
+                            <button id="color2DMod" onclick="set2DColorMode('mod')">By Mod m</button>
+                            <button id="color2DQuadrant" onclick="set2DColorMode('quadrant')">By Quadrant</button>
+                            <button id="color2DAngular" onclick="set2DColorMode('angular')">Angular Sectors</button>
+                            <button id="color2DGCDQuad" onclick="set2DColorMode('gcdquad')">GCD × Quadrant</button>
                         </div>
                         <div id="modControls2D" style="display:none; margin-top:10px;">
                             <label>Modulus m: <span id="mod2Dv">3</span></label>
                             <input type="range" id="mod2D" min="2" max="12" value="3" step="1" oninput="document.getElementById('mod2Dv').textContent=this.value; draw2D()">
                         </div>
                         <div id="sectorControls2D" style="display:none; margin-top:10px;">
-                            <label>Angular Sectors: <span id="sectors2Dv">8</span></label>
+                            <label>Sectors: <span id="sectors2Dv">8</span></label>
                             <input type="range" id="sectors2D" min="4" max="16" value="8" step="1" oninput="document.getElementById('sectors2Dv').textContent=this.value; draw2D()">
                         </div>
                     </div>
-                    <div style="margin-bottom:10px;">
-                        <label><b>Presets:</b></label>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:5px;">
-                            <button onclick="set2DPreset('small')" style="padding:6px 12px; font-size:0.9em;">Small (R=10)</button>
-                            <button onclick="set2DPreset('medium')" style="padding:6px 12px; font-size:0.9em;">Medium (R=50)</button>
-                            <button onclick="set2DPreset('large')" style="padding:6px 12px; font-size:0.9em;">Large (R=100)</button>
-                            <button onclick="set2DPreset('xlarge')" style="padding:6px 12px; font-size:0.9em;">X-Large (R=200)</button>
-                        </div>
-                    </div>
+                    
                     <label>Radius: <span id="r2v">20</span></label>
-                    <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
-                        <input type="range" id="r2" min="1" max="500" value="20" step="1" oninput="update2DRadius(this.value)" style="flex:1;">
-                        <input type="number" id="r2input" min="1" max="1000" value="20" style="width:100px; padding:8px;" oninput="update2DRadius(this.value)">
-                    </div>
+                    <input type="range" id="r2" min="1" max="200" value="20" step="1" oninput="draw2D()">
+                    
+                    <label>Zoom: <span id="zoom2Dv">1.0x</span></label>
+                    <input type="range" id="zoom2D" min="0.5" max="5" value="1" step="0.1" oninput="draw2D()">
+                    
                     <label>Point Size: <span id="psv">3</span></label>
                     <input type="range" id="ps" min="1" max="10" value="3" oninput="draw2D()">
-                    <button onclick="exportCanvas('c2d', '2d-lattice')">Export Image</button>
-                    <button onclick="exportPointData2D()">Export Points</button>
+                    
+                    <button onclick="export2DCanvas()">Export Image (High-Res)</button>
+                    <button onclick="reset2DZoom()">Reset Zoom</button>
                 </div>
-                <div class="warning" id="warn2d" style="display:none;">
-                    ⚠️ Large radius values may slow performance. Consider using R ≤ 200 for smooth rendering.
+                <div class="warning" id="warn2d" style="display:none;">⚠️ Large radius may slow performance. Consider R ≤ 200.</div>
+                
+                <div style="position: relative;">
+                    <canvas id="c2d" width="800" height="800" style="cursor: crosshair;"></canvas>
+                    <div id="legend2D" style="position: absolute; top: 0; right: 0; width: 10%; height: 100%; background: rgba(0,0,0,0.8); color: white; padding: 15px; font-size: 0.85em; overflow-y: auto; border-radius: 0 8px 8px 0;">
+                        <h4 style="margin: 0 0 10px 0; color: var(--blue);">Legend</h4>
+                        <div id="legendContent"></div>
+                    </div>
                 </div>
-                <div class="loading" id="load2d"><div class="spinner"></div><p>Computing lattice points...</p></div>
-                <canvas id="c2d" width="800" height="800"></canvas>
+                
+                <div id="clickedPoint2D" style="background: var(--bg3); padding: 15px; border-radius: 8px; margin-top: 15px; display: none;">
+                    <h3 style="color: var(--blue); margin-top: 0;">Selected Point</h3>
+                    <div id="pointInfo2D"></div>
+                </div>
+                
                 <div class="stats">
                     <div class="stat"><div class="val" id="p2">0</div><div class="lbl">Primitive Points</div></div>
                     <div class="stat"><div class="val" id="t2">0</div><div class="lbl">Total Points</div></div>
                     <div class="stat"><div class="val" id="d2">0%</div><div class="lbl">Density</div></div>
-                    <div class="stat"><div class="val" id="e2">0</div><div class="lbl">|Predicted - Actual|</div></div>
+                    <div class="stat"><div class="val" id="e2">0</div><div class="lbl">Absolute Error</div></div>
+                    <div class="stat"><div class="val" id="pred2">0</div><div class="lbl">Predicted</div></div>
+                    <div class="stat"><div class="val" id="relerr2">0%</div><div class="lbl">Relative Error</div></div>
+                </div>
+                <div class="formula">
+                    <h3 style="color: var(--blue); margin-bottom: 10px;">Error Analysis</h3>
+                    <p><b>Predicted:</b> N₂(R) = πR²/ζ(2) where ζ(2) = π²/6</p>
+                    <p><b>Absolute Error:</b> |Predicted - Actual|</p>
+                    <p><b>Relative Error:</b> (Absolute Error / Predicted) × 100%</p>
+                    <p>The error is O(R), arising from boundary effects.</p>
                 </div>
             </div>
         </div>
 
         <div id="viz3d" class="panel">
             <div class="section">
-                <h2>3D Lattice Visualization <span class="help-icon tooltip" data-tip="Click and drag to rotate">?</span></h2>
+                <h2>3D Lattice Visualization</h2>
                 <div class="controls">
                     <div style="background: var(--bg3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                         <label style="font-size: 1.1em; color: var(--blue); margin-bottom: 10px; display: block;"><b>Boundary Shape:</b></label>
                         <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                            <button id="shape3DSphere" class="active" onclick="set3DShape('sphere')" style="flex:1; min-width:120px; padding: 12px;">Sphere (x²+y²+z² ≤ R²)</button>
-                            <button id="shape3DCube" onclick="set3DShape('cube')" style="flex:1; min-width:120px; padding: 12px;">Cube (|x|,|y|,|z| ≤ R)</button>
+                            <button id="shape3DSphere" class="active" onclick="set3DShape('sphere')" style="flex:1; min-width:120px; padding: 12px;">Sphere</button>
+                            <button id="shape3DCube" onclick="set3DShape('cube')" style="flex:1; min-width:120px; padding: 12px;">Cube</button>
                         </div>
                     </div>
                     
                     <div style="background: var(--bg3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                         <label style="font-size: 1.1em; color: var(--blue); margin-bottom: 10px; display: block;"><b>Coloring Mode:</b></label>
                         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:8px;">
-                            <button id="colorPrimitive" class="active" onclick="set3DColorMode('primitive')" style="padding:10px 12px; font-size:0.85em;">GCD=1 vs GCD>1</button>
-                            <button id="colorGCD" onclick="set3DColorMode('gcd')" style="padding:10px 12px; font-size:0.85em;">By GCD Value</button>
-                            <button id="colorMod" onclick="set3DColorMode('mod')" style="padding:10px 12px; font-size:0.85em;">By Mod m</button>
-                            <button id="colorOctant" onclick="set3DColorMode('octant')" style="padding:10px 12px; font-size:0.85em;">By Octant</button>
-                            <button id="colorDistance" onclick="set3DColorMode('distance')" style="padding:10px 12px; font-size:0.85em;">By Distance</button>
-                            <button id="colorGCDOct" onclick="set3DColorMode('gcdoct')" style="padding:10px 12px; font-size:0.85em;">GCD × Octant</button>
-                            <button id="colorGCDMod" onclick="set3DColorMode('gcdmod')" style="padding:10px 12px; font-size:0.85em;">GCD × Mod</button>
+                            <button id="colorPrimitive" class="active" onclick="set3DColorMode('primitive')">GCD=1 vs GCD>1</button>
+                            <button id="colorGCD" onclick="set3DColorMode('gcd')">By GCD Value</button>
+                            <button id="colorMod" onclick="set3DColorMode('mod')">By Mod m</button>
+                            <button id="colorOctant" onclick="set3DColorMode('octant')">By Octant</button>
+                            <button id="colorDistance" onclick="set3DColorMode('distance')">By Distance</button>
                         </div>
                         <div id="modControls3D" style="display:none; margin-top:10px;">
                             <label>Modulus m: <span id="mod3Dv">3</span></label>
@@ -277,33 +493,18 @@
                         </div>
                     </div>
                     
-                    <div style="margin-bottom:10px;">
-                        <label><b>Presets:</b></label>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:5px;">
-                            <button onclick="set3DPreset('tiny')" style="padding:6px 12px; font-size:0.9em;">Tiny (R=5)</button>
-                            <button onclick="set3DPreset('small')" style="padding:6px 12px; font-size:0.9em;">Small (R=10)</button>
-                            <button onclick="set3DPreset('medium')" style="padding:6px 12px; font-size:0.9em;">Medium (R=20)</button>
-                            <button onclick="set3DPreset('large')" style="padding:6px 12px; font-size:0.9em;">Large (R=30)</button>
-                        </div>
-                    </div>
                     <label>Radius: <span id="r3v">10</span></label>
                     <input type="range" id="r3" min="1" max="40" value="10" step="1" oninput="draw3D()">
-                    
                     <label>Point Size: <span id="ps3v">0.6</span></label>
                     <input type="range" id="ps3" min="0.2" max="2.0" value="0.6" step="0.1" oninput="draw3D()">
-                    
                     <button onclick="reset3D()">Reset View</button>
                     <button onclick="toggleRotation()">Auto-Rotate</button>
-                    <button onclick="export3DData()">Export Points</button>
                 </div>
-                <div class="warning" id="warn3d" style="display:none;">
-                    ⚠️ Radius > 30 generates many points and may impact performance.
-                </div>
-                <div class="loading" id="load3d"><div class="spinner"></div><p>Generating 3D lattice...</p></div>
+                <div class="warning" id="warn3d" style="display:none;">⚠️ Radius > 30 may impact performance.</div>
                 <div id="c3d"></div>
                 <div class="stats">
-                    <div class="stat"><div class="val" id="p3">0</div><div class="lbl">Primitive Points</div></div>
-                    <div class="stat"><div class="val" id="t3">0</div><div class="lbl">Total Points</div></div>
+                    <div class="stat"><div class="val" id="p3">0</div><div class="lbl">Primitive</div></div>
+                    <div class="stat"><div class="val" id="t3">0</div><div class="lbl">Total</div></div>
                     <div class="stat"><div class="val" id="d3">0%</div><div class="lbl">Density</div></div>
                     <div class="stat"><div class="val" id="e3">0</div><div class="lbl">Error</div></div>
                 </div>
@@ -312,274 +513,62 @@
 
         <div id="comparison" class="panel">
             <div class="section">
-                <h2>Dimension Comparison <span class="help-icon tooltip" data-tip="Compare different dimensions">?</span></h2>
-                <p>Compare how primitive lattice point counts change across dimensions for a fixed radius, or analyze how different radii affect each dimension.</p>
-                
+                <h2>Dimension Comparison</h2>
                 <div class="controls">
-                    <label>Comparison Mode:</label>
-                    <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
-                        <button id="modeFixed" class="active" onclick="setComparisonMode('fixed')" style="flex:1; min-width:150px;">Fixed Radius</button>
-                        <button id="modeMulti" onclick="setComparisonMode('multi')" style="flex:1; min-width:150px;">Multiple Radii</button>
-                    </div>
-                    
-                    <div style="margin-bottom:10px;">
-                        <label><b>Presets:</b></label>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:5px;">
-                            <button onclick="setComparisonPreset('low')" style="padding:6px 12px; font-size:0.9em;">Low Dimensions (2-4)</button>
-                            <button onclick="setComparisonPreset('mid')" style="padding:6px 12px; font-size:0.9em;">Mid Dimensions (3-6)</button>
-                            <button onclick="setComparisonPreset('high')" style="padding:6px 12px; font-size:0.9em;">High Dimensions (5-10)</button>
-                            <button onclick="setComparisonPreset('all')" style="padding:6px 12px; font-size:0.9em;">All Dimensions (2-10)</button>
-                            <button onclick="setComparisonPreset('growth')" style="padding:6px 12px; font-size:0.9em;">Growth Analysis</button>
-                        </div>
-                    </div>
-                    
-                    <div id="fixedRadiusControls">
-                        <label>Radius: <span id="crv">15</span></label>
-                        <div style="display:flex; gap:10px; align-items:center; margin-bottom:15px;">
-                            <input type="range" id="cr" min="1" max="100" value="15" step="1" oninput="updateComparisonRadius(this.value)" style="flex:1;">
-                            <input type="number" id="crinput" min="1" max="200" value="15" style="width:100px; padding:8px;" oninput="updateComparisonRadius(this.value)">
-                        </div>
-                    </div>
-                    
-                    <div id="multiRadiusControls" style="display:none;">
-                        <label>Radii to compare (comma-separated): </label>
-                        <input type="text" id="multiRadii" value="10, 20, 30, 40, 50" style="width:100%; padding:10px; margin-bottom:15px;" oninput="updateComparison()">
-                    </div>
-                    
-                    <div style="margin-bottom:15px;">
-                        <p><b>Dimensions to compare:</b></p>
+                    <label>Radius: <span id="crv">15</span></label>
+                    <input type="range" id="cr" min="1" max="100" value="15" step="1" oninput="updateComparison()">
+                    <div style="margin-top:15px;">
+                        <p><b>Dimensions:</b></p>
                         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap:10px; margin-top:10px;">
-                            <label style="display:flex; align-items:center; gap:8px;">
-                                <input type="checkbox" id="compk2" checked onchange="updateComparison()"> k=2
-                            </label>
-                            <label style="display:flex; align-items:center; gap:8px;">
-                                <input type="checkbox" id="compk3" checked onchange="updateComparison()"> k=3
-                            </label>
-                            <label style="display:flex; align-items:center; gap:8px;">
-                                <input type="checkbox" id="compk4" checked onchange="updateComparison()"> k=4
-                            </label>
-                            <label style="display:flex; align-items:center; gap:8px;">
-                                <input type="checkbox" id="compk5" checked onchange="updateComparison()"> k=5
-                            </label>
-                            <label style="display:flex; align-items:center; gap:8px;">
-                                <input type="checkbox" id="compk6" checked onchange="updateComparison()"> k=6
-                            </label>
-                            <label style="display:flex; align-items:center; gap:8px;">
-                                <input type="checkbox" id="compk7" onchange="updateComparison()"> k=7
-                            </label>
-                            <label style="display:flex; align-items:center; gap:8px;">
-                                <input type="checkbox" id="compk8" onchange="updateComparison()"> k=8
-                            </label>
-                            <label style="display:flex; align-items:center; gap:8px;">
-                                <input type="checkbox" id="compk9" onchange="updateComparison()"> k=9
-                            </label>
-                            <label style="display:flex; align-items:center; gap:8px;">
-                                <input type="checkbox" id="compk10" onchange="updateComparison()"> k=10
-                            </label>
+                            <label><input type="checkbox" id="compk2" checked onchange="updateComparison()"> k=2</label>
+                            <label><input type="checkbox" id="compk3" checked onchange="updateComparison()"> k=3</label>
+                            <label><input type="checkbox" id="compk4" checked onchange="updateComparison()"> k=4</label>
+                            <label><input type="checkbox" id="compk5" checked onchange="updateComparison()"> k=5</label>
+                            <label><input type="checkbox" id="compk6" checked onchange="updateComparison()"> k=6</label>
+                            <label><input type="checkbox" id="compk7" onchange="updateComparison()"> k=7</label>
+                            <label><input type="checkbox" id="compk8" onchange="updateComparison()"> k=8</label>
                         </div>
                     </div>
-                    
-                    <div style="margin-bottom:15px;">
-                        <p><b>Display options:</b></p>
-                        <label style="display:flex; align-items:center; gap:8px; margin:8px 0;">
-                            <input type="checkbox" id="showDensity" checked onchange="updateComparison()"> Show Density (1/ζ(k))
-                        </label>
-                        <label style="display:flex; align-items:center; gap:8px; margin:8px 0;">
-                            <input type="checkbox" id="showVolume" checked onchange="updateComparison()"> Show Sphere Volume
-                        </label>
-                        <label style="display:flex; align-items:center; gap:8px; margin:8px 0;">
-                            <input type="checkbox" id="showZeta" checked onchange="updateComparison()"> Show ζ(k) Values
-                        </label>
-                        <label style="display:flex; align-items:center; gap:8px; margin:8px 0;">
-                            <input type="checkbox" id="showChart" checked onchange="updateComparison()"> Show Comparison Chart
-                        </label>
-                    </div>
-                    
-                    <button onclick="updateComparison()">Refresh Comparison</button>
-                    <button onclick="exportComparisonData()">Export Data</button>
-                    <button onclick="exportComparisonChart()">Export Chart</button>
+                    <button onclick="updateComparison()" style="margin-top:15px;">Refresh</button>
                 </div>
-                
                 <div class="compare-grid" id="compGrid"></div>
-                
-                <div id="comparisonChart" style="margin-top:30px;">
-                    <canvas id="compChart" width="800" height="400"></canvas>
-                </div>
-                
-                <div class="formula" style="margin-top:20px;">
-                    <p><b>Key Observations:</b></p>
-                    <p>• As dimension k increases, ζ(k) approaches 1, meaning the density 1/ζ(k) approaches 100%</p>
-                    <p>• Higher dimensions have exponentially more lattice points (grows as R^k)</p>
-                    <p>• The ratio of primitive to total points stabilizes at 1/ζ(k) for each dimension</p>
-                    <p>• Sphere volume grows dramatically with dimension, following the gamma function pattern</p>
-                </div>
             </div>
         </div>
 
         <div id="analysis" class="panel">
             <div class="section">
-                <h2>Error Analysis <span class="help-icon tooltip" data-tip="Study O(R^(k-1)) error term">?</span></h2>
-                <p>Visualization of the error term Δ(R) for different dimensions. The chart shows absolute and relative errors for each radius value.</p>
+                <h2>Error Analysis</h2>
                 <div class="controls">
-                    <div style="margin-bottom:10px;">
-                        <label><b>Presets:</b></label>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:5px;">
-                            <button onclick="setAnalysisPreset('quick')" style="padding:6px 12px; font-size:0.9em;">Quick (R≤50)</button>
-                            <button onclick="setAnalysisPreset('standard')" style="padding:6px 12px; font-size:0.9em;">Standard (R≤100)</button>
-                            <button onclick="setAnalysisPreset('detailed')" style="padding:6px 12px; font-size:0.9em;">Detailed (R≤150)</button>
-                            <button onclick="setAnalysisPreset('absolute')" style="padding:6px 12px; font-size:0.9em;">Absolute Only</button>
-                            <button onclick="setAnalysisPreset('relative')" style="padding:6px 12px; font-size:0.9em;">Relative Only</button>
-                            <button onclick="setAnalysisPreset('boundary')" style="padding:6px 12px; font-size:0.9em;">Boundary Only</button>
-                        </div>
-                    </div>
-                    
                     <label>Dimension k: <span id="analysisKv">2</span></label>
                     <input type="range" id="analysisK" min="2" max="5" value="2" step="1" oninput="document.getElementById('analysisKv').textContent=this.value">
-                    
                     <label>Max Radius: <span id="mrv">100</span></label>
-                    <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
-                        <input type="range" id="mr" min="10" max="200" value="100" step="5" oninput="updateAnalysisRadius(this.value)" style="flex:1;">
-                        <input type="number" id="mrinput" min="10" max="300" value="100" step="5" style="width:100px; padding:8px;" oninput="updateAnalysisRadius(this.value)">
-                    </div>
-                    
-                    <label>Start from Radius: <span id="minrv">1</span></label>
-                    <input type="range" id="minr" min="1" max="50" value="1" step="1" oninput="document.getElementById('minrv').textContent=this.value">
-                    
-                    <div style="margin-top:20px;">
-                        <label style="display:flex; align-items:center; gap:8px; margin:8px 0;">
-                            <input type="checkbox" id="showAbsError" checked onchange="runAnalysis()"> Show Absolute Error
-                        </label>
-                        <label style="display:flex; align-items:center; gap:8px; margin:8px 0;">
-                            <input type="checkbox" id="showRelError" checked onchange="runAnalysis()"> Show Relative Error (%)
-                        </label>
-                        <label style="display:flex; align-items:center; gap:8px; margin:8px 0;">
-                            <input type="checkbox" id="showBoundary" onchange="runAnalysis()"> Show Theoretical Boundary R^(k-1)
-                        </label>
-                        <label style="display:flex; align-items:center; gap:8px; margin:8px 0;">
-                            <input type="checkbox" id="showActualCount" onchange="runAnalysis()"> Show Actual Primitive Count
-                        </label>
-                    </div>
-                    
-                    <button onclick="runAnalysis()" style="margin-top:15px;">Compute Analysis</button>
-                    <button onclick="exportChartData()">Export Chart Data</button>
+                    <input type="range" id="mr" min="10" max="200" value="100" step="5" oninput="document.getElementById('mrv').textContent=this.value">
+                    <button onclick="runAnalysis()">Compute Analysis</button>
                 </div>
-                <div class="loading" id="loadAnalysis"><div class="spinner"></div><p>Computing error analysis...</p></div>
                 <canvas id="ch" width="1600" height="1000" style="max-width: 100%;"></canvas>
-                <div class="formula" style="margin-top: 20px;">
-                    <p><b>Error Bound Theory:</b></p>
-                    <p>The error term O(R^(k-1)) arises from boundary effects. For k=2, the error is O(R), corresponding to points near the circle boundary. As k increases, the error term becomes relatively smaller compared to the main term R^k.</p>
-                    <p style="margin-top:10px;"><b>Relative Error:</b> Shows |Predicted - Actual| / Predicted as a percentage. This decreases as R grows, confirming the asymptotic accuracy.</p>
-                    <p style="margin-top:10px;"><b>Boundary Term:</b> The theoretical R^(k-1) term, showing the expected growth rate of the error.</p>
-                </div>
-            </div>
-        </div>
-
-        <div id="tools" class="panel">
-            <div class="section">
-                <h2>Mathematical Tools <span class="help-icon tooltip" data-tip="Number theory utilities">?</span></h2>
-                
-                <h3>GCD Calculator</h3>
-                <div class="controls">
-                    <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
-                        <button onclick="setGCDPreset('coprime')" style="padding:6px 12px; font-size:0.9em;">Coprime Example</button>
-                        <button onclick="setGCDPreset('common')" style="padding:6px 12px; font-size:0.9em;">Common Factor</button>
-                        <button onclick="setGCDPreset('large')" style="padding:6px 12px; font-size:0.9em;">Large Numbers</button>
-                        <button onclick="setGCDPreset('many')" style="padding:6px 12px; font-size:0.9em;">Many Numbers</button>
-                    </div>
-                    <input type="text" id="gi" placeholder="12, 18, 24" style="width:100%; padding:10px">
-                    <button onclick="calcGCD()">Calculate</button>
-                    <div id="gr" style="margin-top:15px"></div>
-                </div>
-
-                <h3>Möbius Function μ(n)</h3>
-                <div class="controls">
-                    <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
-                        <button onclick="setMobiusPreset('squarefree')" style="padding:6px 12px; font-size:0.9em;">Square-free</button>
-                        <button onclick="setMobiusPreset('notsquarefree')" style="padding:6px 12px; font-size:0.9em;">Not Square-free</button>
-                        <button onclick="setMobiusPreset('prime')" style="padding:6px 12px; font-size:0.9em;">Prime Number</button>
-                        <button onclick="setMobiusPreset('composite')" style="padding:6px 12px; font-size:0.9em;">Large Composite</button>
-                    </div>
-                    <input type="number" id="mi" placeholder="30" style="width:100%; padding:10px" min="1">
-                    <button onclick="calcMobius()">Calculate</button>
-                    <div id="mr2" style="margin-top:15px"></div>
-                </div>
-
-                <h3>Prime Factorization</h3>
-                <div class="controls">
-                    <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
-                        <button onclick="setPrimePreset('small')" style="padding:6px 12px; font-size:0.9em;">Small Number</button>
-                        <button onclick="setPrimePreset('perfect')" style="padding:6px 12px; font-size:0.9em;">Perfect Number</button>
-                        <button onclick="setPrimePreset('highly')" style="padding:6px 12px; font-size:0.9em;">Highly Composite</button>
-                        <button onclick="setPrimePreset('large')" style="padding:6px 12px; font-size:0.9em;">Large Number</button>
-                        <button onclick="setPrimePreset('power')" style="padding:6px 12px; font-size:0.9em;">Prime Power</button>
-                    </div>
-                    <input type="number" id="pi" placeholder="360" style="width:100%; padding:10px" min="2">
-                    <button onclick="calcPrime()">Factorize</button>
-                    <div id="pr" style="margin-top:15px"></div>
-                </div>
-
-                <h3>Coprimality Checker</h3>
-                <div class="controls">
-                    <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
-                        <button onclick="setCoprimePreset('coprime2')" style="padding:6px 12px; font-size:0.9em;">Coprime Pair</button>
-                        <button onclick="setCoprimePreset('notcoprime2')" style="padding:6px 12px; font-size:0.9em;">Non-Coprime Pair</button>
-                        <button onclick="setCoprimePreset('coprime3')" style="padding:6px 12px; font-size:0.9em;">Coprime Triple</button>
-                        <button onclick="setCoprimePreset('consecutive')" style="padding:6px 12px; font-size:0.9em;">Consecutive Numbers</button>
-                    </div>
-                    <input type="text" id="cci" placeholder="15, 28" style="width:100%; padding:10px">
-                    <button onclick="checkCoprime()">Check</button>
-                    <div id="ccr" style="margin-top:15px"></div>
-                </div>
-
-                <h3>Point Search</h3>
-                <div class="controls">
-                    <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
-                        <button onclick="setPointPreset('pythagorean')" style="padding:6px 12px; font-size:0.9em;">Pythagorean Triple</button>
-                        <button onclick="setPointPreset('primitive2d')" style="padding:6px 12px; font-size:0.9em;">Primitive 2D</button>
-                        <button onclick="setPointPreset('nonprimitive2d')" style="padding:6px 12px; font-size:0.9em;">Non-Primitive 2D</button>
-                        <button onclick="setPointPreset('primitive3d')" style="padding:6px 12px; font-size:0.9em;">Primitive 3D</button>
-                        <button onclick="setPointPreset('highd')" style="padding:6px 12px; font-size:0.9em;">High-D Point</button>
-                    </div>
-                    <input type="text" id="psi" placeholder="3, 4 (finds if primitive)" style="width:100%; padding:10px">
-                    <button onclick="searchPoint()">Search</button>
-                    <div id="psr" style="margin-top:15px"></div>
-                </div>
             </div>
         </div>
 
         <div id="derivation" class="panel">
             <div class="section">
-                <h2>Interactive Derivation</h2>
+                <h2>Step-by-Step Derivation</h2>
+                <h3>Step 1: Counting All Points</h3>
+                <div class="formula">$$L_k(R) = |\{(x_1,...,x_k) \in \mathbb{Z}^k : x_1^2 + ... + x_k^2 \leq R^2\}| \sim V_k R^k$$</div>
                 
-                <h3>Step 1: Counting Lattice Points</h3>
-                <p>Start with all lattice points in a k-dimensional sphere of radius R:</p>
-                <div class="formula">$$L_k(R) = |\{(x_1,...,x_k) \in \mathbb{Z}^k : x_1^2 + ... + x_k^2 \leq R^2\}|$$</div>
-                <p>Asymptotically, this equals the volume: L_k(R) ~ V_k R^k</p>
-
-                <h3>Step 2: Separating by GCD</h3>
-                <p>Partition points by their greatest common divisor d:</p>
+                <h3>Step 2: Partition by GCD</h3>
                 <div class="formula">$$L_k(R) = \sum_{d=1}^{R} N_k(R/d)$$</div>
-                <p>Where N_k(R/d) counts primitive points in a sphere of radius R/d.</p>
-
+                
                 <h3>Step 3: Möbius Inversion</h3>
-                <p>Inverting the previous relation using Möbius function:</p>
                 <div class="formula">$$N_k(R) = \sum_{d=1}^{R} \mu(d) L_k(R/d)$$</div>
                 
                 <h3>Step 4: Asymptotic Expansion</h3>
-                <p>Substituting L_k(R/d) ~ V_k (R/d)^k:</p>
                 <div class="formula">$$N_k(R) = V_k R^k \sum_{d=1}^{\infty} \frac{\mu(d)}{d^k} + O(R^{k-1})$$</div>
-
+                
                 <h3>Step 5: Zeta Connection</h3>
-                <p>The sum equals the reciprocal of the zeta function:</p>
                 <div class="formula">$$\sum_{d=1}^{\infty} \frac{\mu(d)}{d^k} = \frac{1}{\zeta(k)}$$</div>
                 
                 <h3>Final Result</h3>
                 <div class="formula">$$N_k(R) = \frac{V_k R^k}{\zeta(k)} + O(R^{k-1})$$</div>
-                <p>This elegant formula connects geometry (V_k), analysis (ζ(k)), and number theory (primitive points)!</p>
-                
-                <div class="controls" style="margin-top: 30px;">
-                    <button onclick="showDerivationAnimation()">Animate Derivation</button>
-                </div>
             </div>
         </div>
     </div>
@@ -590,67 +579,166 @@
     <div class="modal" id="helpModal">
         <div class="modal-content">
             <span class="modal-close" onclick="closeHelp()">&times;</span>
-            <h2>Platform Guide</h2>
-            <h3>Navigation</h3>
-            <p>Use the tabs to explore different aspects of primitive lattice points.</p>
+            <h2>Platform Guide: Primitive Lattice Point Distribution Analysis</h2>
             
-            <h3>2D Visualizations</h3>
+            <h3>Overview</h3>
+            <p>This platform provides comprehensive tools for exploring primitive lattice points in k-dimensional space, combining rigorous mathematical theory with interactive visualizations.</p>
+            
+            <h3>Decimal Precision Control</h3>
+            <p>The global precision selector (top of page) controls decimal places for all numerical displays:</p>
+            <p>• Choose 2-10 decimal places based on your needs</p>
+            <p>• Default: 4 decimals balances precision and readability</p>
+            <p>• Use 8-10 decimals for high-dimensional analysis where errors like 0.0000045 appear</p>
+            <p>• All calculations, statistics, and tables update automatically</p>
+            
+            <h3>Theory Tab</h3>
+            <p><b>Content:</b></p>
+            <p>• Complete mathematical framework with formal definitions and proofs</p>
+            <p>• Boundary Cancellation Principle explanation</p>
+            <p>• Special cases for each dimension (k=1 through k→∞)</p>
+            <p>• Connection to Riemann Zeta Function and Basel problem</p>
+            <p>• Error term analysis with O(R^(k-1)) bounds</p>
+            
+            <p style="margin-top:10px;"><b>Interactive Explorer:</b></p>
+            <p>• Dimension k: 2 to 12</p>
+            <p>• Radius R: 1 to 1,000 (slider) or up to 10,000 (number input)</p>
+            <p>• Quick preset buttons: R=1, 10, 50, 100, 200, 500, 1000</p>
+            <p>• Live calculation display shows volume formula and predictions</p>
+            <p>• Complete reference table with ζ(k) values and closed forms</p>
+            
+            <h3>Discovery Tools Tab</h3>
+            <p><b>Dimensional Scaling Explorer:</b></p>
+            <p>• Compare main term R^k vs boundary term R^(k-1)</p>
+            <p>• See how relative error decreases with dimension</p>
+            <p>• Adjust k (2-12) and R (10-1000) to explore scaling behavior</p>
+            
+            <p style="margin-top:10px;"><b>Number Theory Toolkit:</b></p>
+            <p>• <b>Möbius Function:</b> Calculate μ(n) with prime factorization</p>
+            <p>• <b>Prime Test:</b> Check primality and see factorization</p>
+            <p>• <b>Euler's Totient:</b> Compute φ(n) - count of coprime integers</p>
+            <p>• All tools show detailed mathematical breakdowns</p>
+            
+            <h3>2D Visualization</h3>
             <p><b>View Modes:</b></p>
-            <p>• <b>Colored by Mode:</b> Points colored according to selected coloring mode</p>
-            <p>• <b>Gauss Circle Problem:</b> All lattice points in purple, comparing against πR²</p>
+            <p>• <b>Colored by Mode:</b> Points colored according to selected scheme</p>
+            <p>• <b>Gauss Circle Problem:</b> All points in purple, comparing against πR²</p>
             
-            <p style="margin-top:15px;"><b>Coloring Modes (2D):</b></p>
+            <p style="margin-top:10px;"><b>Coloring Modes:</b></p>
             <p>• <b>GCD=1 vs GCD>1:</b> Blue for primitive (coprime), red for non-primitive</p>
-            <p>• <b>By GCD Value:</b> Different color for each GCD (1=blue, 2=red, 3=green, 4=yellow, etc.)</p>
-            <p>• <b>By Mod m:</b> Colors based on (x+y) mod m - reveals modular patterns</p>
-            <p>• <b>By Quadrant:</b> Four colors for four quadrants (I=blue, II=green, III=yellow, IV=red)</p>
-            <p>• <b>By Angular Sector:</b> Rainbow colors dividing circle into sectors</p>
-            <p>• <b>GCD × Quadrant:</b> Combined coloring showing both GCD structure and spatial position</p>
-            <p>• <b>GCD × Mod:</b> Combined coloring revealing GCD and modular arithmetic patterns</p>
+            <p>• <b>By GCD Value:</b> Each GCD value gets unique color (1=blue, 2=red, 3=green, etc.)</p>
+            <p>• <b>By Mod m:</b> Colors based on (x+y) mod m - reveals modular patterns (m adjustable 2-12)</p>
+            <p>• <b>By Quadrant:</b> Four colors for I, II, III, IV quadrants</p>
+            <p>• <b>Angular Sectors:</b> Rainbow colors dividing circle into 4-16 sectors</p>
+            <p>• <b>GCD × Quadrant:</b> Combined view showing both GCD structure and spatial position</p>
             
-            <h3>3D Visualizations</h3>
+            <p style="margin-top:10px;"><b>Controls:</b></p>
+            <p>• Radius: 1 to 200 (performance warning appears > 200)</p>
+            <p>• Point Size: 1 to 10 pixels</p>
+            <p>• Statistics: 6 metrics including predicted count, errors, density</p>
+            <p>• Detailed error explanation box below visualization</p>
+            
+            <h3>3D Visualization</h3>
             <p><b>Boundary Shapes:</b></p>
-            <p>• Sphere: Points within distance R (x²+y²+z² ≤ R²)</p>
-            <p>• Cube: Points within cube of side 2R (|x|,|y|,|z| ≤ R)</p>
+            <p>• <b>Sphere:</b> Points where x²+y²+z² ≤ R²</p>
+            <p>• <b>Cube:</b> Points where |x|, |y|, |z| ≤ R</p>
             
-            <p style="margin-top:15px;"><b>Coloring Modes (3D):</b></p>
+            <p style="margin-top:10px;"><b>Coloring Modes:</b></p>
             <p>• <b>GCD=1 vs GCD>1:</b> Blue for primitive, red for non-primitive</p>
-            <p>• <b>By GCD Value:</b> Different colors for different GCD values</p>
-            <p>• <b>By Mod m:</b> Colors based on (x+y+z) mod m</p>
-            <p>• <b>By Octant:</b> Eight colors for eight octants in 3D space</p>
+            <p>• <b>By GCD Value:</b> Different colors for each GCD value</p>
+            <p>• <b>By Mod m:</b> Colors based on (x+y+z) mod m (m adjustable 2-12)</p>
+            <p>• <b>By Octant:</b> Eight colors for eight 3D octants</p>
             <p>• <b>By Distance:</b> Gradient from center (blue) to boundary (red)</p>
-            <p>• <b>GCD × Octant:</b> Combined coloring showing GCD and spatial structure</p>
-            <p>• <b>GCD × Mod:</b> Combined GCD and modular arithmetic visualization</p>
             
-            <p style="margin-top:10px;">Click and drag to rotate the view. Adjust point size for clarity.</p>
+            <p style="margin-top:10px;"><b>Controls:</b></p>
+            <p>• Radius: 1 to 40 (warning appears > 30 for performance)</p>
+            <p>• Point Size: 0.2 to 2.0</p>
+            <p>• <b>Mouse:</b> Click and drag to rotate view</p>
+            <p>• Auto-Rotate: Automatic camera rotation</p>
+            <p>• Reset View: Return to default camera position</p>
             
-            <h3>Error Analysis</h3>
-            <p>Shows error per radius value from start to max radius:</p>
-            <p>• <b>Absolute Error:</b> |Predicted - Actual| count of points</p>
-            <p>• <b>Relative Error:</b> Percentage error relative to prediction</p>
-            <p>• <b>Boundary Term:</b> Theoretical R^(k-1) error bound</p>
-            <p>• <b>Actual Count:</b> The true primitive point count at each radius</p>
+            <h3>Comparison Tab</h3>
+            <p>Compare multiple dimensions simultaneously:</p>
+            <p>• Select dimensions k=2 through k=8</p>
+            <p>• Set common radius R (1-100)</p>
+            <p>• View grid showing ζ(k), predicted points, density, volume for each dimension</p>
+            <p>• See how predictions grow exponentially with dimension</p>
+            
+            <h3>Error Analysis Tab</h3>
+            <p>Visualize error term Δ(R) = |Predicted - Actual|:</p>
+            <p>• Select dimension k (2-5)</p>
+            <p>• Set max radius (10-200)</p>
+            <p>• Chart shows absolute error and relative error % per radius</p>
+            <p>• Demonstrates O(R^(k-1)) error bound behavior</p>
+            <p>• For k=2, actual calculations up to R=100; larger values use predictions</p>
+            
+            <h3>Derivation Tab</h3>
+            <p>Step-by-step mathematical derivation:</p>
+            <p>1. Counting all lattice points: L_k(R) ~ V_k R^k</p>
+            <p>2. Partition by GCD</p>
+            <p>3. Apply Möbius inversion</p>
+            <p>4. Asymptotic expansion</p>
+            <p>5. Connection to ζ(k)</p>
+            <p>6. Final result: N_k(R) = V_k R^k / ζ(k) + O(R^(k-1))</p>
+            
+            <h3>Export Features</h3>
+            <p>Save your work:</p>
+            <p>• <b>Export Image:</b> Save 2D/3D visualizations as PNG</p>
+            <p>• <b>Export Data:</b> Download calculations as CSV</p>
+            <p>• All exports preserve current settings and precision</p>
             
             <h3>Performance Tips</h3>
-            <p>• Keep radius ≤ 100 in 2D, ≤ 30 in 3D for smooth performance</p>
-            <p>• Use Export buttons to save data and images</p>
-            <p>• Compare mode shows multiple dimensions simultaneously</p>
+            <p>• <b>2D:</b> Keep R ≤ 200 for smooth rendering</p>
+            <p>• <b>3D:</b> Keep R ≤ 30 for best performance</p>
+            <p>• <b>Theory:</b> Can explore R up to 10,000 (calculations only, no visualization)</p>
+            <p>• <b>Precision:</b> Higher decimal places (8-10) useful for high dimensions</p>
+            <p>• Warning messages appear when performance may be impacted</p>
             
-            <h3>Tools Section</h3>
-            <p>Calculate GCD, Möbius function, prime factorizations, and search for specific lattice points.</p>
+            <h3>Display Modes</h3>
+            <p>• <b>Light Mode:</b> White background, easier for printing/screenshots</p>
+            <p>• <b>Dark Mode (default):</b> Black background, easier on eyes for extended use</p>
+            <p>• Toggle with button in bottom-right corner</p>
+            <p>• Visualizations automatically adjust to current theme</p>
+            
+            <h3>Mathematical Background</h3>
+            <p><b>Key Concepts:</b></p>
+            <p>• <b>Primitive Point:</b> (x₁,...,xₖ) where gcd(x₁,...,xₖ) = 1</p>
+            <p>• <b>ζ(k):</b> Riemann zeta function, Σ(1/n^k) for n=1 to ∞</p>
+            <p>• <b>Density:</b> Proportion of primitive points = 1/ζ(k)</p>
+            <p>• <b>Boundary Term:</b> Error O(R^(k-1)) from truncated Möbius sum</p>
+            
+            <p style="margin-top:10px;"><b>Special Values:</b></p>
+            <p>• k=2: ζ(2) = π²/6, density ≈ 60.79%</p>
+            <p>• k=3: ζ(3) ≈ 1.202 (Apéry's constant), density ≈ 83.19%</p>
+            <p>• k=4: ζ(4) = π⁴/90, density ≈ 92.39%</p>
+            <p>• k→∞: ζ(k)→1, density→100%</p>
+            
+            <h3>About This Platform</h3>
+            <p>Created by <b>Wessen Getachew</b> (@7dview)</p>
+            <p>Combines rigorous number theory with interactive visualization to explore the distribution of primitive lattice points across dimensions.</p>
+            
+            <p style="margin-top:15px; padding-top:15px; border-top:1px solid var(--border);">
+                <b>Need Help?</b> Use the preset buttons and tooltips throughout the platform for quick guidance.
+            </p>
         </div>
     </div>
 
     <script>
         let scene, camera, renderer, chart, autoRotate = false;
-        const cache = { mobius: new Map(), gcd: new Map(), points2D: null, points3D: null };
+        let view2D = 'primitive', colorMode2D = 'primitive', colorMode3D = 'primitive';
+        let shape3D = 'sphere';
         let mouseDown = false, prevMouse = { x: 0, y: 0 };
-        let view2D = 'primitive'; // 'primitive' or 'gauss'
-        let comparisonMode = 'fixed'; // 'fixed' or 'multi'
-        let comparisonChart = null;
-        let shape3D = 'sphere'; // 'sphere' or 'cube'
-        let colorMode3D = 'primitive'; // 'primitive', 'gcd', 'mod', 'octant', 'distance', 'gcdoct', 'gcdmod'
-        let colorMode2D = 'primitive'; // 'primitive', 'gcd', 'mod', 'quadrant', 'angular', 'gcdquad', 'gcdmod'
+        let zoom2D = 1.0;
+        let points2DCache = [];
+        let canvas2DParams = { R: 20, cx: 400, cy: 400, scale: 1 };
+
+        function getPrecision() {
+            return parseInt(document.getElementById('decimalPrecision').value);
+        }
+
+        function formatNumber(num, decimals = null) {
+            if (decimals === null) decimals = getPrecision();
+            return num.toFixed(decimals);
+        }
 
         function gcd(a, b) {
             a = Math.abs(a); b = Math.abs(b);
@@ -658,7 +746,9 @@
             return a;
         }
 
-        function gcdArray(arr) { return arr.reduce((a, b) => gcd(a, b)); }
+        function gcdArray(arr) {
+            return arr.reduce((a, b) => gcd(a, b));
+        }
 
         function isPrime(n) {
             if (n < 2) return false;
@@ -679,12 +769,16 @@
         }
 
         function mobius(n) {
-            if (cache.mobius.has(n)) return cache.mobius.get(n);
             if (n === 1) return 1;
             const f = primeFactors(n), u = [...new Set(f)];
-            const r = f.length !== u.length ? 0 : Math.pow(-1, f.length);
-            cache.mobius.set(n, r);
-            return r;
+            return f.length !== u.length ? 0 : Math.pow(-1, f.length);
+        }
+
+        function eulerPhi(n) {
+            let result = n;
+            const factors = [...new Set(primeFactors(n))];
+            factors.forEach(p => result = result * (p - 1) / p);
+            return Math.round(result);
         }
 
         function zeta(k) {
@@ -694,33 +788,11 @@
         }
 
         function sphereVolume(k, R) {
+            const factorial = n => n <= 1 ? 1 : n * factorial(n - 1);
             const gamma = k % 2 === 0 ? 
                 Math.PI**(k/2) / factorial(k/2) : 
                 2 * factorial((k-1)/2) * Math.PI**((k-1)/2) / factorial(k);
             return gamma * R**k;
-        }
-
-        function factorial(n) {
-            if (n <= 1) return 1;
-            let res = 1;
-            for (let i = 2; i <= n; i++) res *= i;
-            return res;
-        }
-
-        function animateValue(id, start, end, duration = 500) {
-            const el = document.getElementById(id);
-            const range = end - start;
-            const increment = range / (duration / 16);
-            let current = start;
-            const timer = setInterval(() => {
-                current += increment;
-                if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
-                    el.textContent = typeof end === 'number' && end % 1 !== 0 ? end.toFixed(3) : Math.round(end).toLocaleString();
-                    clearInterval(timer);
-                } else {
-                    el.textContent = typeof current === 'number' && current % 1 !== 0 ? current.toFixed(3) : Math.round(current).toLocaleString();
-                }
-            }, 16);
         }
 
         function showTab(id) {
@@ -731,21 +803,97 @@
             if (id === 'viz2d') draw2D();
             if (id === 'viz3d' && !scene) init3D();
             if (id === 'comparison') updateComparison();
+            if (id === 'discovery') updateDimScale();
+        }
+
+        function updateAllDisplays() {
+            const activePanel = document.querySelector('.panel.active');
+            if (activePanel) {
+                const id = activePanel.id;
+                if (id === 'theory') updateTheory();
+                else if (id === 'viz2d') draw2D();
+                else if (id === 'viz3d') draw3D();
+                else if (id === 'comparison') updateComparison();
+                else if (id === 'discovery') updateDimScale();
+            }
         }
 
         function updateTheory() {
             const k = parseInt(document.getElementById('tks').value);
-            const R = parseInt(document.getElementById('trs').value);
+            const R = parseInt(document.getElementById('trInput').value);
             document.getElementById('tk').textContent = k;
             document.getElementById('tr').textContent = R;
             const z = zeta(k), d = 1/z;
             const vol = sphereVolume(k, R);
             const pred = Math.round(vol / z);
+            const prec = getPrecision();
             
-            animateValue('sz', parseFloat(document.getElementById('sz').textContent) || z, z);
-            animateValue('sd', parseFloat(document.getElementById('sd').textContent) || d, d);
-            animateValue('sp', parseInt(document.getElementById('sp').textContent.replace(/,/g, '')) || pred, pred);
-            animateValue('svol', parseFloat(document.getElementById('svol').textContent) || vol, vol);
+            document.getElementById('sz').textContent = formatNumber(z, prec);
+            document.getElementById('sd').textContent = formatNumber(d, prec);
+            document.getElementById('sp').textContent = pred.toLocaleString();
+            document.getElementById('svol').textContent = formatNumber(vol, prec);
+            
+            // Update detailed calculation display
+            document.getElementById('currentK').textContent = k;
+            document.getElementById('currentR').textContent = R;
+            document.getElementById('vk').textContent = k;
+            document.getElementById('nk').textContent = k;
+            document.getElementById('nk2').textContent = k;
+            document.getElementById('nk3').textContent = k;
+            document.getElementById('nr').textContent = R;
+            document.getElementById('nr2').textContent = R;
+            document.getElementById('predCalc').textContent = pred.toLocaleString();
+            document.getElementById('densCalc').textContent = formatNumber(d * 100, prec) + '%';
+            
+            // Update volume formula display
+            const formulas = {
+                2: 'πR²',
+                3: '4πR³/3',
+                4: 'π²R⁴/2',
+                5: '8π²R⁵/15',
+                6: 'π³R⁶/6'
+            };
+            document.getElementById('volFormula').textContent = formulas[k] || `V_${k}(R)`;
+        }
+
+        function updateTheoryRadius(value) {
+            const R = parseInt(value);
+            if (R < 1 || isNaN(R)) return;
+            
+            document.getElementById('tr').textContent = R;
+            document.getElementById('trs').value = Math.min(R, 1000);
+            document.getElementById('trInput').value = R;
+            updateTheory();
+        }
+
+        function setTheoryPreset(R) {
+            document.getElementById('trs').value = Math.min(R, 1000);
+            document.getElementById('trInput').value = R;
+            updateTheoryRadius(R);
+        }
+
+        function updateDimScale() {
+            const k = parseInt(document.getElementById('dimScaleKSlider').value);
+            const R = parseInt(document.getElementById('dimScaleRSlider').value);
+            document.getElementById('dimScaleK').textContent = k;
+            document.getElementById('dimScaleR').textContent = R;
+            document.getElementById('dimK2').textContent = k;
+            document.getElementById('dimR2').textContent = R;
+            
+            const mainTerm = Math.pow(R, k);
+            const boundaryTerm = Math.pow(R, k - 1);
+            const relativeError = (boundaryTerm / mainTerm) * 100;
+            const density = 1 / zeta(k);
+            const prec = getPrecision();
+            
+            document.getElementById('mainTerm').textContent = mainTerm.toLocaleString();
+            document.getElementById('boundTerm').textContent = boundaryTerm.toLocaleString();
+            document.getElementById('relErr').textContent = formatNumber(relativeError, prec) + '%';
+            document.getElementById('dimDens').textContent = formatNumber(density, prec);
+            
+            document.getElementById('mainCalc').textContent = `${R}^${k} = ${mainTerm.toLocaleString()}`;
+            document.getElementById('boundCalc').textContent = `${R}^${k-1} = ${boundaryTerm.toLocaleString()}`;
+            document.getElementById('relCalc').textContent = `${boundaryTerm.toLocaleString()} / ${mainTerm.toLocaleString()} = ${formatNumber(relativeError, prec)}%`;
         }
 
         function set2DView(mode) {
@@ -757,200 +905,305 @@
 
         function set2DColorMode(mode) {
             colorMode2D = mode;
-            document.querySelectorAll('#color2DPrimitive, #color2DGCD, #color2DMod, #color2DQuadrant, #color2DAngular, #color2DGCDQuad, #color2DGCDMod').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('#color2DPrimitive, #color2DGCD, #color2DMod, #color2DQuadrant, #color2DAngular, #color2DGCDQuad').forEach(btn => btn.classList.remove('active'));
             const btnIds = {
-                'primitive': 'color2DPrimitive',
-                'gcd': 'color2DGCD',
-                'mod': 'color2DMod',
-                'quadrant': 'color2DQuadrant',
-                'angular': 'color2DAngular',
-                'gcdquad': 'color2DGCDQuad',
-                'gcdmod': 'color2DGCDMod'
+                'primitive': 'color2DPrimitive', 'gcd': 'color2DGCD', 'mod': 'color2DMod',
+                'quadrant': 'color2DQuadrant', 'angular': 'color2DAngular', 'gcdquad': 'color2DGCDQuad'
             };
             document.getElementById(btnIds[mode]).classList.add('active');
-            
-            // Show/hide modulus controls
-            document.getElementById('modControls2D').style.display = (mode === 'mod' || mode === 'gcdmod') ? 'block' : 'none';
-            document.getElementById('sectorControls2D').style.display = (mode === 'angular') ? 'block' : 'none';
-            
-            draw2D();
-        }
-
-        function update2DRadius(value) {
-            const R = parseInt(value);
-            if (R < 1 || R > 1000 || isNaN(R)) return;
-            
-            document.getElementById('r2v').textContent = R;
-            document.getElementById('r2').value = Math.min(R, 500);
-            document.getElementById('r2input').value = R;
-            
-            // Show performance warning
-            document.getElementById('warn2d').style.display = R > 200 ? 'block' : 'none';
-            
+            document.getElementById('modControls2D').style.display = mode === 'mod' ? 'block' : 'none';
+            document.getElementById('sectorControls2D').style.display = mode === 'angular' ? 'block' : 'none';
             draw2D();
         }
 
         function draw2D() {
             const canvas = document.getElementById('c2d'), ctx = canvas.getContext('2d');
-            const R = parseInt(document.getElementById('r2input').value);
+            const R = parseInt(document.getElementById('r2').value);
             const sz = parseInt(document.getElementById('ps').value);
+            zoom2D = parseFloat(document.getElementById('zoom2D').value);
             document.getElementById('r2v').textContent = R;
             document.getElementById('psv').textContent = sz;
-            
+            document.getElementById('zoom2Dv').textContent = zoom2D.toFixed(1) + 'x';
             document.getElementById('warn2d').style.display = R > 200 ? 'block' : 'none';
-            if (R > 250) {
-                document.getElementById('load2d').classList.add('active');
+            
+            ctx.clearRect(0, 0, 800, 800);
+            
+            // Use 90% of canvas for visualization, 10% for legend
+            const vizWidth = 720; // 90% of 800
+            const cx = vizWidth / 2, cy = 400;
+            const sc = (vizWidth * 0.9 / (2 * R)) * zoom2D;
+            
+            canvas2DParams = { R, cx, cy, scale: sc };
+            
+            ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--border');
+            ctx.lineWidth = 2;
+            ctx.beginPath(); 
+            ctx.arc(cx, cy, R*sc, 0, 2*Math.PI); 
+            ctx.stroke();
+            
+            points2DCache = [];
+            const allPoints = [];
+            let prim = 0, tot = 0;
+            const modulus = parseInt(document.getElementById('mod2D').value);
+            const numSectors = parseInt(document.getElementById('sectors2D').value);
+            
+            for (let x = -R; x <= R; x++) {
+                for (let y = -R; y <= R; y++) {
+                    if (x*x + y*y <= R*R) {
+                        tot++;
+                        const g = gcd(Math.abs(x), Math.abs(y));
+                        const isPrimitive = g === 1;
+                        if (isPrimitive) prim++;
+                        
+                        let quadrant = 1;
+                        if (x >= 0 && y >= 0) quadrant = 1;
+                        else if (x < 0 && y >= 0) quadrant = 2;
+                        else if (x < 0 && y < 0) quadrant = 3;
+                        else quadrant = 4;
+                        
+                        const angle = Math.atan2(y, x) + Math.PI;
+                        const screenX = cx + x*sc;
+                        const screenY = cy - y*sc;
+                        
+                        allPoints.push({ 
+                            x, y, gcd: g, isPrimitive, quadrant, angle,
+                            screenX, screenY
+                        });
+                    }
+                }
             }
             
-            setTimeout(() => {
-                ctx.clearRect(0, 0, 800, 800);
-                const cx = 400, cy = 400, sc = 350/R;
-                ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--border');
-                ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.arc(cx, cy, R*sc, 0, 2*Math.PI); ctx.stroke();
+            points2DCache = allPoints;
+            
+            const colors = {
+                prim: '#0066cc', nonprim: '#dc3545',
+                gcd1: '#0066cc', gcd2: '#dc3545', gcd3: '#28a745', gcd4: '#ffc107',
+                gcd5: '#6f42c1', gcd6: '#fd7e14', gcd7: '#00d4ff', gcd8: '#ff006e',
+                quad1: '#0066cc', quad2: '#28a745', quad3: '#ffc107', quad4: '#dc3545',
+                mod0: '#0066cc', mod1: '#dc3545', mod2: '#28a745', mod3: '#ffc107'
+            };
+            
+            for (let i = 0; i < 16; i++) {
+                colors[`sector${i}`] = `hsl(${(i / 16) * 360}, 70%, 50%)`;
+            }
+            
+            allPoints.forEach(pt => {
+                let colorKey;
+                if (view2D === 'gauss') colorKey = 'prim';
+                else {
+                    switch(colorMode2D) {
+                        case 'primitive': colorKey = pt.isPrimitive ? 'prim' : 'nonprim'; break;
+                        case 'gcd': colorKey = `gcd${Math.min(pt.gcd, 8)}`; break;
+                        case 'mod': colorKey = `mod${((pt.x + pt.y) % modulus + modulus) % modulus}`; break;
+                        case 'quadrant': colorKey = `quad${pt.quadrant}`; break;
+                        case 'angular': colorKey = `sector${Math.floor(pt.angle / (2 * Math.PI / numSectors))}`; break;
+                        case 'gcdquad': colorKey = `quad${pt.quadrant}`; break;
+                    }
+                }
                 
-                const allPoints = [];
-                let prim = 0, tot = 0;
-                
-                // Collect all points with properties
-                for (let x = -R; x <= R; x++) {
-                    for (let y = -R; y <= R; y++) {
-                        if (x*x + y*y <= R*R) {
-                            tot++;
-                            const g = gcd(Math.abs(x), Math.abs(y));
-                            const isPrimitive = g === 1;
-                            if (isPrimitive) prim++;
-                            
-                            // Calculate quadrant
-                            let quadrant;
-                            if (x >= 0 && y >= 0) quadrant = 1;
-                            else if (x < 0 && y >= 0) quadrant = 2;
-                            else if (x < 0 && y < 0) quadrant = 3;
-                            else quadrant = 4;
-                            
-                            // Calculate angle (0 to 2π)
-                            const angle = Math.atan2(y, x) + Math.PI; // 0 to 2π
-                            
-                            allPoints.push({
-                                x, y, gcd: g, isPrimitive, quadrant, angle,
-                                sum: x + y
-                            });
+                ctx.fillStyle = colors[colorKey] || '#999';
+                ctx.beginPath();
+                ctx.arc(pt.screenX, pt.screenY, sz, 0, 2*Math.PI);
+                ctx.fill();
+            });
+            
+            updateLegend2D(colors);
+            
+            const pred = Math.round(Math.PI * R * R / zeta(2));
+            const error = Math.abs(pred - prim);
+            const relError = pred > 0 ? (error / pred) * 100 : 0;
+            const prec = getPrecision();
+            
+            document.getElementById('p2').textContent = prim.toLocaleString();
+            document.getElementById('t2').textContent = tot.toLocaleString();
+            document.getElementById('d2').textContent = formatNumber((prim/tot)*100, prec) + '%';
+            document.getElementById('e2').textContent = error.toLocaleString();
+            document.getElementById('pred2').textContent = pred.toLocaleString();
+            document.getElementById('relerr2').textContent = formatNumber(relError, prec) + '%';
+        }
+
+        function updateLegend2D(colors) {
+            const legend = document.getElementById('legendContent');
+            const R = canvas2DParams.R;
+            const mode = colorMode2D;
+            
+            let html = `<p><b>R = ${R}</b></p>`;
+            html += `<p><b>Zoom:</b> ${zoom2D.toFixed(1)}x</p><hr style="border-color: var(--border); margin: 10px 0;">`;
+            
+            if (view2D === 'gauss') {
+                html += `<p style="color: ${colors.prim};">■ All Points</p>`;
+                html += `<p style="margin-top:10px; font-size:0.8em;">Gauss Circle Problem: counting all lattice points in circle</p>`;
+            } else {
+                switch(mode) {
+                    case 'primitive':
+                        html += `<p style="color: ${colors.prim};">■ Primitive (GCD=1)</p>`;
+                        html += `<p style="color: ${colors.nonprim};">■ Non-Primitive (GCD>1)</p>`;
+                        break;
+                    case 'gcd':
+                        for (let i = 1; i <= 8; i++) {
+                            html += `<p style="color: ${colors[`gcd${i}`]};">■ GCD = ${i}</p>`;
                         }
-                    }
-                }
-                
-                // Group points by color based on mode
-                const pointsByColor = {};
-                const modulus = parseInt(document.getElementById('mod2D').value);
-                const numSectors = parseInt(document.getElementById('sectors2D').value);
-                
-                allPoints.forEach(pt => {
-                    let colorKey;
-                    
-                    if (view2D === 'gauss') {
-                        colorKey = 'all';
-                    } else {
-                        switch(colorMode2D) {
-                            case 'primitive':
-                                colorKey = pt.isPrimitive ? 'prim' : 'nonprim';
-                                break;
-                            case 'gcd':
-                                colorKey = `gcd${Math.min(pt.gcd, 8)}`;
-                                break;
-                            case 'mod':
-                                colorKey = `mod${((pt.x + pt.y) % modulus + modulus) % modulus}`;
-                                break;
-                            case 'quadrant':
-                                colorKey = `quad${pt.quadrant}`;
-                                break;
-                            case 'angular':
-                                const sector = Math.floor(pt.angle / (2 * Math.PI / numSectors));
-                                colorKey = `sector${sector}`;
-                                break;
-                            case 'gcdquad':
-                                colorKey = `gcd${Math.min(pt.gcd, 4)}_q${pt.quadrant}`;
-                                break;
-                            case 'gcdmod':
-                                const modVal = ((pt.x + pt.y) % modulus + modulus) % modulus;
-                                colorKey = `gcd${Math.min(pt.gcd, 4)}_m${modVal}`;
-                                break;
+                        break;
+                    case 'mod':
+                        const m = parseInt(document.getElementById('mod2D').value);
+                        html += `<p><b>Modulus: ${m}</b></p>`;
+                        for (let i = 0; i < Math.min(m, 4); i++) {
+                            html += `<p style="color: ${colors[`mod${i}`]};">■ (x+y) ≡ ${i} (mod ${m})</p>`;
                         }
-                    }
+                        break;
+                    case 'quadrant':
+                        html += `<p style="color: ${colors.quad1};">■ Quadrant I</p>`;
+                        html += `<p style="color: ${colors.quad2};">■ Quadrant II</p>`;
+                        html += `<p style="color: ${colors.quad3};">■ Quadrant III</p>`;
+                        html += `<p style="color: ${colors.quad4};">■ Quadrant IV</p>`;
+                        break;
+                    case 'angular':
+                        const sectors = parseInt(document.getElementById('sectors2D').value);
+                        html += `<p><b>${sectors} sectors</b></p>`;
+                        html += `<p style="font-size:0.8em;">Rainbow colored by angle</p>`;
+                        break;
+                    case 'gcdquad':
+                        html += `<p><b>GCD × Quadrant</b></p>`;
+                        html += `<p style="font-size:0.8em;">Combined coloring</p>`;
+                        break;
+                }
+            }
+            
+            html += `<hr style="border-color: var(--border); margin: 10px 0;">`;
+            html += `<p style="font-size:0.8em; color: var(--text2);">Click a point to inspect</p>`;
+            
+            legend.innerHTML = html;
+        }
+
+        function reset2DZoom() {
+            document.getElementById('zoom2D').value = 1;
+            draw2D();
+        }
+
+        // Add click handler for 2D canvas
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('c2d');
+            if (canvas) {
+                canvas.addEventListener('click', function(e) {
+                    const rect = canvas.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const clickY = e.clientY - rect.top;
                     
-                    if (!pointsByColor[colorKey]) pointsByColor[colorKey] = [];
-                    pointsByColor[colorKey].push(pt);
-                });
-                
-                // Define color palettes
-                const colors = {
-                    all: '#6f42c1',
-                    prim: '#0066cc',
-                    nonprim: '#dc3545',
-                    gcd1: '#0066cc', gcd2: '#dc3545', gcd3: '#28a745', gcd4: '#ffc107',
-                    gcd5: '#6f42c1', gcd6: '#fd7e14', gcd7: '#00d4ff', gcd8: '#ff006e',
-                    quad1: '#0066cc', quad2: '#28a745', quad3: '#ffc107', quad4: '#dc3545',
-                    mod0: '#0066cc', mod1: '#dc3545', mod2: '#28a745', mod3: '#ffc107',
-                    mod4: '#6f42c1', mod5: '#fd7e14', mod6: '#00d4ff', mod7: '#ff006e',
-                    mod8: '#20c997', mod9: '#e83e8c', mod10: '#17a2b8', mod11: '#6610f2'
-                };
-                
-                // Generate sector colors (rainbow)
-                for (let i = 0; i < 16; i++) {
-                    const hue = (i / 16) * 360;
-                    colors[`sector${i}`] = `hsl(${hue}, 70%, 50%)`;
-                }
-                
-                // Generate combined colors
-                const baseColors = ['#0066cc', '#dc3545', '#28a745', '#ffc107'];
-                for (let g = 1; g <= 4; g++) {
-                    for (let q = 1; q <= 4; q++) {
-                        colors[`gcd${g}_q${q}`] = baseColors[(g - 1 + q - 1) % 4];
-                    }
-                    for (let m = 0; m < 12; m++) {
-                        const hue = ((g - 1) * 90 + m * 30) % 360;
-                        colors[`gcd${g}_m${m}`] = `hsl(${hue}, 65%, 50%)`;
-                    }
-                }
-                
-                // Draw points
-                Object.entries(pointsByColor).forEach(([colorKey, points]) => {
-                    ctx.fillStyle = colors[colorKey] || '#999';
-                    points.forEach(pt => {
-                        ctx.beginPath();
-                        ctx.arc(cx + pt.x*sc, cy - pt.y*sc, sz, 0, 2*Math.PI);
-                        ctx.fill();
+                    // Find closest point within threshold
+                    let closestPoint = null;
+                    let minDist = 15; // 15 pixel threshold
+                    
+                    points2DCache.forEach(pt => {
+                        const dx = pt.screenX - clickX;
+                        const dy = pt.screenY - clickY;
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+                        if (dist < minDist) {
+                            minDist = dist;
+                            closestPoint = pt;
+                        }
                     });
+                    
+                    if (closestPoint) {
+                        displayPointInfo2D(closestPoint);
+                    }
                 });
-                
-                cache.points2D = { primitive: allPoints.filter(p => p.isPrimitive), 
-                                   nonPrimitive: allPoints.filter(p => !p.isPrimitive), R };
-                
-                const pred = Math.round(Math.PI * R * R / zeta(2));
-                const error = Math.abs(pred - prim);
-                
-                // Update stats based on view mode
-                if (view2D === 'gauss') {
-                    document.getElementById('p2').parentElement.querySelector('.lbl').textContent = 'Total Lattice Points';
-                    animateValue('p2', 0, tot);
-                    document.getElementById('t2').parentElement.querySelector('.lbl').textContent = 'Expected (πR²)';
-                    animateValue('t2', 0, Math.round(Math.PI * R * R));
-                    document.getElementById('d2').parentElement.querySelector('.lbl').textContent = 'Error';
-                    document.getElementById('d2').textContent = Math.abs(tot - Math.PI * R * R).toFixed(1);
-                    document.getElementById('e2').parentElement.querySelector('.lbl').textContent = '% of Expected';
-                    document.getElementById('e2').textContent = ((tot / (Math.PI * R * R)) * 100).toFixed(2) + '%';
-                } else {
-                    document.getElementById('p2').parentElement.querySelector('.lbl').textContent = 'Primitive Points';
-                    animateValue('p2', 0, prim);
-                    document.getElementById('t2').parentElement.querySelector('.lbl').textContent = 'Total Points';
-                    animateValue('t2', 0, tot);
-                    document.getElementById('d2').parentElement.querySelector('.lbl').textContent = 'Density';
-                    document.getElementById('d2').textContent = ((prim/tot)*100).toFixed(1) + '%';
-                    document.getElementById('e2').parentElement.querySelector('.lbl').textContent = '|Predicted - Actual|';
-                    animateValue('e2', 0, error);
-                }
-                
-                document.getElementById('load2d').classList.remove('active');
-            }, 100);
+            }
+        });
+
+        function displayPointInfo2D(pt) {
+            const info = document.getElementById('clickedPoint2D');
+            const content = document.getElementById('pointInfo2D');
+            const prec = getPrecision();
+            
+            const distance = Math.sqrt(pt.x * pt.x + pt.y * pt.y);
+            const angleRad = Math.atan2(pt.y, pt.x);
+            const angleDeg = ((angleRad * 180 / Math.PI) + 360) % 360;
+            const factors = primeFactors(Math.abs(pt.gcd));
+            
+            let html = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">`;
+            html += `<div><p><b>Coordinates:</b> (${pt.x}, ${pt.y})</p>`;
+            html += `<p><b>GCD:</b> ${pt.gcd}</p>`;
+            html += `<p><b>Type:</b> ${pt.isPrimitive ? '<span style="color: var(--blue);">Primitive</span>' : '<span style="color: var(--red);">Non-Primitive</span>'}</p></div>`;
+            html += `<div><p><b>Distance:</b> ${formatNumber(distance, prec)}</p>`;
+            html += `<p><b>Angle:</b> ${formatNumber(angleDeg, 2)}°</p>`;
+            html += `<p><b>Quadrant:</b> ${pt.quadrant}</p></div>`;
+            html += `</div>`;
+            
+            if (pt.gcd > 1) {
+                html += `<p style="margin-top: 10px;"><b>GCD Factorization:</b> ${factors.join(' × ')}</p>`;
+                const reduced = [pt.x / pt.gcd, pt.y / pt.gcd];
+                html += `<p><b>Primitive Form:</b> (${reduced[0]}, ${reduced[1]})</p>`;
+                html += `<p><b>Relationship:</b> (${pt.x}, ${pt.y}) = ${pt.gcd} × (${reduced[0]}, ${reduced[1]})</p>`;
+            }
+            
+            content.innerHTML = html;
+            info.style.display = 'block';
+        }
+
+        function export2DCanvas() {
+            const sourceCanvas = document.getElementById('c2d');
+            const R = canvas2DParams.R;
+            
+            // Create high-res canvas (2x resolution)
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = 1600;
+            exportCanvas.height = 1800; // Extra space for title
+            const ctx = exportCanvas.getContext('2d');
+            
+            // Background
+            ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--bg');
+            ctx.fillRect(0, 0, 1600, 1800);
+            
+            // Title section
+            ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text');
+            ctx.font = 'bold 32px system-ui';
+            ctx.textAlign = 'center';
+            ctx.fillText('2D Primitive Lattice Point Distribution', 800, 50);
+            
+            // Subtitle
+            ctx.font = '20px system-ui';
+            const modeNames = {
+                'primitive': 'Primitive vs Non-Primitive',
+                'gcd': 'Colored by GCD Value',
+                'mod': `Modular Arithmetic (mod ${document.getElementById('mod2D').value})`,
+                'quadrant': 'Colored by Quadrant',
+                'angular': `Angular Sectors (${document.getElementById('sectors2D').value} sectors)`,
+                'gcdquad': 'GCD × Quadrant'
+            };
+            ctx.fillText(`R = ${R} | Mode: ${modeNames[colorMode2D]} | Zoom: ${zoom2D.toFixed(1)}x`, 800, 85);
+            
+            // Draw main visualization (scaled 2x)
+            ctx.save();
+            ctx.translate(0, 100);
+            ctx.scale(2, 2);
+            ctx.drawImage(sourceCanvas, 0, 0);
+            ctx.restore();
+            
+            // Footer
+            ctx.font = '16px system-ui';
+            ctx.fillText('Generated by Primitive Lattice Point Distribution Analysis | Wessen Getachew (@7dview)', 800, 1770);
+            
+            // Export
+            const link = document.createElement('a');
+            link.download = `2d-lattice-R${R}-${colorMode2D}-${Date.now()}.png`;
+            link.href = exportCanvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function set3DShape(shape) {
+            shape3D = shape;
+            document.querySelectorAll('#shape3DSphere, #shape3DCube').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(shape === 'sphere' ? 'shape3DSphere' : 'shape3DCube').classList.add('active');
+            draw3D();
+        }
+
+        function set3DColorMode(mode) {
+            colorMode3D = mode;
+            document.querySelectorAll('#colorPrimitive, #colorGCD, #colorMod, #colorOctant, #colorDistance').forEach(btn => btn.classList.remove('active'));
+            const btnIds = { 'primitive': 'colorPrimitive', 'gcd': 'colorGCD', 'mod': 'colorMod', 'octant': 'colorOctant', 'distance': 'colorDistance' };
+            document.getElementById(btnIds[mode]).classList.add('active');
+            document.getElementById('modControls3D').style.display = mode === 'mod' ? 'block' : 'none';
+            draw3D();
         }
 
         function init3D() {
@@ -960,7 +1213,7 @@
             camera = new THREE.PerspectiveCamera(75, c.clientWidth/600, 0.1, 1000);
             camera.position.set(50, 50, 50);
             camera.lookAt(0, 0, 0);
-            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+            renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(c.clientWidth, 600);
             c.appendChild(renderer.domElement);
             
@@ -996,33 +1249,6 @@
             animate3D();
         }
 
-        function set3DShape(shape) {
-            shape3D = shape;
-            document.querySelectorAll('#shape3DSphere, #shape3DCube').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(shape === 'sphere' ? 'shape3DSphere' : 'shape3DCube').classList.add('active');
-            draw3D();
-        }
-
-        function set3DColorMode(mode) {
-            colorMode3D = mode;
-            document.querySelectorAll('#colorPrimitive, #colorGCD, #colorMod, #colorOctant, #colorDistance, #colorGCDOct, #colorGCDMod').forEach(btn => btn.classList.remove('active'));
-            const btnIds = {
-                'primitive': 'colorPrimitive',
-                'gcd': 'colorGCD',
-                'mod': 'colorMod',
-                'octant': 'colorOctant',
-                'distance': 'colorDistance',
-                'gcdoct': 'colorGCDOct',
-                'gcdmod': 'colorGCDMod'
-            };
-            document.getElementById(btnIds[mode]).classList.add('active');
-            
-            // Show/hide modulus controls
-            document.getElementById('modControls3D').style.display = (mode === 'mod' || mode === 'gcdmod') ? 'block' : 'none';
-            
-            draw3D();
-        }
-
         function draw3D() {
             if (!scene) return;
             while(scene.children.length > 3) scene.remove(scene.children[3]);
@@ -1033,158 +1259,92 @@
             document.getElementById('ps3v').textContent = pointSize;
             document.getElementById('warn3d').style.display = R > 30 ? 'block' : 'none';
             
-            if (R > 25) document.getElementById('load3d').classList.add('active');
+            if (shape3D === 'sphere') {
+                const sg = new THREE.SphereGeometry(R, 32, 32);
+                const sm = new THREE.MeshBasicMaterial({ color: 0x6f42c1, wireframe: true, transparent: true, opacity: 0.15 });
+                scene.add(new THREE.Mesh(sg, sm));
+            } else {
+                const boxGeometry = new THREE.BoxGeometry(2*R, 2*R, 2*R);
+                const edges = new THREE.EdgesGeometry(boxGeometry);
+                const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x6f42c1, transparent: true, opacity: 0.3 }));
+                scene.add(line);
+            }
             
-            setTimeout(() => {
-                // Add boundary shape
-                if (shape3D === 'sphere') {
-                    const sg = new THREE.SphereGeometry(R, 32, 32);
-                    const sm = new THREE.MeshBasicMaterial({ 
-                        color: 0x6f42c1, wireframe: true, transparent: true, opacity: 0.15 
-                    });
-                    scene.add(new THREE.Mesh(sg, sm));
-                } else {
-                    const boxGeometry = new THREE.BoxGeometry(2*R, 2*R, 2*R);
-                    const edges = new THREE.EdgesGeometry(boxGeometry);
-                    const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ 
-                        color: 0x6f42c1, transparent: true, opacity: 0.3 
-                    }));
-                    scene.add(line);
-                }
-                
-                // Collect all points with their properties
-                const allPoints = [];
-                let prim = 0, tot = 0;
-                const modulus = parseInt(document.getElementById('mod3D').value);
-                
-                for (let x = -R; x <= R; x++) {
-                    for (let y = -R; y <= R; y++) {
-                        for (let z = -R; z <= R; z++) {
-                            const distSq = x*x + y*y + z*z;
-                            const inBounds = shape3D === 'sphere' ? 
-                                (distSq <= R*R) : 
-                                (Math.abs(x) <= R && Math.abs(y) <= R && Math.abs(z) <= R);
+            const allPoints = [];
+            let prim = 0, tot = 0;
+            const modulus = parseInt(document.getElementById('mod3D').value);
+            
+            for (let x = -R; x <= R; x++) {
+                for (let y = -R; y <= R; y++) {
+                    for (let z = -R; z <= R; z++) {
+                        const distSq = x*x + y*y + z*z;
+                        const inBounds = shape3D === 'sphere' ? (distSq <= R*R) : true;
+                        
+                        if (inBounds) {
+                            tot++;
+                            const g = gcdArray([Math.abs(x), Math.abs(y), Math.abs(z)]);
+                            const isPrimitive = g === 1;
+                            if (isPrimitive) prim++;
                             
-                            if (inBounds) {
-                                tot++;
-                                const g = gcdArray([Math.abs(x), Math.abs(y), Math.abs(z)]);
-                                const isPrimitive = g === 1;
-                                if (isPrimitive) prim++;
-                                
-                                // Determine octant (1-8)
-                                let octant = 1;
-                                if (x >= 0 && y >= 0 && z >= 0) octant = 1;
-                                else if (x < 0 && y >= 0 && z >= 0) octant = 2;
-                                else if (x < 0 && y < 0 && z >= 0) octant = 3;
-                                else if (x >= 0 && y < 0 && z >= 0) octant = 4;
-                                else if (x >= 0 && y >= 0 && z < 0) octant = 5;
-                                else if (x < 0 && y >= 0 && z < 0) octant = 6;
-                                else if (x < 0 && y < 0 && z < 0) octant = 7;
-                                else octant = 8;
-                                
-                                allPoints.push({
-                                    x, y, z,
-                                    gcd: g,
-                                    isPrimitive,
-                                    distance: Math.sqrt(distSq),
-                                    sum: x + y + z,
-                                    octant
-                                });
-                            }
+                            let octant = 1;
+                            if (x >= 0 && y >= 0 && z >= 0) octant = 1;
+                            else if (x < 0 && y >= 0 && z >= 0) octant = 2;
+                            else if (x < 0 && y < 0 && z >= 0) octant = 3;
+                            else if (x >= 0 && y < 0 && z >= 0) octant = 4;
+                            else if (x >= 0 && y >= 0 && z < 0) octant = 5;
+                            else if (x < 0 && y >= 0 && z < 0) octant = 6;
+                            else if (x < 0 && y < 0 && z < 0) octant = 7;
+                            else octant = 8;
+                            
+                            allPoints.push({ x, y, z, gcd: g, isPrimitive, distance: Math.sqrt(distSq), octant });
                         }
                     }
                 }
-                
-                cache.points3D = { 
-                    primitive: allPoints.filter(p => p.isPrimitive),
-                    nonPrimitive: allPoints.filter(p => !p.isPrimitive),
-                    R 
-                };
-                
-                // Color points based on mode
-                const pointsByColor = {};
-                
-                allPoints.forEach(pt => {
-                    let colorKey;
-                    
-                    switch(colorMode3D) {
-                        case 'primitive':
-                            colorKey = pt.isPrimitive ? 'prim' : 'nonprim';
-                            break;
-                        case 'gcd':
-                            colorKey = `gcd${Math.min(pt.gcd, 8)}`;
-                            break;
-                        case 'mod':
-                            colorKey = `mod${((pt.sum % modulus) + modulus) % modulus}`;
-                            break;
-                        case 'octant':
-                            colorKey = `oct${pt.octant}`;
-                            break;
-                        case 'distance':
-                            const distBucket = Math.floor(pt.distance / (R / 5));
-                            colorKey = `dist${Math.min(distBucket, 5)}`;
-                            break;
-                        case 'gcdoct':
-                            colorKey = `gcd${Math.min(pt.gcd, 4)}_oct${pt.octant}`;
-                            break;
-                        case 'gcdmod':
-                            const modVal = ((pt.sum % modulus) + modulus) % modulus;
-                            colorKey = `gcd${Math.min(pt.gcd, 4)}_m${modVal}`;
-                            break;
-                    }
-                    
-                    if (!pointsByColor[colorKey]) pointsByColor[colorKey] = [];
-                    pointsByColor[colorKey].push(pt.x, pt.y, pt.z);
-                });
-                
-                // Define color schemes
-                const colorMap = {
-                    prim: 0x0066cc,
-                    nonprim: 0xdc3545,
-                    gcd1: 0x0066cc, gcd2: 0xdc3545, gcd3: 0x28a745, gcd4: 0xffc107,
-                    gcd5: 0x6f42c1, gcd6: 0xfd7e14, gcd7: 0x00d4ff, gcd8: 0xff006e,
-                    oct1: 0x0066cc, oct2: 0xdc3545, oct3: 0x28a745, oct4: 0xffc107,
-                    oct5: 0x6f42c1, oct6: 0xfd7e14, oct7: 0x00d4ff, oct8: 0xff006e,
-                    dist0: 0x0066cc, dist1: 0x00d4ff, dist2: 0x28a745, 
-                    dist3: 0xffc107, dist4: 0xfd7e14, dist5: 0xdc3545,
-                    mod0: 0x0066cc, mod1: 0xdc3545, mod2: 0x28a745, mod3: 0xffc107,
-                    mod4: 0x6f42c1, mod5: 0xfd7e14, mod6: 0x00d4ff, mod7: 0xff006e,
-                    mod8: 0x20c997, mod9: 0xe83e8c, mod10: 0x17a2b8, mod11: 0x6610f2
-                };
-                
-                // Generate combined colors
-                const baseColors = [0x0066cc, 0xdc3545, 0x28a745, 0xffc107, 0x6f42c1, 0xfd7e14, 0x00d4ff, 0xff006e];
-                for (let g = 1; g <= 4; g++) {
-                    for (let o = 1; o <= 8; o++) {
-                        colorMap[`gcd${g}_oct${o}`] = baseColors[(g - 1 + o - 1) % 8];
-                    }
-                    for (let m = 0; m < 12; m++) {
-                        colorMap[`gcd${g}_m${m}`] = baseColors[(g - 1 + m) % 8];
-                    }
+            }
+            
+            const pointsByColor = {};
+            allPoints.forEach(pt => {
+                let colorKey;
+                switch(colorMode3D) {
+                    case 'primitive': colorKey = pt.isPrimitive ? 'prim' : 'nonprim'; break;
+                    case 'gcd': colorKey = `gcd${Math.min(pt.gcd, 8)}`; break;
+                    case 'mod': colorKey = `mod${((pt.x + pt.y + pt.z) % modulus + modulus) % modulus}`; break;
+                    case 'octant': colorKey = `oct${pt.octant}`; break;
+                    case 'distance': colorKey = `dist${Math.min(Math.floor(pt.distance / (R / 5)), 5)}`; break;
                 }
                 
-                // Create point groups
-                Object.entries(pointsByColor).forEach(([colorKey, positions]) => {
-                    if (positions.length > 0) {
-                        const geometry = new THREE.BufferGeometry();
-                        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-                        
-                        const color = colorMap[colorKey] || 0x999999;
-                        const material = new THREE.PointsMaterial({ color, size: pointSize });
-                        scene.add(new THREE.Points(geometry, material));
-                    }
-                });
-                
-                const pred = Math.round(4 * Math.PI * R**3 / (3 * zeta(3)));
-                const error = Math.abs(pred - prim);
-                
-                animateValue('p3', 0, prim);
-                animateValue('t3', 0, tot);
-                document.getElementById('d3').textContent = ((prim/tot)*100).toFixed(1) + '%';
-                animateValue('e3', 0, error);
-                
-                document.getElementById('load3d').classList.remove('active');
-            }, 100);
+                if (!pointsByColor[colorKey]) pointsByColor[colorKey] = [];
+                pointsByColor[colorKey].push(pt.x, pt.y, pt.z);
+            });
+            
+            const colorMap = {
+                prim: 0x0066cc, nonprim: 0xdc3545,
+                gcd1: 0x0066cc, gcd2: 0xdc3545, gcd3: 0x28a745, gcd4: 0xffc107,
+                gcd5: 0x6f42c1, gcd6: 0xfd7e14, gcd7: 0x00d4ff, gcd8: 0xff006e,
+                oct1: 0x0066cc, oct2: 0xdc3545, oct3: 0x28a745, oct4: 0xffc107,
+                oct5: 0x6f42c1, oct6: 0xfd7e14, oct7: 0x00d4ff, oct8: 0xff006e,
+                dist0: 0x0066cc, dist1: 0x00d4ff, dist2: 0x28a745, dist3: 0xffc107, dist4: 0xfd7e14, dist5: 0xdc3545,
+                mod0: 0x0066cc, mod1: 0xdc3545, mod2: 0x28a745, mod3: 0xffc107
+            };
+            
+            Object.entries(pointsByColor).forEach(([colorKey, positions]) => {
+                if (positions.length > 0) {
+                    const geometry = new THREE.BufferGeometry();
+                    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+                    const color = colorMap[colorKey] || 0x999999;
+                    const material = new THREE.PointsMaterial({ color, size: pointSize });
+                    scene.add(new THREE.Points(geometry, material));
+                }
+            });
+            
+            const pred = Math.round(4 * Math.PI * R**3 / (3 * zeta(3)));
+            const error = Math.abs(pred - prim);
+            const prec = getPrecision();
+            
+            document.getElementById('p3').textContent = prim.toLocaleString();
+            document.getElementById('t3').textContent = tot.toLocaleString();
+            document.getElementById('d3').textContent = formatNumber((prim/tot)*100, prec) + '%';
+            document.getElementById('e3').textContent = error.toLocaleString();
         }
 
         function animate3D() {
@@ -1210,1091 +1370,140 @@
             event.target.textContent = autoRotate ? 'Stop Rotation' : 'Auto-Rotate';
         }
 
-        function setComparisonMode(mode) {
-            comparisonMode = mode;
-            document.querySelectorAll('#modeFixed, #modeMulti').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(mode === 'fixed' ? 'modeFixed' : 'modeMulti').classList.add('active');
-            
-            if (mode === 'fixed') {
-                document.getElementById('fixedRadiusControls').style.display = 'block';
-                document.getElementById('multiRadiusControls').style.display = 'none';
-            } else {
-                document.getElementById('fixedRadiusControls').style.display = 'none';
-                document.getElementById('multiRadiusControls').style.display = 'block';
-            }
-            updateComparison();
-        }
-
-        function updateComparisonRadius(value) {
-            const R = parseInt(value);
-            if (R < 1 || R > 200 || isNaN(R)) return;
-            
+        function updateComparison() {
+            const R = parseInt(document.getElementById('cr').value);
             document.getElementById('crv').textContent = R;
-            document.getElementById('cr').value = Math.min(R, 100);
-            document.getElementById('crinput').value = R;
-            updateComparison();
-        }
-
-        function updateComparison() {
             const grid = document.getElementById('compGrid');
-            const showDensity = document.getElementById('showDensity').checked;
-            const showVolume = document.getElementById('showVolume').checked;
-            const showZeta = document.getElementById('showZeta').checked;
-            const showChart = document.getElementById('showChart').checked;
+            grid.innerHTML = '';
+            const prec = getPrecision();
             
             const dims = [];
-            for (let k = 2; k <= 10; k++) {
+            for (let k = 2; k <= 8; k++) {
                 if (document.getElementById(`compk${k}`)?.checked) dims.push(k);
             }
             
-            if (dims.length === 0) {
-                grid.innerHTML = '<p style="color:var(--red);">Please select at least one dimension</p>';
-                return;
-            }
-            
-            grid.innerHTML = '';
-            
-            if (comparisonMode === 'fixed') {
-                const R = parseInt(document.getElementById('crinput').value);
+            dims.forEach(k => {
+                const z = zeta(k);
+                const vol = sphereVolume(k, R);
+                const pred = Math.round(vol / z);
+                const density = formatNumber((1/z) * 100, prec);
                 
-                dims.forEach(k => {
-                    const z = zeta(k);
-                    const vol = sphereVolume(k, R);
-                    const pred = Math.round(vol / z);
-                    const density = (1/z * 100).toFixed(2);
-                    
-                    let content = `
-                        <div class="compare-item">
-                            <h3 style="color:var(--blue); margin-bottom:15px;">Dimension k = ${k}</h3>
-                            <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
-                                <p style="font-size:1.1em;"><b>Predicted Points:</b> ${pred.toLocaleString()}</p>
-                            </div>
-                    `;
-                    
-                    if (showZeta) {
-                        content += `
-                            <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
-                                <p><b>ζ(${k}):</b> ${z.toFixed(6)}</p>
-                            </div>
-                        `;
-                    }
-                    
-                    if (showDensity) {
-                        content += `
-                            <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
-                                <p><b>Primitive Density:</b> ${density}%</p>
-                                <p style="font-size:0.9em; color:var(--text2);">1/ζ(${k}) = ${(1/z).toFixed(6)}</p>
-                            </div>
-                        `;
-                    }
-                    
-                    if (showVolume) {
-                        content += `
-                            <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
-                                <p><b>Sphere Volume:</b></p>
-                                <p style="font-size:0.95em;">${vol.toExponential(4)}</p>
-                            </div>
-                        `;
-                    }
-                    
-                    // Add growth rate info
-                    content += `
-                        <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
-                            <p><b>Growth Rate:</b> O(R^${k})</p>
-                            <p style="font-size:0.9em; color:var(--text2);">Error: O(R^${k-1})</p>
-                        </div>
-                    `;
-                    
-                    content += `</div>`;
-                    grid.innerHTML += content;
-                });
-            } else {
-                // Multiple radii mode
-                const radiiStr = document.getElementById('multiRadii').value;
-                const radii = radiiStr.split(',').map(r => parseInt(r.trim())).filter(r => !isNaN(r) && r > 0);
-                
-                if (radii.length === 0) {
-                    grid.innerHTML = '<p style="color:var(--red);">Please enter valid radii (e.g., 10, 20, 30)</p>';
-                    return;
-                }
-                
-                dims.forEach(k => {
-                    let content = `
-                        <div class="compare-item">
-                            <h3 style="color:var(--blue); margin-bottom:15px;">Dimension k = ${k}</h3>
-                    `;
-                    
-                    if (showZeta) {
-                        const z = zeta(k);
-                        content += `
-                            <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
-                                <p><b>ζ(${k}):</b> ${z.toFixed(6)}</p>
-                                <p><b>Density:</b> ${((1/z)*100).toFixed(2)}%</p>
-                            </div>
-                        `;
-                    }
-                    
-                    content += '<table style="width:100%; font-size:0.9em;"><thead><tr><th>R</th><th>Predicted</th>';
-                    if (showVolume) content += '<th>Volume</th>';
-                    content += '</tr></thead><tbody>';
-                    
-                    radii.forEach(R => {
-                        const vol = sphereVolume(k, R);
-                        const pred = Math.round(vol / zeta(k));
-                        content += `<tr><td>${R}</td><td>${pred.toLocaleString()}</td>`;
-                        if (showVolume) content += `<td>${vol.toExponential(2)}</td>`;
-                        content += '</tr>';
-                    });
-                    
-                    content += '</tbody></table></div>';
-                    grid.innerHTML += content;
-                });
-            }
-            
-            // Update chart
-            if (showChart) {
-                document.getElementById('comparisonChart').style.display = 'block';
-                updateComparisonChart(dims);
-            } else {
-                document.getElementById('comparisonChart').style.display = 'none';
-            }
-        }
-
-        function updateComparisonChart(dims) {
-            const canvas = document.getElementById('compChart');
-            const ctx = canvas.getContext('2d');
-            
-            if (comparisonChart) comparisonChart.destroy();
-            
-            const colors = ['#0066cc', '#ffc107', '#00d4ff', '#ff006e', '#28a745', '#6f42c1', '#fd7e14', '#dc3545', '#20c997'];
-            
-            if (comparisonMode === 'fixed') {
-                const R = parseInt(document.getElementById('crinput').value);
-                
-                const data = dims.map(k => {
-                    const vol = sphereVolume(k, R);
-                    return Math.round(vol / zeta(k));
-                });
-                
-                comparisonChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: dims.map(k => `k=${k}`),
-                        datasets: [{
-                            label: `Primitive Points (R=${R})`,
-                            data: data,
-                            backgroundColor: dims.map((k, i) => colors[i % colors.length]),
-                            borderColor: dims.map((k, i) => colors[i % colors.length]),
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                type: 'logarithmic',
-                                title: { display: true, text: 'Number of Primitive Points', font: { size: 14 } }
-                            },
-                            x: {
-                                title: { display: true, text: 'Dimension', font: { size: 14 } }
-                            }
-                        },
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: `Primitive Lattice Points Across Dimensions (R=${R})`,
-                                font: { size: 16, weight: 'bold' }
-                            },
-                            legend: { display: true }
-                        }
-                    }
-                });
-            } else {
-                // Multiple radii - show lines
-                const radiiStr = document.getElementById('multiRadii').value;
-                const radii = radiiStr.split(',').map(r => parseInt(r.trim())).filter(r => !isNaN(r) && r > 0);
-                
-                const datasets = dims.map((k, i) => {
-                    const data = radii.map(R => {
-                        const vol = sphereVolume(k, R);
-                        return { x: R, y: Math.round(vol / zeta(k)) };
-                    });
-                    
-                    return {
-                        label: `k=${k}`,
-                        data: data,
-                        borderColor: colors[i % colors.length],
-                        backgroundColor: colors[i % colors.length] + '33',
-                        borderWidth: 2,
-                        tension: 0.1,
-                        fill: false
-                    };
-                });
-                
-                comparisonChart = new Chart(ctx, {
-                    type: 'line',
-                    data: { datasets },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                type: 'logarithmic',
-                                title: { display: true, text: 'Number of Primitive Points', font: { size: 14 } }
-                            },
-                            x: {
-                                title: { display: true, text: 'Radius R', font: { size: 14 } }
-                            }
-                        },
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Primitive Lattice Points Growth Across Dimensions',
-                                font: { size: 16, weight: 'bold' }
-                            },
-                            legend: { display: true }
-                        }
-                    }
-                });
-            }
-        }
-
-        function exportComparisonChart() {
-            if (!comparisonChart) {
-                alert('Please generate a comparison chart first');
-                return;
-            }
-            exportCanvas('compChart', 'dimension-comparison-chart');
-        }
-
-        function updateComparison() {
-            const grid = document.getElementById('compGrid');
-            const showDensity = document.getElementById('showDensity').checked;
-            const showVolume = document.getElementById('showVolume').checked;
-            const showZeta = document.getElementById('showZeta').checked;
-            const showChart = document.getElementById('showChart').checked;
-            
-            const dims = [];
-            for (let k = 2; k <= 10; k++) {
-                if (document.getElementById(`compk${k}`)?.checked) dims.push(k);
-            }
-            
-            if (dims.length === 0) {
-                grid.innerHTML = '<p style="color:var(--red);">Please select at least one dimension</p>';
-                return;
-            }
-            
-            grid.innerHTML = '';
-            
-            if (comparisonMode === 'fixed') {
-                const R = parseInt(document.getElementById('crinput').value);
-                
-                dims.forEach(k => {
-                    const z = zeta(k);
-                    const vol = sphereVolume(k, R);
-                    const pred = Math.round(vol / z);
-                    const density = (1/z * 100).toFixed(2);
-                    
-                    let content = `
-                        <div class="compare-item">
-                            <h3 style="color:var(--blue); margin-bottom:15px;">Dimension k = ${k}</h3>
-                            <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
-                                <p style="font-size:1.1em;"><b>Predicted Points:</b> ${pred.toLocaleString()}</p>
-                            </div>
-                    `;
-                    
-                    if (showZeta) {
-                        content += `
-                            <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
-                                <p><b>ζ(${k}):</b> ${z.toFixed(6)}</p>
-                            </div>
-                        `;
-                    }
-                    
-                    if (showDensity) {
-                        content += `
-                            <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
-                                <p><b>Primitive Density:</b> ${density}%</p>
-                                <p style="font-size:0.9em; color:var(--text2);">1/ζ(${k}) = ${(1/z).toFixed(6)}</p>
-                            </div>
-                        `;
-                    }
-                    
-                    if (showVolume) {
-                        content += `
-                            <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
-                                <p><b>Sphere Volume:</b></p>
-                                <p style="font-size:0.95em;">${vol.toExponential(4)}</p>
-                            </div>
-                        `;
-                    }
-                    
-                    // Add growth rate info
-                    content += `
-                        <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
-                            <p><b>Growth Rate:</b> O(R^${k})</p>
-                            <p style="font-size:0.9em; color:var(--text2);">Error: O(R^${k-1})</p>
-                        </div>
-                    `;
-                    
-                    content += `</div>`;
-                    grid.innerHTML += content;
-                });
-            } else {
-                // Multiple radii mode
-                const radiiStr = document.getElementById('multiRadii').value;
-                const radii = radiiStr.split(',').map(r => parseInt(r.trim())).filter(r => !isNaN(r) && r > 0);
-                
-                if (radii.length === 0) {
-                    grid.innerHTML = '<p style="color:var(--red);">Please enter valid radii (e.g., 10, 20, 30)</p>';
-                    return;
-                }
-                
-                dims.forEach(k => {
-                    let content = `
-                        <div class="compare-item">
-                            <h3 style="color:var(--blue); margin-bottom:15px;">Dimension k = ${k}</h3>
-                    `;
-                    
-                    if (showZeta) {
-                        const z = zeta(k);
-                        content += `
-                            <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
-                                <p><b>ζ(${k}):</b> ${z.toFixed(6)}</p>
-                                <p><b>Density:</b> ${((1/z)*100).toFixed(2)}%</p>
-                            </div>
-                        `;
-                    }
-                    
-                    content += '<table style="width:100%; font-size:0.9em;"><thead><tr><th>R</th><th>Predicted</th>';
-                    if (showVolume) content += '<th>Volume</th>';
-                    content += '</tr></thead><tbody>';
-                    
-                    radii.forEach(R => {
-                        const vol = sphereVolume(k, R);
-                        const pred = Math.round(vol / zeta(k));
-                        content += `<tr><td>${R}</td><td>${pred.toLocaleString()}</td>`;
-                        if (showVolume) content += `<td>${vol.toExponential(2)}</td>`;
-                        content += '</tr>';
-                    });
-                    
-                    content += '</tbody></table></div>';
-                    grid.innerHTML += content;
-                });
-            }
-            
-            // Update chart
-            if (showChart) {
-                document.getElementById('comparisonChart').style.display = 'block';
-                updateComparisonChart(dims);
-            } else {
-                document.getElementById('comparisonChart').style.display = 'none';
-            }
-        }
-
-        function updateAnalysisRadius(value) {
-            const R = parseInt(value);
-            if (R < 10 || R > 300 || isNaN(R)) return;
-            
-            document.getElementById('mrv').textContent = R;
-            document.getElementById('mr').value = Math.min(R, 200);
-            document.getElementById('mrinput').value = R;
+                grid.innerHTML += `
+                    <div class="compare-item">
+                        <h3>Dimension k = ${k}</h3>
+                        <p><b>ζ(${k}):</b> ${formatNumber(z, prec)}</p>
+                        <p><b>Predicted:</b> ${pred.toLocaleString()}</p>
+                        <p><b>Density:</b> ${density}%</p>
+                        <p><b>Volume:</b> ${vol.toExponential(prec)}</p>
+                    </div>
+                `;
+            });
         }
 
         function runAnalysis() {
             const canvas = document.getElementById('ch');
             const ctx = canvas.getContext('2d');
             const k = parseInt(document.getElementById('analysisK').value);
-            const maxR = parseInt(document.getElementById('mrinput').value);
-            const minR = parseInt(document.getElementById('minr').value);
+            const maxR = parseInt(document.getElementById('mr').value);
             
-            const showAbsError = document.getElementById('showAbsError').checked;
-            const showRelError = document.getElementById('showRelError').checked;
-            const showBoundary = document.getElementById('showBoundary').checked;
-            const showActualCount = document.getElementById('showActualCount').checked;
+            if (chart) chart.destroy();
             
-            document.getElementById('loadAnalysis').classList.add('active');
+            const labels = [];
+            const absErrorData = [];
+            const relErrorData = [];
             
-            setTimeout(() => {
-                if (chart) chart.destroy();
+            for (let R = 1; R <= maxR; R++) {
+                labels.push(R);
+                const vol = sphereVolume(k, R);
+                const pred = Math.round(vol / zeta(k));
                 
-                const labels = [];
-                const absErrorData = [];
-                const relErrorData = [];
-                const boundaryData = [];
-                const actualCountData = [];
-                
-                // Compute for each radius from minR to maxR
-                for (let R = minR; R <= maxR; R++) {
-                    labels.push(R);
-                    
-                    const vol = sphereVolume(k, R);
-                    const pred = Math.round(vol / zeta(k));
-                    
-                    let actual = pred; // Use prediction for large values
-                    
-                    // Only compute actual count for small enough cases
-                    if (k === 2 && R <= 100) {
-                        actual = 0;
-                        for (let x = -R; x <= R; x++)
-                            for (let y = -R; y <= R; y++)
-                                if (x*x + y*y <= R*R && gcd(Math.abs(x), Math.abs(y)) === 1) actual++;
-                    } else if (k === 3 && R <= 30) {
-                        actual = 0;
-                        for (let x = -R; x <= R; x++)
-                            for (let y = -R; y <= R; y++)
-                                for (let z = -R; z <= R; z++)
-                                    if (x*x + y*y + z*z <= R*R && gcdArray([Math.abs(x), Math.abs(y), Math.abs(z)]) === 1) actual++;
-                    }
-                    
-                    const absError = Math.abs(pred - actual);
-                    const relError = pred > 0 ? (absError / pred) * 100 : 0;
-                    const boundary = Math.pow(R, k - 1);
-                    
-                    absErrorData.push(absError);
-                    relErrorData.push(relError);
-                    boundaryData.push(boundary);
-                    actualCountData.push(actual);
+                let actual = pred;
+                if (k === 2 && R <= 100) {
+                    actual = 0;
+                    for (let x = -R; x <= R; x++)
+                        for (let y = -R; y <= R; y++)
+                            if (x*x + y*y <= R*R && gcd(Math.abs(x), Math.abs(y)) === 1) actual++;
                 }
                 
-                const datasets = [];
+                const absError = Math.abs(pred - actual);
+                const relError = pred > 0 ? (absError / pred) * 100 : 0;
                 
-                if (showActualCount) {
-                    datasets.push({
-                        label: `Actual Primitive Count (k=${k})`,
-                        data: actualCountData,
-                        backgroundColor: 'rgba(0, 102, 204, 0.5)',
-                        borderColor: '#0066cc',
-                        borderWidth: 1,
-                        type: 'bar',
-                        yAxisID: 'y1',
-                        order: 4
-                    });
-                }
-                
-                if (showAbsError) {
-                    datasets.push({
-                        label: `Absolute Error |Pred - Actual| (k=${k})`,
-                        data: absErrorData,
-                        backgroundColor: 'rgba(220, 53, 69, 0.6)',
-                        borderColor: '#dc3545',
-                        borderWidth: 2,
-                        type: 'bar',
-                        yAxisID: 'y',
-                        order: 3
-                    });
-                }
-                
-                if (showRelError) {
-                    datasets.push({
-                        label: `Relative Error % (k=${k})`,
-                        data: relErrorData,
-                        backgroundColor: 'rgba(255, 193, 7, 0.6)',
-                        borderColor: '#ffc107',
-                        borderWidth: 2,
-                        pointRadius: 3,
-                        pointHoverRadius: 5,
-                        type: 'line',
-                        yAxisID: 'y2',
-                        order: 2,
-                        fill: false
-                    });
-                }
-                
-                if (showBoundary) {
-                    datasets.push({
-                        label: `Theoretical Boundary R^${k-1}`,
-                        data: boundaryData,
-                        backgroundColor: 'rgba(111, 66, 193, 0.3)',
-                        borderColor: '#6f42c1',
-                        borderWidth: 2,
-                        borderDash: [5, 5],
-                        pointRadius: 2,
-                        type: 'line',
-                        yAxisID: 'y',
-                        order: 1,
-                        fill: false
-                    });
-                }
-                
-                const scales = {
-                    x: { 
-                        title: { display: true, text: 'Radius R', font: { size: 14 } }
-                    },
-                    y: {
-                        type: 'logarithmic',
-                        position: 'left',
-                        title: { display: true, text: 'Count / Error', font: { size: 14 } },
-                        display: showAbsError || showBoundary || showActualCount
-                    }
-                };
-                
-                if (showActualCount) {
-                    scales.y1 = {
-                        type: 'logarithmic',
-                        position: 'right',
-                        title: { display: true, text: 'Actual Count', font: { size: 14 } },
-                        grid: { drawOnChartArea: false }
-                    };
-                }
-                
-                if (showRelError) {
-                    scales.y2 = {
-                        type: 'linear',
-                        position: 'right',
-                        title: { display: true, text: 'Relative Error %', font: { size: 14 } },
-                        grid: { drawOnChartArea: false }
-                    };
-                }
-                
-                chart = new Chart(ctx, {
-                    type: 'bar',
-                    data: { labels, datasets },
-                    options: { 
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        scales,
-                        plugins: {
-                            legend: { 
-                                display: true,
-                                position: 'top',
-                                labels: { font: { size: 11 } }
-                            },
-                            title: {
-                                display: true,
-                                text: `Error Analysis per Radius (k=${k}, R=${minR} to ${maxR})`,
-                                font: { size: 16, weight: 'bold' }
-                            },
-                            tooltip: { 
-                                mode: 'index', 
-                                intersect: false,
-                                callbacks: {
-                                    label: function(context) {
-                                        let label = context.dataset.label || '';
-                                        if (label) label += ': ';
-                                        if (context.parsed.y !== null) {
-                                            if (label.includes('%')) {
-                                                label += context.parsed.y.toFixed(4) + '%';
-                                            } else {
-                                                label += context.parsed.y.toLocaleString(undefined, {
-                                                    minimumFractionDigits: 0,
-                                                    maximumFractionDigits: 2
-                                                });
-                                            }
-                                        }
-                                        return label;
-                                    }
-                                }
-                            }
+                absErrorData.push(absError);
+                relErrorData.push(relError);
+            }
+            
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: `k=${k}: Absolute Error`,
+                            data: absErrorData,
+                            borderColor: '#dc3545',
+                            borderWidth: 2,
+                            fill: false
                         },
-                        interaction: {
-                            mode: 'index',
-                            intersect: false
+                        {
+                            label: `k=${k}: Relative Error (%)`,
+                            data: relErrorData,
+                            borderColor: '#ffc107',
+                            borderWidth: 2,
+                            fill: false,
+                            yAxisID: 'y2'
                         }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { type: 'logarithmic', position: 'left', title: { display: true, text: 'Absolute Error' } },
+                        y2: { type: 'linear', position: 'right', title: { display: true, text: 'Relative Error %' }, grid: { drawOnChartArea: false } },
+                        x: { title: { display: true, text: 'Radius R' } }
                     }
-                });
-                
-                document.getElementById('loadAnalysis').classList.remove('active');
-            }, 100);
-        }
-
-        function set2DPreset(preset) {
-            const presets = {
-                'small': 10,
-                'medium': 50,
-                'large': 100,
-                'xlarge': 200
-            };
-            update2DRadius(presets[preset]);
-        }
-
-        function set3DPreset(preset) {
-            const presets = {
-                'tiny': 5,
-                'small': 10,
-                'medium': 20,
-                'large': 30
-            };
-            document.getElementById('r3').value = presets[preset];
-            document.getElementById('r3v').textContent = presets[preset];
-            draw3D();
-        }
-
-        function setComparisonPreset(preset) {
-            // Uncheck all dimensions first
-            for (let k = 2; k <= 10; k++) {
-                const checkbox = document.getElementById(`compk${k}`);
-                if (checkbox) checkbox.checked = false;
-            }
-            
-            if (preset === 'low') {
-                [2, 3, 4].forEach(k => document.getElementById(`compk${k}`).checked = true);
-            } else if (preset === 'mid') {
-                [3, 4, 5, 6].forEach(k => document.getElementById(`compk${k}`).checked = true);
-            } else if (preset === 'high') {
-                [5, 6, 7, 8, 9, 10].forEach(k => document.getElementById(`compk${k}`).checked = true);
-            } else if (preset === 'all') {
-                for (let k = 2; k <= 10; k++) {
-                    document.getElementById(`compk${k}`).checked = true;
                 }
-            } else if (preset === 'growth') {
-                setComparisonMode('multi');
-                [2, 3, 4, 5].forEach(k => document.getElementById(`compk${k}`).checked = true);
-                document.getElementById('multiRadii').value = '5, 10, 15, 20, 25, 30';
-            }
-            
-            updateComparison();
-        }
-
-        function setAnalysisPreset(preset) {
-            if (preset === 'quick') {
-                updateAnalysisRadius(50);
-            } else if (preset === 'standard') {
-                updateAnalysisRadius(100);
-            } else if (preset === 'detailed') {
-                updateAnalysisRadius(150);
-            } else if (preset === 'absolute') {
-                document.getElementById('showAbsError').checked = true;
-                document.getElementById('showRelError').checked = false;
-                document.getElementById('showBoundary').checked = false;
-                document.getElementById('showActualCount').checked = false;
-            } else if (preset === 'relative') {
-                document.getElementById('showAbsError').checked = false;
-                document.getElementById('showRelError').checked = true;
-                document.getElementById('showBoundary').checked = false;
-                document.getElementById('showActualCount').checked = false;
-            } else if (preset === 'boundary') {
-                document.getElementById('showAbsError').checked = false;
-                document.getElementById('showRelError').checked = false;
-                document.getElementById('showBoundary').checked = true;
-                document.getElementById('showActualCount').checked = false;
-            }
-            
-            runAnalysis();
-        }
-
-        function setGCDPreset(preset) {
-            const presets = {
-                'coprime': '15, 28',
-                'common': '12, 18, 24',
-                'large': '1024, 2048, 4096',
-                'many': '60, 72, 90, 120, 150'
-            };
-            document.getElementById('gi').value = presets[preset];
-            calcGCD();
-        }
-
-        function setMobiusPreset(preset) {
-            const presets = {
-                'squarefree': 30,
-                'notsquarefree': 72,
-                'prime': 17,
-                'composite': 210
-            };
-            document.getElementById('mi').value = presets[preset];
-            calcMobius();
-        }
-
-        function setPrimePreset(preset) {
-            const presets = {
-                'small': 60,
-                'perfect': 28,
-                'highly': 5040,
-                'large': 65536,
-                'power': 243
-            };
-            document.getElementById('pi').value = presets[preset];
-            calcPrime();
-        }
-
-        function setCoprimePreset(preset) {
-            const presets = {
-                'coprime2': '35, 64',
-                'notcoprime2': '24, 36',
-                'coprime3': '7, 11, 13',
-                'consecutive': '100, 101, 102'
-            };
-            document.getElementById('cci').value = presets[preset];
-            checkCoprime();
-        }
-
-        function setPointPreset(preset) {
-            const presets = {
-                'pythagorean': '3, 4, 5',
-                'primitive2d': '7, 9',
-                'nonprimitive2d': '6, 8',
-                'primitive3d': '1, 2, 3',
-                'highd': '1, 1, 1, 1, 1'
-            };
-            document.getElementById('psi').value = presets[preset];
-            searchPoint();
-        }
-
-        function calcGCD() {
-            const inp = document.getElementById('gi').value;
-            const nums = inp.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
-            if (nums.length < 2) {
-                document.getElementById('gr').innerHTML = '<p style="color:var(--red)">Need 2+ numbers</p>';
-                return;
-            }
-            const g = gcdArray(nums);
-            const coprime = g === 1 ? '<span style="color:var(--green)">✓ Coprime</span>' : '<span style="color:var(--red)">✗ Not Coprime</span>';
-            
-            // Show step-by-step GCD calculation for pairs
-            let steps = '<div style="background:var(--bg3); padding:15px; border-radius:8px; margin-top:10px;">';
-            steps += '<b>Step-by-step calculation:</b><br>';
-            let current = nums[0];
-            for (let i = 1; i < nums.length; i++) {
-                const prev = current;
-                current = gcd(current, nums[i]);
-                steps += `gcd(${prev}, ${nums[i]}) = ${current}<br>`;
-            }
-            steps += '</div>';
-            
-            // Prime factorizations
-            let factorizations = '<div style="background:var(--bg3); padding:15px; border-radius:8px; margin-top:10px;">';
-            factorizations += '<b>Prime factorizations:</b><br>';
-            nums.forEach(n => {
-                const f = primeFactors(Math.abs(n));
-                const fc = {};
-                f.forEach(p => fc[p] = (fc[p]||0) + 1);
-                const fs = Object.entries(fc).map(([p,c]) => c>1 ? `${p}^${c}` : p).join(' × ');
-                factorizations += `${n} = ${fs || '1'}<br>`;
             });
-            
-            // GCD factorization
-            if (g > 1) {
-                const gf = primeFactors(g);
-                const gfc = {};
-                gf.forEach(p => gfc[p] = (gfc[p]||0) + 1);
-                const gfs = Object.entries(gfc).map(([p,c]) => c>1 ? `${p}^${c}` : p).join(' × ');
-                factorizations += `<br><b>GCD = ${g} = ${gfs}</b>`;
-            }
-            factorizations += '</div>';
-            
-            document.getElementById('gr').innerHTML = `
-                <p><b>Numbers:</b> ${nums.join(', ')}</p>
-                <p><b>GCD:</b> ${g}</p>
-                <p>${coprime}</p>
-                ${steps}
-                ${factorizations}
-            `;
         }
 
-        function calcMobius() {
-            const n = parseInt(document.getElementById('mi').value);
+        function calcMobiusFunction() {
+            const n = parseInt(document.getElementById('mobiusInput').value);
             if (!n || n < 1) return;
-            const mu = mobius(n), f = primeFactors(n);
+            const mu = mobius(n);
+            const f = primeFactors(n);
             const u = [...new Set(f)];
             const sqfree = f.length === u.length;
-            const interp = mu === 0 ? 'Not square-free (has repeated prime factors)' : mu === 1 ? 'Even number of distinct prime factors' : 'Odd number of distinct prime factors';
             
-            // Build prime factorization display
-            const fc = {};
-            f.forEach(p => fc[p] = (fc[p]||0) + 1);
-            const fs = Object.entries(fc).map(([p,c]) => c>1 ? `${p}^${c}` : p).join(' × ');
-            const repeatedPrimes = Object.entries(fc).filter(([p,c]) => c > 1).map(([p,c]) => `${p} (appears ${c} times)`);
-            
-            let details = '<div style="background:var(--bg3); padding:15px; border-radius:8px; margin-top:10px;">';
-            details += `<b>Prime factorization:</b> ${n} = ${fs || '1'}<br>`;
-            details += `<b>Distinct primes:</b> {${u.join(', ')}}<br>`;
-            details += `<b>Number of distinct primes:</b> ${u.length}<br>`;
-            if (repeatedPrimes.length > 0) {
-                details += `<b>Repeated primes:</b> ${repeatedPrimes.join(', ')}<br>`;
-            }
-            details += `<b>Square-free:</b> ${sqfree ? '✓ Yes' : '✗ No'}<br>`;
-            details += '</div>';
-            
-            let formula = '<div style="background:var(--bg3); padding:15px; border-radius:8px; margin-top:10px;">';
-            formula += '<b>Formula calculation:</b><br>';
-            if (mu === 0) {
-                formula += `μ(${n}) = 0 (not square-free)<br>`;
-            } else {
-                formula += `μ(${n}) = (-1)^${u.length} = (-1)^${u.length} = ${mu}<br>`;
-            }
-            formula += '</div>';
-            
-            document.getElementById('mr2').innerHTML = `
+            document.getElementById('mobiusResult').innerHTML = `
                 <p style="font-size:1.3em;"><b>μ(${n}) = ${mu}</b></p>
-                <p style="color:var(--blue);"><b>${interp}</b></p>
-                ${details}
-                ${formula}
+                <p>Prime factors: ${f.join(' × ')}</p>
+                <p>Distinct primes: ${u.join(', ')}</p>
+                <p>Square-free: ${sqfree ? 'Yes' : 'No'}</p>
             `;
         }
 
-        function calcPrime() {
-            const n = parseInt(document.getElementById('pi').value);
+        function testPrime() {
+            const n = parseInt(document.getElementById('primeInput').value);
             if (!n || n < 2) return;
+            const prime = isPrime(n);
             const f = primeFactors(n);
-            const fc = {};
-            f.forEach(p => fc[p] = (fc[p]||0) + 1);
-            const fs = Object.entries(fc).map(([p,c]) => c>1 ? `${p}^${c}` : p).join(' × ');
             
-            let details = '<div style="background:var(--bg3); padding:15px; border-radius:8px; margin-top:10px;">';
-            details += '<b>Detailed breakdown:</b><br>';
-            details += `<b>All prime factors:</b> ${f.join(' × ')}<br>`;
-            details += `<b>Distinct primes:</b> ${Object.keys(fc).join(', ')}<br>`;
-            details += `<b>Number of distinct primes:</b> ${Object.keys(fc).length}<br>`;
-            details += `<b>Total number of prime factors (with repetition):</b> ${f.length}<br>`;
-            
-            // Show exponent breakdown
-            details += '<br><b>Exponent breakdown:</b><br>';
-            Object.entries(fc).forEach(([p, c]) => {
-                details += `${p} appears ${c} time${c > 1 ? 's' : ''}<br>`;
-            });
-            
-            // Divisor information
-            const numDivisors = Object.values(fc).reduce((prod, exp) => prod * (exp + 1), 1);
-            details += `<br><b>Number of divisors:</b> ${numDivisors}<br>`;
-            
-            // Sum of divisors (for small numbers)
-            if (n <= 1000) {
-                let sumDiv = 0;
-                for (let i = 1; i <= n; i++) {
-                    if (n % i === 0) sumDiv += i;
-                }
-                details += `<b>Sum of divisors:</b> ${sumDiv}<br>`;
-                const perfect = sumDiv === 2 * n;
-                const abundant = sumDiv > 2 * n;
-                const deficient = sumDiv < 2 * n;
-                details += `<b>Number type:</b> ${perfect ? 'Perfect' : abundant ? 'Abundant' : 'Deficient'}<br>`;
-            }
-            
-            details += '</div>';
-            
-            document.getElementById('pr').innerHTML = `
-                <p style="font-size:1.3em;"><b>${n} = ${fs}</b></p>
-                <p style="font-size:1.1em;">${isPrime(n) ? '<span style="color:var(--green)">✓ PRIME NUMBER</span>' : '<span style="color:var(--blue)">COMPOSITE NUMBER</span>'}</p>
-                ${details}
+            document.getElementById('primeResult').innerHTML = `
+                <p style="font-size:1.3em;"><b>${n} is ${prime ? 'PRIME' : 'COMPOSITE'}</b></p>
+                ${!prime ? `<p>Factorization: ${f.join(' × ')}</p>` : ''}
             `;
         }
 
-        function checkCoprime() {
-            const inp = document.getElementById('cci').value;
-            const nums = inp.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
-            if (nums.length < 2) {
-                document.getElementById('ccr').innerHTML = '<p style="color:var(--red)">Need 2+ numbers</p>';
-                return;
-            }
-            const g = gcdArray(nums);
-            const coprime = g === 1;
+        function calcTotient() {
+            const n = parseInt(document.getElementById('totientInput').value);
+            if (!n || n < 1) return;
+            const phi = eulerPhi(n);
+            const f = primeFactors(n);
             
-            // Prime factorizations
-            let factorInfo = '<div style="background:var(--bg3); padding:15px; border-radius:8px; margin-top:10px;">';
-            factorInfo += '<b>Prime factorizations:</b><br>';
-            nums.forEach(n => {
-                const f = primeFactors(Math.abs(n));
-                const fc = {};
-                f.forEach(p => fc[p] = (fc[p]||0) + 1);
-                const fs = Object.entries(fc).map(([p,c]) => c>1 ? `${p}^${c}` : p).join(' × ');
-                factorInfo += `${n} = ${fs || '1'}<br>`;
-            });
-            factorInfo += '</div>';
-            
-            // Common factors
-            let commonInfo = '<div style="background:var(--bg3); padding:15px; border-radius:8px; margin-top:10px;">';
-            if (coprime) {
-                commonInfo += '<b>Common factors:</b> Only 1 (coprime)<br>';
-                commonInfo += 'These numbers share no prime factors.';
-            } else {
-                const gf = primeFactors(g);
-                const gfc = {};
-                gf.forEach(p => gfc[p] = (gfc[p]||0) + 1);
-                const gfs = Object.entries(gfc).map(([p,c]) => c>1 ? `${p}^${c}` : p).join(' × ');
-                commonInfo += `<b>Common factors:</b> Divisors of ${g}<br>`;
-                commonInfo += `<b>GCD breakdown:</b> ${g} = ${gfs}<br>`;
-                commonInfo += `<b>Shared primes:</b> ${Object.keys(gfc).join(', ')}`;
-            }
-            commonInfo += '</div>';
-            
-            document.getElementById('ccr').innerHTML = `
-                <p><b>Numbers:</b> ${nums.join(', ')}</p>
-                <p><b>GCD:</b> ${g}</p>
-                <p style="font-size:1.2em; margin-top:10px">${coprime ? '<span style="color:var(--green)">✓ COPRIME (Primitive point)</span>' : '<span style="color:var(--red)">✗ NOT COPRIME (Non-primitive)</span>'}</p>
-                ${factorInfo}
-                ${commonInfo}
+            document.getElementById('totientResult').innerHTML = `
+                <p style="font-size:1.3em;"><b>φ(${n}) = ${phi}</b></p>
+                <p>Prime factorization: ${f.join(' × ')}</p>
+                <p>Coprime integers: ${phi} numbers less than ${n} are coprime to it</p>
             `;
-        }
-
-        function searchPoint() {
-            const inp = document.getElementById('psi').value;
-            const coords = inp.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
-            if (coords.length < 2) {
-                document.getElementById('psr').innerHTML = '<p style="color:var(--red)">Need 2+ coordinates</p>';
-                return;
-            }
-            const g = gcdArray(coords);
-            const isPrim = g === 1;
-            const dist = Math.sqrt(coords.reduce((sum, x) => sum + x*x, 0));
-            
-            // Point factorization
-            let pointInfo = '<div style="background:var(--bg3); padding:15px; border-radius:8px; margin-top:10px;">';
-            pointInfo += '<b>Coordinate factorizations:</b><br>';
-            coords.forEach((c, i) => {
-                const label = ['x', 'y', 'z', 'w', 'v', 'u'][i] || `x${i}`;
-                if (c === 0) {
-                    pointInfo += `${label} = 0<br>`;
-                } else {
-                    const f = primeFactors(Math.abs(c));
-                    const fc = {};
-                    f.forEach(p => fc[p] = (fc[p]||0) + 1);
-                    const fs = Object.entries(fc).map(([p,cnt]) => cnt>1 ? `${p}^${cnt}` : p).join(' × ');
-                    const sign = c < 0 ? '-' : '';
-                    pointInfo += `${label} = ${sign}${fs || '1'}<br>`;
-                }
-            });
-            pointInfo += '</div>';
-            
-            // GCD analysis
-            let gcdInfo = '<div style="background:var(--bg3); padding:15px; border-radius:8px; margin-top:10px;">';
-            if (g === 1) {
-                gcdInfo += '<b>GCD Analysis:</b><br>';
-                gcdInfo += 'GCD = 1 → Coordinates are coprime<br>';
-                gcdInfo += 'This point cannot be expressed as d·(simpler point) where d > 1';
-            } else {
-                const reduced = coords.map(c => c / g);
-                const gf = primeFactors(g);
-                const gfc = {};
-                gf.forEach(p => gfc[p] = (gfc[p]||0) + 1);
-                const gfs = Object.entries(gfc).map(([p,c]) => c>1 ? `${p}^${c}` : p).join(' × ');
-                gcdInfo += '<b>GCD Analysis:</b><br>';
-                gcdInfo += `GCD = ${g} = ${gfs}<br>`;
-                gcdInfo += `<b>Reduced form:</b> (${reduced.join(', ')}) is the primitive point<br>`;
-                gcdInfo += `<b>Relationship:</b> (${coords.join(', ')}) = ${g} × (${reduced.join(', ')})`;
-            }
-            gcdInfo += '</div>';
-            
-            // Geometric properties
-            let geomInfo = '<div style="background:var(--bg3); padding:15px; border-radius:8px; margin-top:10px;">';
-            geomInfo += '<b>Geometric Properties:</b><br>';
-            geomInfo += `<b>Euclidean norm:</b> ||point|| = √(${coords.map(c => c + '²').join(' + ')}) = ${dist.toFixed(4)}<br>`;
-            geomInfo += `<b>Manhattan distance:</b> ${coords.reduce((sum, c) => sum + Math.abs(c), 0)}<br>`;
-            geomInfo += `<b>Max coordinate:</b> ${Math.max(...coords.map(Math.abs))}<br>`;
-            const numZeros = coords.filter(c => c === 0).length;
-            if (numZeros > 0) {
-                geomInfo += `<b>Zero coordinates:</b> ${numZeros} (lies on ${coords.length - numZeros}D subspace)`;
-            }
-            geomInfo += '</div>';
-            
-            document.getElementById('psr').innerHTML = `
-                <p><b>Point:</b> (${coords.join(', ')})</p>
-                <p><b>Dimension:</b> ${coords.length}</p>
-                <p><b>GCD of coordinates:</b> ${g}</p>
-                <p style="font-size:1.2em; margin-top:10px">${isPrim ? '<span style="color:var(--green)">✓ PRIMITIVE LATTICE POINT</span>' : '<span style="color:var(--red)">✗ NON-PRIMITIVE LATTICE POINT</span>'}</p>
-                ${pointInfo}
-                ${gcdInfo}
-                ${geomInfo}
-            `;
-        }
-
-        function exportCanvas(canvasId, filename) {
-            const canvas = document.getElementById(canvasId);
-            const link = document.createElement('a');
-            link.download = `${filename}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-        }
-
-        function exportPointData2D() {
-            if (!cache.points2D) { alert('Generate 2D visualization first'); return; }
-            const data = cache.points2D;
-            let csv = 'x,y,type\n';
-            data.primitive.forEach(p => csv += `${p.x},${p.y},primitive\n`);
-            data.nonPrimitive.forEach(p => csv += `${p.x},${p.y},non-primitive\n`);
-            downloadCSV(csv, '2d-lattice-points.csv');
-        }
-
-        function export3DData() {
-            if (!cache.points3D) { alert('Generate 3D visualization first'); return; }
-            const data = cache.points3D;
-            let csv = 'x,y,z,type\n';
-            data.primitive.forEach(p => csv += `${p.x},${p.y},${p.z},primitive\n`);
-            data.nonPrimitive.forEach(p => csv += `${p.x},${p.y},${p.z},non-primitive\n`);
-            downloadCSV(csv, '3d-lattice-points.csv');
-        }
-
-        function exportTheoryData() {
-            const k = parseInt(document.getElementById('tks').value);
-            const R = parseInt(document.getElementById('trs').value);
-            const z = zeta(k);
-            const vol = sphereVolume(k, R);
-            const pred = Math.round(vol / z);
-            
-            let csv = 'dimension,radius,zeta,density,volume,predicted_points\n';
-            csv += `${k},${R},${z},${1/z},${vol},${pred}\n`;
-            downloadCSV(csv, 'theory-data.csv');
-        }
-
-        function exportChartData() {
-            if (!chart) { alert('Run analysis first'); return; }
-            const data = chart.data.datasets[0].data;
-            let csv = 'radius,error\n';
-            data.forEach(pt => csv += `${pt.x},${pt.y}\n`);
-            downloadCSV(csv, 'error-analysis.csv');
-        }
-
-        function exportComparisonData() {
-            const showDensity = document.getElementById('showDensity').checked;
-            const showVolume = document.getElementById('showVolume').checked;
-            const showZeta = document.getElementById('showZeta').checked;
-            
-            const dims = [];
-            for (let k = 2; k <= 10; k++) {
-                if (document.getElementById(`compk${k}`)?.checked) dims.push(k);
-            }
-            
-            let csv = 'dimension,';
-            if (comparisonMode === 'fixed') {
-                csv += 'radius,';
-            }
-            if (showZeta) csv += 'zeta,';
-            if (showDensity) csv += 'density,';
-            csv += 'predicted_points';
-            if (showVolume) csv += ',volume';
-            csv += '\n';
-            
-            if (comparisonMode === 'fixed') {
-                const R = parseInt(document.getElementById('crinput').value);
-                dims.forEach(k => {
-                    const z = zeta(k);
-                    const vol = sphereVolume(k, R);
-                    const pred = Math.round(vol / z);
-                    csv += `${k},${R},`;
-                    if (showZeta) csv += `${z},`;
-                    if (showDensity) csv += `${1/z},`;
-                    csv += `${pred}`;
-                    if (showVolume) csv += `,${vol}`;
-                    csv += '\n';
-                });
-            } else {
-                const radiiStr = document.getElementById('multiRadii').value;
-                const radii = radiiStr.split(',').map(r => parseInt(r.trim())).filter(r => !isNaN(r) && r > 0);
-                
-                dims.forEach(k => {
-                    const z = zeta(k);
-                    radii.forEach(R => {
-                        const vol = sphereVolume(k, R);
-                        const pred = Math.round(vol / z);
-                        csv += `${k},${R},`;
-                        if (showZeta) csv += `${z},`;
-                        if (showDensity) csv += `${1/z},`;
-                        csv += `${pred}`;
-                        if (showVolume) csv += `,${vol}`;
-                        csv += '\n';
-                    });
-                });
-            }
-            
-            downloadCSV(csv, 'dimension-comparison.csv');
-        }
-
-        function downloadCSV(content, filename) {
-            const blob = new Blob([content], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = filename;
-            link.click();
-            URL.revokeObjectURL(url);
         }
 
         function toggleDark() {
@@ -2312,24 +1521,63 @@
             document.getElementById('helpModal').classList.remove('active');
         }
 
-        function showDerivationAnimation() {
-            alert('Interactive animation coming soon! This would show step-by-step how Möbius inversion leads to the zeta function connection.');
+        function exportCanvas(id, name) {
+            const canvas = document.getElementById(id);
+            const link = document.createElement('a');
+            link.download = `${name}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
         }
 
-        // Init
-        updateTheory();
-        const tb = document.getElementById('tbl');
-        for (let k = 2; k <= 12; k++) {
+        function exportTheoryData() {
+            const k = parseInt(document.getElementById('tks').value);
+            const R = parseInt(document.getElementById('trs').value);
             const z = zeta(k);
-            const v = k % 2 === 0 ? 
-                (Math.PI**(k/2) / factorial(k/2)).toFixed(4) :
-                (2 * factorial((k-1)/2) * Math.PI**((k-1)/2) / factorial(k)).toFixed(4);
-            tb.innerHTML += `<tr><td>${k}</td><td>${z.toFixed(4)}</td><td>${(1/z).toFixed(4)}</td><td>${v}</td></tr>`;
+            const vol = sphereVolume(k, R);
+            const pred = Math.round(vol / z);
+            
+            let csv = 'dimension,radius,zeta,density,volume,predicted_points\n';
+            csv += `${k},${R},${z},${1/z},${vol},${pred}\n`;
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'theory-data.csv';
+            link.click();
+            URL.revokeObjectURL(url);
         }
-        
+
         document.getElementById('helpModal').addEventListener('click', e => {
             if (e.target.id === 'helpModal') closeHelp();
         });
+
+        // Init
+        updateTheory();
+        updateDimScale();
+        const tb = document.getElementById('tbl');
+        const prec = getPrecision();
+        
+        const notes = {
+            2: 'π²/6 (Basel problem)',
+            3: 'Apéry\'s constant',
+            4: 'π⁴/90',
+            5: 'No closed form',
+            6: 'π⁶/945',
+            7: 'No closed form',
+            8: 'π⁸/9450',
+            9: 'No closed form',
+            10: 'No closed form',
+            11: 'No closed form',
+            12: 'No closed form'
+        };
+        
+        for (let k = 2; k <= 12; k++) {
+            const z = zeta(k);
+            const v = k % 2 === 0 ? (Math.PI**(k/2) / (function f(n){return n<=1?1:n*f(n-1)})(k/2)) : 
+                (2 * (function f(n){return n<=1?1:n*f(n-1)})((k-1)/2) * Math.PI**((k-1)/2) / (function f(n){return n<=1?1:n*f(n-1)})(k));
+            tb.innerHTML += `<tr><td>${k}</td><td>${formatNumber(z, prec)}</td><td>${formatNumber(1/z, prec)}</td><td>${formatNumber(v, prec)}</td><td>${notes[k]}</td></tr>`;
+        }
     </script>
 </body>
-                                </html>
+    </html>
