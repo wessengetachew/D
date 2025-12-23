@@ -9,11 +9,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg: #fff; --bg2: #f8f9fa; --bg3: #e9ecef; --text: #212529; --text2: #495057;
-            --border: #dee2e6; --blue: #0066cc; --purple: #6f42c1; --green: #28a745; --red: #dc3545;
+            --bg: #1a1a1a; --bg2: #2d2d2d; --bg3: #3a3a3a; --text: #e0e0e0; --text2: #b0b0b0;
+            --border: #4a4a4a; --blue: #0066cc; --purple: #6f42c1; --green: #28a745; --red: #dc3545;
             --yellow: #ffc107; --orange: #fd7e14;
         }
-        body.dark { --bg: #1a1a1a; --bg2: #2d2d2d; --bg3: #3a3a3a; --text: #e0e0e0; --text2: #b0b0b0; --border: #4a4a4a; }
+        body.light { --bg: #fff; --bg2: #f8f9fa; --bg3: #e9ecef; --text: #212529; --text2: #495057; --border: #dee2e6; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: system-ui; background: var(--bg); color: var(--text); line-height: 1.6; transition: background 0.3s, color 0.3s; }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
@@ -66,8 +66,8 @@
         #darkBtn { right: 20px; background: var(--blue); }
         #helpBtn { right: 140px; background: var(--green); }
         .formula { background: var(--bg3); padding: 20px; border-left: 4px solid var(--blue); border-radius: 8px; margin: 20px 0; }
-        .warning { background: #fff3cd; color: #856404; padding: 15px; border-left: 4px solid var(--yellow); border-radius: 8px; margin: 20px 0; }
-        body.dark .warning { background: #3d3106; color: #ffc107; }
+        .warning { background: #3d3106; color: #ffc107; padding: 15px; border-left: 4px solid var(--yellow); border-radius: 8px; margin: 20px 0; }
+        body.light .warning { background: #fff3cd; color: #856404; }
         .loading { display: none; text-align: center; padding: 20px; }
         .loading.active { display: block; }
         .spinner { border: 4px solid var(--border); border-top: 4px solid var(--blue); border-radius: 50%;
@@ -185,12 +185,35 @@
 
         <div id="viz2d" class="panel">
             <div class="section">
-                <h2>2D Lattice Visualization <span class="help-icon tooltip" data-tip="Blue=primitive, Red=non-primitive">?</span></h2>
+                <h2>2D Lattice Visualization <span class="help-icon tooltip" data-tip="Explore primitive lattice points">?</span></h2>
                 <div class="controls">
-                    <label>View Mode:</label>
-                    <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
-                        <button id="viewPrimitive" class="active" onclick="set2DView('primitive')" style="flex:1; min-width:150px;">Primitive Points Only</button>
-                        <button id="viewGauss" onclick="set2DView('gauss')" style="flex:1; min-width:150px;">Circle Problem (All Points)</button>
+                    <div style="background: var(--bg3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <label style="font-size: 1.1em; color: var(--blue); margin-bottom: 10px; display: block;"><b>View Mode:</b></label>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button id="viewPrimitive" class="active" onclick="set2DView('primitive')" style="flex:1; min-width:150px; padding: 12px;">Colored by Mode</button>
+                            <button id="viewGauss" onclick="set2DView('gauss')" style="flex:1; min-width:150px; padding: 12px;">Circle Problem (All Points)</button>
+                        </div>
+                    </div>
+                    
+                    <div style="background: var(--bg3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <label style="font-size: 1.1em; color: var(--blue); margin-bottom: 10px; display: block;"><b>Coloring Mode:</b></label>
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:8px;">
+                            <button id="color2DPrimitive" class="active" onclick="set2DColorMode('primitive')" style="padding:10px 12px; font-size:0.85em;">GCD=1 vs GCD>1</button>
+                            <button id="color2DGCD" onclick="set2DColorMode('gcd')" style="padding:10px 12px; font-size:0.85em;">By GCD Value</button>
+                            <button id="color2DMod" onclick="set2DColorMode('mod')" style="padding:10px 12px; font-size:0.85em;">By Mod m</button>
+                            <button id="color2DQuadrant" onclick="set2DColorMode('quadrant')" style="padding:10px 12px; font-size:0.85em;">By Quadrant</button>
+                            <button id="color2DAngular" onclick="set2DColorMode('angular')" style="padding:10px 12px; font-size:0.85em;">By Angular Sector</button>
+                            <button id="color2DGCDQuad" onclick="set2DColorMode('gcdquad')" style="padding:10px 12px; font-size:0.85em;">GCD × Quadrant</button>
+                            <button id="color2DGCDMod" onclick="set2DColorMode('gcdmod')" style="padding:10px 12px; font-size:0.85em;">GCD × Mod</button>
+                        </div>
+                        <div id="modControls2D" style="display:none; margin-top:10px;">
+                            <label>Modulus m: <span id="mod2Dv">3</span></label>
+                            <input type="range" id="mod2D" min="2" max="12" value="3" step="1" oninput="document.getElementById('mod2Dv').textContent=this.value; draw2D()">
+                        </div>
+                        <div id="sectorControls2D" style="display:none; margin-top:10px;">
+                            <label>Angular Sectors: <span id="sectors2Dv">8</span></label>
+                            <input type="range" id="sectors2D" min="4" max="16" value="8" step="1" oninput="document.getElementById('sectors2Dv').textContent=this.value; draw2D()">
+                        </div>
                     </div>
                     <div style="margin-bottom:10px;">
                         <label><b>Presets:</b></label>
@@ -229,6 +252,31 @@
             <div class="section">
                 <h2>3D Lattice Visualization <span class="help-icon tooltip" data-tip="Click and drag to rotate">?</span></h2>
                 <div class="controls">
+                    <div style="background: var(--bg3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <label style="font-size: 1.1em; color: var(--blue); margin-bottom: 10px; display: block;"><b>Boundary Shape:</b></label>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button id="shape3DSphere" class="active" onclick="set3DShape('sphere')" style="flex:1; min-width:120px; padding: 12px;">Sphere (x²+y²+z² ≤ R²)</button>
+                            <button id="shape3DCube" onclick="set3DShape('cube')" style="flex:1; min-width:120px; padding: 12px;">Cube (|x|,|y|,|z| ≤ R)</button>
+                        </div>
+                    </div>
+                    
+                    <div style="background: var(--bg3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <label style="font-size: 1.1em; color: var(--blue); margin-bottom: 10px; display: block;"><b>Coloring Mode:</b></label>
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:8px;">
+                            <button id="colorPrimitive" class="active" onclick="set3DColorMode('primitive')" style="padding:10px 12px; font-size:0.85em;">GCD=1 vs GCD>1</button>
+                            <button id="colorGCD" onclick="set3DColorMode('gcd')" style="padding:10px 12px; font-size:0.85em;">By GCD Value</button>
+                            <button id="colorMod" onclick="set3DColorMode('mod')" style="padding:10px 12px; font-size:0.85em;">By Mod m</button>
+                            <button id="colorOctant" onclick="set3DColorMode('octant')" style="padding:10px 12px; font-size:0.85em;">By Octant</button>
+                            <button id="colorDistance" onclick="set3DColorMode('distance')" style="padding:10px 12px; font-size:0.85em;">By Distance</button>
+                            <button id="colorGCDOct" onclick="set3DColorMode('gcdoct')" style="padding:10px 12px; font-size:0.85em;">GCD × Octant</button>
+                            <button id="colorGCDMod" onclick="set3DColorMode('gcdmod')" style="padding:10px 12px; font-size:0.85em;">GCD × Mod</button>
+                        </div>
+                        <div id="modControls3D" style="display:none; margin-top:10px;">
+                            <label>Modulus m: <span id="mod3Dv">3</span></label>
+                            <input type="range" id="mod3D" min="2" max="12" value="3" step="1" oninput="document.getElementById('mod3Dv').textContent=this.value; draw3D()">
+                        </div>
+                    </div>
+                    
                     <div style="margin-bottom:10px;">
                         <label><b>Presets:</b></label>
                         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:5px;">
@@ -240,6 +288,10 @@
                     </div>
                     <label>Radius: <span id="r3v">10</span></label>
                     <input type="range" id="r3" min="1" max="40" value="10" step="1" oninput="draw3D()">
+                    
+                    <label>Point Size: <span id="ps3v">0.6</span></label>
+                    <input type="range" id="ps3" min="0.2" max="2.0" value="0.6" step="0.1" oninput="draw3D()">
+                    
                     <button onclick="reset3D()">Reset View</button>
                     <button onclick="toggleRotation()">Auto-Rotate</button>
                     <button onclick="export3DData()">Export Points</button>
@@ -367,26 +419,31 @@
         <div id="analysis" class="panel">
             <div class="section">
                 <h2>Error Analysis <span class="help-icon tooltip" data-tip="Study O(R^(k-1)) error term">?</span></h2>
-                <p>Visualization of the error term Δ(R) for different dimensions. The chart shows how the relative error decreases as dimension increases.</p>
+                <p>Visualization of the error term Δ(R) for different dimensions. The chart shows absolute and relative errors for each radius value.</p>
                 <div class="controls">
                     <div style="margin-bottom:10px;">
                         <label><b>Presets:</b></label>
                         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:5px;">
-                            <button onclick="setAnalysisPreset('quick')" style="padding:6px 12px; font-size:0.9em;">Quick (R≤100)</button>
-                            <button onclick="setAnalysisPreset('standard')" style="padding:6px 12px; font-size:0.9em;">Standard (R≤300)</button>
-                            <button onclick="setAnalysisPreset('detailed')" style="padding:6px 12px; font-size:0.9em;">Detailed (R≤500)</button>
+                            <button onclick="setAnalysisPreset('quick')" style="padding:6px 12px; font-size:0.9em;">Quick (R≤50)</button>
+                            <button onclick="setAnalysisPreset('standard')" style="padding:6px 12px; font-size:0.9em;">Standard (R≤100)</button>
+                            <button onclick="setAnalysisPreset('detailed')" style="padding:6px 12px; font-size:0.9em;">Detailed (R≤150)</button>
                             <button onclick="setAnalysisPreset('absolute')" style="padding:6px 12px; font-size:0.9em;">Absolute Only</button>
                             <button onclick="setAnalysisPreset('relative')" style="padding:6px 12px; font-size:0.9em;">Relative Only</button>
                             <button onclick="setAnalysisPreset('boundary')" style="padding:6px 12px; font-size:0.9em;">Boundary Only</button>
                         </div>
                     </div>
-                    <label>Max Radius: <span id="mrv">500</span></label>
+                    
+                    <label>Dimension k: <span id="analysisKv">2</span></label>
+                    <input type="range" id="analysisK" min="2" max="5" value="2" step="1" oninput="document.getElementById('analysisKv').textContent=this.value">
+                    
+                    <label>Max Radius: <span id="mrv">100</span></label>
                     <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
-                        <input type="range" id="mr" min="50" max="500" value="500" step="10" oninput="updateAnalysisRadius(this.value)" style="flex:1;">
-                        <input type="number" id="mrinput" min="50" max="1000" value="500" step="10" style="width:100px; padding:8px;" oninput="updateAnalysisRadius(this.value)">
+                        <input type="range" id="mr" min="10" max="200" value="100" step="5" oninput="updateAnalysisRadius(this.value)" style="flex:1;">
+                        <input type="number" id="mrinput" min="10" max="300" value="100" step="5" style="width:100px; padding:8px;" oninput="updateAnalysisRadius(this.value)">
                     </div>
-                    <label>Step Size: <span id="stepsizev">50</span></label>
-                    <input type="range" id="stepsize" min="5" max="100" value="50" step="5" oninput="document.getElementById('stepsizev').textContent=this.value">
+                    
+                    <label>Start from Radius: <span id="minrv">1</span></label>
+                    <input type="range" id="minr" min="1" max="50" value="1" step="1" oninput="document.getElementById('minrv').textContent=this.value">
                     
                     <div style="margin-top:20px;">
                         <label style="display:flex; align-items:center; gap:8px; margin:8px 0;">
@@ -396,33 +453,18 @@
                             <input type="checkbox" id="showRelError" checked onchange="runAnalysis()"> Show Relative Error (%)
                         </label>
                         <label style="display:flex; align-items:center; gap:8px; margin:8px 0;">
-                            <input type="checkbox" id="showBoundary" checked onchange="runAnalysis()"> Show Boundary Term
+                            <input type="checkbox" id="showBoundary" onchange="runAnalysis()"> Show Theoretical Boundary R^(k-1)
                         </label>
-                    </div>
-                    
-                    <div style="margin-top:15px;">
-                        <p><b>Dimensions to display:</b></p>
-                        <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:10px;">
-                            <label style="display:flex; align-items:center; gap:8px;">
-                                <input type="checkbox" id="dimk2" checked onchange="runAnalysis()"> k=2
-                            </label>
-                            <label style="display:flex; align-items:center; gap:8px;">
-                                <input type="checkbox" id="dimk3" checked onchange="runAnalysis()"> k=3
-                            </label>
-                            <label style="display:flex; align-items:center; gap:8px;">
-                                <input type="checkbox" id="dimk4" checked onchange="runAnalysis()"> k=4
-                            </label>
-                            <label style="display:flex; align-items:center; gap:8px;">
-                                <input type="checkbox" id="dimk5" checked onchange="runAnalysis()"> k=5
-                            </label>
-                        </div>
+                        <label style="display:flex; align-items:center; gap:8px; margin:8px 0;">
+                            <input type="checkbox" id="showActualCount" onchange="runAnalysis()"> Show Actual Primitive Count
+                        </label>
                     </div>
                     
                     <button onclick="runAnalysis()" style="margin-top:15px;">Compute Analysis</button>
                     <button onclick="exportChartData()">Export Chart Data</button>
                 </div>
                 <div class="loading" id="loadAnalysis"><div class="spinner"></div><p>Computing error analysis...</p></div>
-                <canvas id="ch" width="800" height="500"></canvas>
+                <canvas id="ch" width="1600" height="1000" style="max-width: 100%;"></canvas>
                 <div class="formula" style="margin-top: 20px;">
                     <p><b>Error Bound Theory:</b></p>
                     <p>The error term O(R^(k-1)) arises from boundary effects. For k=2, the error is O(R), corresponding to points near the circle boundary. As k increases, the error term becomes relatively smaller compared to the main term R^k.</p>
@@ -543,7 +585,7 @@
     </div>
 
     <button class="btn-fixed" id="helpBtn" onclick="showHelp()">Help</button>
-    <button class="btn-fixed" id="darkBtn" onclick="toggleDark()">Dark Mode</button>
+    <button class="btn-fixed" id="darkBtn" onclick="toggleDark()">Light Mode</button>
 
     <div class="modal" id="helpModal">
         <div class="modal-content">
@@ -551,11 +593,49 @@
             <h2>Platform Guide</h2>
             <h3>Navigation</h3>
             <p>Use the tabs to explore different aspects of primitive lattice points.</p>
-            <h3>2D/3D Visualizations</h3>
-            <p><b>Blue points:</b> Primitive (coprime coordinates)<br><b>Red points:</b> Non-primitive (share common factor)</p>
-            <p>In 3D, click and drag to rotate the view.</p>
+            
+            <h3>2D Visualizations</h3>
+            <p><b>View Modes:</b></p>
+            <p>• <b>Colored by Mode:</b> Points colored according to selected coloring mode</p>
+            <p>• <b>Gauss Circle Problem:</b> All lattice points in purple, comparing against πR²</p>
+            
+            <p style="margin-top:15px;"><b>Coloring Modes (2D):</b></p>
+            <p>• <b>GCD=1 vs GCD>1:</b> Blue for primitive (coprime), red for non-primitive</p>
+            <p>• <b>By GCD Value:</b> Different color for each GCD (1=blue, 2=red, 3=green, 4=yellow, etc.)</p>
+            <p>• <b>By Mod m:</b> Colors based on (x+y) mod m - reveals modular patterns</p>
+            <p>• <b>By Quadrant:</b> Four colors for four quadrants (I=blue, II=green, III=yellow, IV=red)</p>
+            <p>• <b>By Angular Sector:</b> Rainbow colors dividing circle into sectors</p>
+            <p>• <b>GCD × Quadrant:</b> Combined coloring showing both GCD structure and spatial position</p>
+            <p>• <b>GCD × Mod:</b> Combined coloring revealing GCD and modular arithmetic patterns</p>
+            
+            <h3>3D Visualizations</h3>
+            <p><b>Boundary Shapes:</b></p>
+            <p>• Sphere: Points within distance R (x²+y²+z² ≤ R²)</p>
+            <p>• Cube: Points within cube of side 2R (|x|,|y|,|z| ≤ R)</p>
+            
+            <p style="margin-top:15px;"><b>Coloring Modes (3D):</b></p>
+            <p>• <b>GCD=1 vs GCD>1:</b> Blue for primitive, red for non-primitive</p>
+            <p>• <b>By GCD Value:</b> Different colors for different GCD values</p>
+            <p>• <b>By Mod m:</b> Colors based on (x+y+z) mod m</p>
+            <p>• <b>By Octant:</b> Eight colors for eight octants in 3D space</p>
+            <p>• <b>By Distance:</b> Gradient from center (blue) to boundary (red)</p>
+            <p>• <b>GCD × Octant:</b> Combined coloring showing GCD and spatial structure</p>
+            <p>• <b>GCD × Mod:</b> Combined GCD and modular arithmetic visualization</p>
+            
+            <p style="margin-top:10px;">Click and drag to rotate the view. Adjust point size for clarity.</p>
+            
+            <h3>Error Analysis</h3>
+            <p>Shows error per radius value from start to max radius:</p>
+            <p>• <b>Absolute Error:</b> |Predicted - Actual| count of points</p>
+            <p>• <b>Relative Error:</b> Percentage error relative to prediction</p>
+            <p>• <b>Boundary Term:</b> Theoretical R^(k-1) error bound</p>
+            <p>• <b>Actual Count:</b> The true primitive point count at each radius</p>
+            
             <h3>Performance Tips</h3>
-            <p>• Keep radius ≤ 100 in 2D, ≤ 30 in 3D for smooth performance<br>• Use Export buttons to save data and images<br>• Compare mode shows multiple dimensions simultaneously</p>
+            <p>• Keep radius ≤ 100 in 2D, ≤ 30 in 3D for smooth performance</p>
+            <p>• Use Export buttons to save data and images</p>
+            <p>• Compare mode shows multiple dimensions simultaneously</p>
+            
             <h3>Tools Section</h3>
             <p>Calculate GCD, Möbius function, prime factorizations, and search for specific lattice points.</p>
         </div>
@@ -568,6 +648,9 @@
         let view2D = 'primitive'; // 'primitive' or 'gauss'
         let comparisonMode = 'fixed'; // 'fixed' or 'multi'
         let comparisonChart = null;
+        let shape3D = 'sphere'; // 'sphere' or 'cube'
+        let colorMode3D = 'primitive'; // 'primitive', 'gcd', 'mod', 'octant', 'distance', 'gcdoct', 'gcdmod'
+        let colorMode2D = 'primitive'; // 'primitive', 'gcd', 'mod', 'quadrant', 'angular', 'gcdquad', 'gcdmod'
 
         function gcd(a, b) {
             a = Math.abs(a); b = Math.abs(b);
@@ -672,6 +755,27 @@
             draw2D();
         }
 
+        function set2DColorMode(mode) {
+            colorMode2D = mode;
+            document.querySelectorAll('#color2DPrimitive, #color2DGCD, #color2DMod, #color2DQuadrant, #color2DAngular, #color2DGCDQuad, #color2DGCDMod').forEach(btn => btn.classList.remove('active'));
+            const btnIds = {
+                'primitive': 'color2DPrimitive',
+                'gcd': 'color2DGCD',
+                'mod': 'color2DMod',
+                'quadrant': 'color2DQuadrant',
+                'angular': 'color2DAngular',
+                'gcdquad': 'color2DGCDQuad',
+                'gcdmod': 'color2DGCDMod'
+            };
+            document.getElementById(btnIds[mode]).classList.add('active');
+            
+            // Show/hide modulus controls
+            document.getElementById('modControls2D').style.display = (mode === 'mod' || mode === 'gcdmod') ? 'block' : 'none';
+            document.getElementById('sectorControls2D').style.display = (mode === 'angular') ? 'block' : 'none';
+            
+            draw2D();
+        }
+
         function update2DRadius(value) {
             const R = parseInt(value);
             if (R < 1 || R > 1000 || isNaN(R)) return;
@@ -705,54 +809,121 @@
                 ctx.lineWidth = 2;
                 ctx.beginPath(); ctx.arc(cx, cy, R*sc, 0, 2*Math.PI); ctx.stroke();
                 
-                const primPoints = [], nonPrimPoints = [];
+                const allPoints = [];
                 let prim = 0, tot = 0;
                 
+                // Collect all points with properties
                 for (let x = -R; x <= R; x++) {
                     for (let y = -R; y <= R; y++) {
                         if (x*x + y*y <= R*R) {
                             tot++;
-                            const p = gcd(x, y) === 1;
-                            if (p) { prim++; primPoints.push({x, y}); }
-                            else nonPrimPoints.push({x, y});
+                            const g = gcd(Math.abs(x), Math.abs(y));
+                            const isPrimitive = g === 1;
+                            if (isPrimitive) prim++;
+                            
+                            // Calculate quadrant
+                            let quadrant;
+                            if (x >= 0 && y >= 0) quadrant = 1;
+                            else if (x < 0 && y >= 0) quadrant = 2;
+                            else if (x < 0 && y < 0) quadrant = 3;
+                            else quadrant = 4;
+                            
+                            // Calculate angle (0 to 2π)
+                            const angle = Math.atan2(y, x) + Math.PI; // 0 to 2π
+                            
+                            allPoints.push({
+                                x, y, gcd: g, isPrimitive, quadrant, angle,
+                                sum: x + y
+                            });
                         }
                     }
                 }
                 
-                // Draw based on view mode
-                if (view2D === 'gauss') {
-                    // Gauss circle problem: show all lattice points in one color
-                    nonPrimPoints.forEach(pt => {
-                        ctx.fillStyle = '#6f42c1'; // Purple for all points
-                        ctx.beginPath();
-                        ctx.arc(cx + pt.x*sc, cy - pt.y*sc, sz, 0, 2*Math.PI);
-                        ctx.fill();
-                    });
+                // Group points by color based on mode
+                const pointsByColor = {};
+                const modulus = parseInt(document.getElementById('mod2D').value);
+                const numSectors = parseInt(document.getElementById('sectors2D').value);
+                
+                allPoints.forEach(pt => {
+                    let colorKey;
                     
-                    primPoints.forEach(pt => {
-                        ctx.fillStyle = '#6f42c1'; // Purple for all points
-                        ctx.beginPath();
-                        ctx.arc(cx + pt.x*sc, cy - pt.y*sc, sz, 0, 2*Math.PI);
-                        ctx.fill();
-                    });
-                } else {
-                    // Primitive view: show primitive (blue) vs non-primitive (red)
-                    nonPrimPoints.forEach(pt => {
-                        ctx.fillStyle = '#dc3545';
-                        ctx.beginPath();
-                        ctx.arc(cx + pt.x*sc, cy - pt.y*sc, sz, 0, 2*Math.PI);
-                        ctx.fill();
-                    });
+                    if (view2D === 'gauss') {
+                        colorKey = 'all';
+                    } else {
+                        switch(colorMode2D) {
+                            case 'primitive':
+                                colorKey = pt.isPrimitive ? 'prim' : 'nonprim';
+                                break;
+                            case 'gcd':
+                                colorKey = `gcd${Math.min(pt.gcd, 8)}`;
+                                break;
+                            case 'mod':
+                                colorKey = `mod${((pt.x + pt.y) % modulus + modulus) % modulus}`;
+                                break;
+                            case 'quadrant':
+                                colorKey = `quad${pt.quadrant}`;
+                                break;
+                            case 'angular':
+                                const sector = Math.floor(pt.angle / (2 * Math.PI / numSectors));
+                                colorKey = `sector${sector}`;
+                                break;
+                            case 'gcdquad':
+                                colorKey = `gcd${Math.min(pt.gcd, 4)}_q${pt.quadrant}`;
+                                break;
+                            case 'gcdmod':
+                                const modVal = ((pt.x + pt.y) % modulus + modulus) % modulus;
+                                colorKey = `gcd${Math.min(pt.gcd, 4)}_m${modVal}`;
+                                break;
+                        }
+                    }
                     
-                    primPoints.forEach(pt => {
-                        ctx.fillStyle = '#0066cc';
-                        ctx.beginPath();
-                        ctx.arc(cx + pt.x*sc, cy - pt.y*sc, sz, 0, 2*Math.PI);
-                        ctx.fill();
-                    });
+                    if (!pointsByColor[colorKey]) pointsByColor[colorKey] = [];
+                    pointsByColor[colorKey].push(pt);
+                });
+                
+                // Define color palettes
+                const colors = {
+                    all: '#6f42c1',
+                    prim: '#0066cc',
+                    nonprim: '#dc3545',
+                    gcd1: '#0066cc', gcd2: '#dc3545', gcd3: '#28a745', gcd4: '#ffc107',
+                    gcd5: '#6f42c1', gcd6: '#fd7e14', gcd7: '#00d4ff', gcd8: '#ff006e',
+                    quad1: '#0066cc', quad2: '#28a745', quad3: '#ffc107', quad4: '#dc3545',
+                    mod0: '#0066cc', mod1: '#dc3545', mod2: '#28a745', mod3: '#ffc107',
+                    mod4: '#6f42c1', mod5: '#fd7e14', mod6: '#00d4ff', mod7: '#ff006e',
+                    mod8: '#20c997', mod9: '#e83e8c', mod10: '#17a2b8', mod11: '#6610f2'
+                };
+                
+                // Generate sector colors (rainbow)
+                for (let i = 0; i < 16; i++) {
+                    const hue = (i / 16) * 360;
+                    colors[`sector${i}`] = `hsl(${hue}, 70%, 50%)`;
                 }
                 
-                cache.points2D = { primitive: primPoints, nonPrimitive: nonPrimPoints, R };
+                // Generate combined colors
+                const baseColors = ['#0066cc', '#dc3545', '#28a745', '#ffc107'];
+                for (let g = 1; g <= 4; g++) {
+                    for (let q = 1; q <= 4; q++) {
+                        colors[`gcd${g}_q${q}`] = baseColors[(g - 1 + q - 1) % 4];
+                    }
+                    for (let m = 0; m < 12; m++) {
+                        const hue = ((g - 1) * 90 + m * 30) % 360;
+                        colors[`gcd${g}_m${m}`] = `hsl(${hue}, 65%, 50%)`;
+                    }
+                }
+                
+                // Draw points
+                Object.entries(pointsByColor).forEach(([colorKey, points]) => {
+                    ctx.fillStyle = colors[colorKey] || '#999';
+                    points.forEach(pt => {
+                        ctx.beginPath();
+                        ctx.arc(cx + pt.x*sc, cy - pt.y*sc, sz, 0, 2*Math.PI);
+                        ctx.fill();
+                    });
+                });
+                
+                cache.points2D = { primitive: allPoints.filter(p => p.isPrimitive), 
+                                   nonPrimitive: allPoints.filter(p => !p.isPrimitive), R };
                 
                 const pred = Math.round(Math.PI * R * R / zeta(2));
                 const error = Math.abs(pred - prim);
@@ -785,7 +956,7 @@
         function init3D() {
             const c = document.getElementById('c3d');
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(document.body.classList.contains('dark') ? 0x1a1a1a : 0xffffff);
+            scene.background = new THREE.Color(document.body.classList.contains('light') ? 0xffffff : 0x1a1a1a);
             camera = new THREE.PerspectiveCamera(75, c.clientWidth/600, 0.1, 1000);
             camera.position.set(50, 50, 50);
             camera.lookAt(0, 0, 0);
@@ -825,55 +996,184 @@
             animate3D();
         }
 
+        function set3DShape(shape) {
+            shape3D = shape;
+            document.querySelectorAll('#shape3DSphere, #shape3DCube').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(shape === 'sphere' ? 'shape3DSphere' : 'shape3DCube').classList.add('active');
+            draw3D();
+        }
+
+        function set3DColorMode(mode) {
+            colorMode3D = mode;
+            document.querySelectorAll('#colorPrimitive, #colorGCD, #colorMod, #colorOctant, #colorDistance, #colorGCDOct, #colorGCDMod').forEach(btn => btn.classList.remove('active'));
+            const btnIds = {
+                'primitive': 'colorPrimitive',
+                'gcd': 'colorGCD',
+                'mod': 'colorMod',
+                'octant': 'colorOctant',
+                'distance': 'colorDistance',
+                'gcdoct': 'colorGCDOct',
+                'gcdmod': 'colorGCDMod'
+            };
+            document.getElementById(btnIds[mode]).classList.add('active');
+            
+            // Show/hide modulus controls
+            document.getElementById('modControls3D').style.display = (mode === 'mod' || mode === 'gcdmod') ? 'block' : 'none';
+            
+            draw3D();
+        }
+
         function draw3D() {
             if (!scene) return;
             while(scene.children.length > 3) scene.remove(scene.children[3]);
             
             const R = parseInt(document.getElementById('r3').value);
+            const pointSize = parseFloat(document.getElementById('ps3').value);
             document.getElementById('r3v').textContent = R;
+            document.getElementById('ps3v').textContent = pointSize;
             document.getElementById('warn3d').style.display = R > 30 ? 'block' : 'none';
             
             if (R > 25) document.getElementById('load3d').classList.add('active');
             
             setTimeout(() => {
-                const sg = new THREE.SphereGeometry(R, 32, 32);
-                const sm = new THREE.MeshBasicMaterial({ 
-                    color: 0x6f42c1, wireframe: true, transparent: true, opacity: 0.15 
-                });
-                scene.add(new THREE.Mesh(sg, sm));
+                // Add boundary shape
+                if (shape3D === 'sphere') {
+                    const sg = new THREE.SphereGeometry(R, 32, 32);
+                    const sm = new THREE.MeshBasicMaterial({ 
+                        color: 0x6f42c1, wireframe: true, transparent: true, opacity: 0.15 
+                    });
+                    scene.add(new THREE.Mesh(sg, sm));
+                } else {
+                    const boxGeometry = new THREE.BoxGeometry(2*R, 2*R, 2*R);
+                    const edges = new THREE.EdgesGeometry(boxGeometry);
+                    const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ 
+                        color: 0x6f42c1, transparent: true, opacity: 0.3 
+                    }));
+                    scene.add(line);
+                }
                 
-                const pg = new THREE.BufferGeometry(), ng = new THREE.BufferGeometry();
-                const pp = [], np = [], primPoints = [], nonPrimPoints = [];
+                // Collect all points with their properties
+                const allPoints = [];
                 let prim = 0, tot = 0;
+                const modulus = parseInt(document.getElementById('mod3D').value);
                 
                 for (let x = -R; x <= R; x++) {
                     for (let y = -R; y <= R; y++) {
                         for (let z = -R; z <= R; z++) {
-                            if (x*x + y*y + z*z <= R*R) {
+                            const distSq = x*x + y*y + z*z;
+                            const inBounds = shape3D === 'sphere' ? 
+                                (distSq <= R*R) : 
+                                (Math.abs(x) <= R && Math.abs(y) <= R && Math.abs(z) <= R);
+                            
+                            if (inBounds) {
                                 tot++;
-                                if (gcdArray([x,y,z]) === 1) { 
-                                    prim++; 
-                                    pp.push(x,y,z);
-                                    primPoints.push({x, y, z});
-                                } else {
-                                    np.push(x,y,z);
-                                    nonPrimPoints.push({x, y, z});
-                                }
+                                const g = gcdArray([Math.abs(x), Math.abs(y), Math.abs(z)]);
+                                const isPrimitive = g === 1;
+                                if (isPrimitive) prim++;
+                                
+                                // Determine octant (1-8)
+                                let octant = 1;
+                                if (x >= 0 && y >= 0 && z >= 0) octant = 1;
+                                else if (x < 0 && y >= 0 && z >= 0) octant = 2;
+                                else if (x < 0 && y < 0 && z >= 0) octant = 3;
+                                else if (x >= 0 && y < 0 && z >= 0) octant = 4;
+                                else if (x >= 0 && y >= 0 && z < 0) octant = 5;
+                                else if (x < 0 && y >= 0 && z < 0) octant = 6;
+                                else if (x < 0 && y < 0 && z < 0) octant = 7;
+                                else octant = 8;
+                                
+                                allPoints.push({
+                                    x, y, z,
+                                    gcd: g,
+                                    isPrimitive,
+                                    distance: Math.sqrt(distSq),
+                                    sum: x + y + z,
+                                    octant
+                                });
                             }
                         }
                     }
                 }
                 
-                cache.points3D = { primitive: primPoints, nonPrimitive: nonPrimPoints, R };
+                cache.points3D = { 
+                    primitive: allPoints.filter(p => p.isPrimitive),
+                    nonPrimitive: allPoints.filter(p => !p.isPrimitive),
+                    R 
+                };
                 
-                if (pp.length) {
-                    pg.setAttribute('position', new THREE.Float32BufferAttribute(pp, 3));
-                    scene.add(new THREE.Points(pg, new THREE.PointsMaterial({ color: 0x0066cc, size: 0.6 })));
+                // Color points based on mode
+                const pointsByColor = {};
+                
+                allPoints.forEach(pt => {
+                    let colorKey;
+                    
+                    switch(colorMode3D) {
+                        case 'primitive':
+                            colorKey = pt.isPrimitive ? 'prim' : 'nonprim';
+                            break;
+                        case 'gcd':
+                            colorKey = `gcd${Math.min(pt.gcd, 8)}`;
+                            break;
+                        case 'mod':
+                            colorKey = `mod${((pt.sum % modulus) + modulus) % modulus}`;
+                            break;
+                        case 'octant':
+                            colorKey = `oct${pt.octant}`;
+                            break;
+                        case 'distance':
+                            const distBucket = Math.floor(pt.distance / (R / 5));
+                            colorKey = `dist${Math.min(distBucket, 5)}`;
+                            break;
+                        case 'gcdoct':
+                            colorKey = `gcd${Math.min(pt.gcd, 4)}_oct${pt.octant}`;
+                            break;
+                        case 'gcdmod':
+                            const modVal = ((pt.sum % modulus) + modulus) % modulus;
+                            colorKey = `gcd${Math.min(pt.gcd, 4)}_m${modVal}`;
+                            break;
+                    }
+                    
+                    if (!pointsByColor[colorKey]) pointsByColor[colorKey] = [];
+                    pointsByColor[colorKey].push(pt.x, pt.y, pt.z);
+                });
+                
+                // Define color schemes
+                const colorMap = {
+                    prim: 0x0066cc,
+                    nonprim: 0xdc3545,
+                    gcd1: 0x0066cc, gcd2: 0xdc3545, gcd3: 0x28a745, gcd4: 0xffc107,
+                    gcd5: 0x6f42c1, gcd6: 0xfd7e14, gcd7: 0x00d4ff, gcd8: 0xff006e,
+                    oct1: 0x0066cc, oct2: 0xdc3545, oct3: 0x28a745, oct4: 0xffc107,
+                    oct5: 0x6f42c1, oct6: 0xfd7e14, oct7: 0x00d4ff, oct8: 0xff006e,
+                    dist0: 0x0066cc, dist1: 0x00d4ff, dist2: 0x28a745, 
+                    dist3: 0xffc107, dist4: 0xfd7e14, dist5: 0xdc3545,
+                    mod0: 0x0066cc, mod1: 0xdc3545, mod2: 0x28a745, mod3: 0xffc107,
+                    mod4: 0x6f42c1, mod5: 0xfd7e14, mod6: 0x00d4ff, mod7: 0xff006e,
+                    mod8: 0x20c997, mod9: 0xe83e8c, mod10: 0x17a2b8, mod11: 0x6610f2
+                };
+                
+                // Generate combined colors
+                const baseColors = [0x0066cc, 0xdc3545, 0x28a745, 0xffc107, 0x6f42c1, 0xfd7e14, 0x00d4ff, 0xff006e];
+                for (let g = 1; g <= 4; g++) {
+                    for (let o = 1; o <= 8; o++) {
+                        colorMap[`gcd${g}_oct${o}`] = baseColors[(g - 1 + o - 1) % 8];
+                    }
+                    for (let m = 0; m < 12; m++) {
+                        colorMap[`gcd${g}_m${m}`] = baseColors[(g - 1 + m) % 8];
+                    }
                 }
-                if (np.length) {
-                    ng.setAttribute('position', new THREE.Float32BufferAttribute(np, 3));
-                    scene.add(new THREE.Points(ng, new THREE.PointsMaterial({ color: 0xdc3545, size: 0.6 })));
-                }
+                
+                // Create point groups
+                Object.entries(pointsByColor).forEach(([colorKey, positions]) => {
+                    if (positions.length > 0) {
+                        const geometry = new THREE.BufferGeometry();
+                        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+                        
+                        const color = colorMap[colorKey] || 0x999999;
+                        const material = new THREE.PointsMaterial({ color, size: pointSize });
+                        scene.add(new THREE.Points(geometry, material));
+                    }
+                });
                 
                 const pred = Math.round(4 * Math.PI * R**3 / (3 * zeta(3)));
                 const error = Math.abs(pred - prim);
@@ -1167,164 +1467,292 @@
         }
 
         function updateComparison() {
-            const R = parseInt(document.getElementById('cr').value);
-            document.getElementById('crv').textContent = R;
             const grid = document.getElementById('compGrid');
+            const showDensity = document.getElementById('showDensity').checked;
+            const showVolume = document.getElementById('showVolume').checked;
+            const showZeta = document.getElementById('showZeta').checked;
+            const showChart = document.getElementById('showChart').checked;
+            
+            const dims = [];
+            for (let k = 2; k <= 10; k++) {
+                if (document.getElementById(`compk${k}`)?.checked) dims.push(k);
+            }
+            
+            if (dims.length === 0) {
+                grid.innerHTML = '<p style="color:var(--red);">Please select at least one dimension</p>';
+                return;
+            }
+            
             grid.innerHTML = '';
             
-            for (let k = 2; k <= 6; k++) {
-                const z = zeta(k);
-                const vol = sphereVolume(k, R);
-                const pred = Math.round(vol / z);
-                const density = (1/z * 100).toFixed(1);
+            if (comparisonMode === 'fixed') {
+                const R = parseInt(document.getElementById('crinput').value);
                 
-                grid.innerHTML += `
-                    <div class="compare-item">
-                        <h3>Dimension k = ${k}</h3>
-                        <p><b>ζ(${k}):</b> ${z.toFixed(4)}</p>
-                        <p><b>Predicted Points:</b> ${pred.toLocaleString()}</p>
-                        <p><b>Density:</b> ${density}%</p>
-                        <p><b>Volume:</b> ${vol.toFixed(2)}</p>
-                    </div>
-                `;
+                dims.forEach(k => {
+                    const z = zeta(k);
+                    const vol = sphereVolume(k, R);
+                    const pred = Math.round(vol / z);
+                    const density = (1/z * 100).toFixed(2);
+                    
+                    let content = `
+                        <div class="compare-item">
+                            <h3 style="color:var(--blue); margin-bottom:15px;">Dimension k = ${k}</h3>
+                            <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
+                                <p style="font-size:1.1em;"><b>Predicted Points:</b> ${pred.toLocaleString()}</p>
+                            </div>
+                    `;
+                    
+                    if (showZeta) {
+                        content += `
+                            <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
+                                <p><b>ζ(${k}):</b> ${z.toFixed(6)}</p>
+                            </div>
+                        `;
+                    }
+                    
+                    if (showDensity) {
+                        content += `
+                            <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
+                                <p><b>Primitive Density:</b> ${density}%</p>
+                                <p style="font-size:0.9em; color:var(--text2);">1/ζ(${k}) = ${(1/z).toFixed(6)}</p>
+                            </div>
+                        `;
+                    }
+                    
+                    if (showVolume) {
+                        content += `
+                            <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
+                                <p><b>Sphere Volume:</b></p>
+                                <p style="font-size:0.95em;">${vol.toExponential(4)}</p>
+                            </div>
+                        `;
+                    }
+                    
+                    // Add growth rate info
+                    content += `
+                        <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
+                            <p><b>Growth Rate:</b> O(R^${k})</p>
+                            <p style="font-size:0.9em; color:var(--text2);">Error: O(R^${k-1})</p>
+                        </div>
+                    `;
+                    
+                    content += `</div>`;
+                    grid.innerHTML += content;
+                });
+            } else {
+                // Multiple radii mode
+                const radiiStr = document.getElementById('multiRadii').value;
+                const radii = radiiStr.split(',').map(r => parseInt(r.trim())).filter(r => !isNaN(r) && r > 0);
+                
+                if (radii.length === 0) {
+                    grid.innerHTML = '<p style="color:var(--red);">Please enter valid radii (e.g., 10, 20, 30)</p>';
+                    return;
+                }
+                
+                dims.forEach(k => {
+                    let content = `
+                        <div class="compare-item">
+                            <h3 style="color:var(--blue); margin-bottom:15px;">Dimension k = ${k}</h3>
+                    `;
+                    
+                    if (showZeta) {
+                        const z = zeta(k);
+                        content += `
+                            <div style="background:var(--bg); padding:10px; border-radius:6px; margin-bottom:10px;">
+                                <p><b>ζ(${k}):</b> ${z.toFixed(6)}</p>
+                                <p><b>Density:</b> ${((1/z)*100).toFixed(2)}%</p>
+                            </div>
+                        `;
+                    }
+                    
+                    content += '<table style="width:100%; font-size:0.9em;"><thead><tr><th>R</th><th>Predicted</th>';
+                    if (showVolume) content += '<th>Volume</th>';
+                    content += '</tr></thead><tbody>';
+                    
+                    radii.forEach(R => {
+                        const vol = sphereVolume(k, R);
+                        const pred = Math.round(vol / zeta(k));
+                        content += `<tr><td>${R}</td><td>${pred.toLocaleString()}</td>`;
+                        if (showVolume) content += `<td>${vol.toExponential(2)}</td>`;
+                        content += '</tr>';
+                    });
+                    
+                    content += '</tbody></table></div>';
+                    grid.innerHTML += content;
+                });
+            }
+            
+            // Update chart
+            if (showChart) {
+                document.getElementById('comparisonChart').style.display = 'block';
+                updateComparisonChart(dims);
+            } else {
+                document.getElementById('comparisonChart').style.display = 'none';
             }
         }
 
         function updateAnalysisRadius(value) {
             const R = parseInt(value);
-            if (R < 50 || R > 1000 || isNaN(R)) return;
+            if (R < 10 || R > 300 || isNaN(R)) return;
             
             document.getElementById('mrv').textContent = R;
-            document.getElementById('mr').value = Math.min(R, 500);
+            document.getElementById('mr').value = Math.min(R, 200);
             document.getElementById('mrinput').value = R;
         }
 
         function runAnalysis() {
             const canvas = document.getElementById('ch');
             const ctx = canvas.getContext('2d');
-            const mr = parseInt(document.getElementById('mrinput').value);
-            const stepSize = parseInt(document.getElementById('stepsize').value);
+            const k = parseInt(document.getElementById('analysisK').value);
+            const maxR = parseInt(document.getElementById('mrinput').value);
+            const minR = parseInt(document.getElementById('minr').value);
             
             const showAbsError = document.getElementById('showAbsError').checked;
             const showRelError = document.getElementById('showRelError').checked;
             const showBoundary = document.getElementById('showBoundary').checked;
-            
-            const dims = [];
-            if (document.getElementById('dimk2').checked) dims.push(2);
-            if (document.getElementById('dimk3').checked) dims.push(3);
-            if (document.getElementById('dimk4').checked) dims.push(4);
-            if (document.getElementById('dimk5').checked) dims.push(5);
-            
-            if (dims.length === 0) {
-                alert('Please select at least one dimension');
-                return;
-            }
+            const showActualCount = document.getElementById('showActualCount').checked;
             
             document.getElementById('loadAnalysis').classList.add('active');
             
             setTimeout(() => {
                 if (chart) chart.destroy();
                 
+                const labels = [];
+                const absErrorData = [];
+                const relErrorData = [];
+                const boundaryData = [];
+                const actualCountData = [];
+                
+                // Compute for each radius from minR to maxR
+                for (let R = minR; R <= maxR; R++) {
+                    labels.push(R);
+                    
+                    const vol = sphereVolume(k, R);
+                    const pred = Math.round(vol / zeta(k));
+                    
+                    let actual = pred; // Use prediction for large values
+                    
+                    // Only compute actual count for small enough cases
+                    if (k === 2 && R <= 100) {
+                        actual = 0;
+                        for (let x = -R; x <= R; x++)
+                            for (let y = -R; y <= R; y++)
+                                if (x*x + y*y <= R*R && gcd(Math.abs(x), Math.abs(y)) === 1) actual++;
+                    } else if (k === 3 && R <= 30) {
+                        actual = 0;
+                        for (let x = -R; x <= R; x++)
+                            for (let y = -R; y <= R; y++)
+                                for (let z = -R; z <= R; z++)
+                                    if (x*x + y*y + z*z <= R*R && gcdArray([Math.abs(x), Math.abs(y), Math.abs(z)]) === 1) actual++;
+                    }
+                    
+                    const absError = Math.abs(pred - actual);
+                    const relError = pred > 0 ? (absError / pred) * 100 : 0;
+                    const boundary = Math.pow(R, k - 1);
+                    
+                    absErrorData.push(absError);
+                    relErrorData.push(relError);
+                    boundaryData.push(boundary);
+                    actualCountData.push(actual);
+                }
+                
                 const datasets = [];
-                const colors = {
-                    2: { main: '#0066cc', light: 'rgba(0,102,204,0.3)', dark: '#004080' },
-                    3: { main: '#ffc107', light: 'rgba(255,193,7,0.3)', dark: '#cc9a00' },
-                    4: { main: '#00d4ff', light: 'rgba(0,212,255,0.3)', dark: '#00a8cc' },
-                    5: { main: '#ff006e', light: 'rgba(255,0,110,0.3)', dark: '#cc0058' }
+                
+                if (showActualCount) {
+                    datasets.push({
+                        label: `Actual Primitive Count (k=${k})`,
+                        data: actualCountData,
+                        backgroundColor: 'rgba(0, 102, 204, 0.5)',
+                        borderColor: '#0066cc',
+                        borderWidth: 1,
+                        type: 'bar',
+                        yAxisID: 'y1',
+                        order: 4
+                    });
+                }
+                
+                if (showAbsError) {
+                    datasets.push({
+                        label: `Absolute Error |Pred - Actual| (k=${k})`,
+                        data: absErrorData,
+                        backgroundColor: 'rgba(220, 53, 69, 0.6)',
+                        borderColor: '#dc3545',
+                        borderWidth: 2,
+                        type: 'bar',
+                        yAxisID: 'y',
+                        order: 3
+                    });
+                }
+                
+                if (showRelError) {
+                    datasets.push({
+                        label: `Relative Error % (k=${k})`,
+                        data: relErrorData,
+                        backgroundColor: 'rgba(255, 193, 7, 0.6)',
+                        borderColor: '#ffc107',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        type: 'line',
+                        yAxisID: 'y2',
+                        order: 2,
+                        fill: false
+                    });
+                }
+                
+                if (showBoundary) {
+                    datasets.push({
+                        label: `Theoretical Boundary R^${k-1}`,
+                        data: boundaryData,
+                        backgroundColor: 'rgba(111, 66, 193, 0.3)',
+                        borderColor: '#6f42c1',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 2,
+                        type: 'line',
+                        yAxisID: 'y',
+                        order: 1,
+                        fill: false
+                    });
+                }
+                
+                const scales = {
+                    x: { 
+                        title: { display: true, text: 'Radius R', font: { size: 14 } }
+                    },
+                    y: {
+                        type: 'logarithmic',
+                        position: 'left',
+                        title: { display: true, text: 'Count / Error', font: { size: 14 } },
+                        display: showAbsError || showBoundary || showActualCount
+                    }
                 };
                 
-                dims.forEach(k => {
-                    const absData = [], relData = [], boundaryData = [];
-                    
-                    for (let R = 50; R <= mr; R += stepSize) {
-                        const vol = sphereVolume(k, R);
-                        const pred = Math.round(vol / zeta(k));
-                        let act = pred; // For k>3 or large R, use prediction
-                        
-                        // Only compute actual for small enough cases
-                        if (k === 2 && R <= 200) {
-                            act = 0;
-                            for (let x = -R; x <= R; x++)
-                                for (let y = -R; y <= R; y++)
-                                    if (x*x + y*y <= R*R && gcd(x,y) === 1) act++;
-                        } else if (k === 3 && R <= 50) {
-                            act = 0;
-                            for (let x = -R; x <= R; x++)
-                                for (let y = -R; y <= R; y++)
-                                    for (let z = -R; z <= R; z++)
-                                        if (x*x + y*y + z*z <= R*R && gcdArray([x,y,z]) === 1) act++;
-                        }
-                        
-                        const absError = Math.abs(pred - act);
-                        const relError = (absError / pred) * 100;
-                        const boundary = Math.pow(R, k - 1);
-                        
-                        absData.push({ x: R, y: absError });
-                        relData.push({ x: R, y: relError });
-                        boundaryData.push({ x: R, y: boundary });
-                    }
-                    
-                    if (showAbsError) {
-                        datasets.push({
-                            label: `k=${k}: Absolute Error`,
-                            data: absData,
-                            borderColor: colors[k].main,
-                            backgroundColor: colors[k].light,
-                            borderWidth: 2,
-                            tension: 0.1,
-                            fill: false,
-                            pointRadius: 3,
-                            pointHoverRadius: 5
-                        });
-                    }
-                    
-                    if (showRelError) {
-                        datasets.push({
-                            label: `k=${k}: Relative Error (%)`,
-                            data: relData,
-                            borderColor: colors[k].main,
-                            backgroundColor: colors[k].light,
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            tension: 0.1,
-                            fill: false,
-                            pointRadius: 3,
-                            pointHoverRadius: 5
-                        });
-                    }
-                    
-                    if (showBoundary) {
-                        datasets.push({
-                            label: `k=${k}: Boundary Term R^${k-1}`,
-                            data: boundaryData,
-                            borderColor: colors[k].dark,
-                            backgroundColor: colors[k].light,
-                            borderWidth: 1,
-                            borderDash: [2, 2],
-                            tension: 0.1,
-                            fill: false,
-                            pointRadius: 2,
-                            pointHoverRadius: 4
-                        });
-                    }
-                });
+                if (showActualCount) {
+                    scales.y1 = {
+                        type: 'logarithmic',
+                        position: 'right',
+                        title: { display: true, text: 'Actual Count', font: { size: 14 } },
+                        grid: { drawOnChartArea: false }
+                    };
+                }
+                
+                if (showRelError) {
+                    scales.y2 = {
+                        type: 'linear',
+                        position: 'right',
+                        title: { display: true, text: 'Relative Error %', font: { size: 14 } },
+                        grid: { drawOnChartArea: false }
+                    };
+                }
                 
                 chart = new Chart(ctx, {
-                    type: 'line',
-                    data: { datasets },
+                    type: 'bar',
+                    data: { labels, datasets },
                     options: { 
                         responsive: true,
                         maintainAspectRatio: true,
-                        scales: { 
-                            y: { 
-                                beginAtZero: true, 
-                                title: { display: true, text: 'Error Δ(R)', font: { size: 14 } },
-                                type: 'logarithmic'
-                            },
-                            x: { 
-                                title: { display: true, text: 'Radius R', font: { size: 14 } }
-                            }
-                        },
+                        scales,
                         plugins: {
                             legend: { 
                                 display: true,
@@ -1333,7 +1761,7 @@
                             },
                             title: {
                                 display: true,
-                                text: 'Boundary Cancellation Error Analysis',
+                                text: `Error Analysis per Radius (k=${k}, R=${minR} to ${maxR})`,
                                 font: { size: 16, weight: 'bold' }
                             },
                             tooltip: { 
@@ -1344,10 +1772,14 @@
                                         let label = context.dataset.label || '';
                                         if (label) label += ': ';
                                         if (context.parsed.y !== null) {
-                                            label += context.parsed.y.toLocaleString(undefined, {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2
-                                            });
+                                            if (label.includes('%')) {
+                                                label += context.parsed.y.toFixed(4) + '%';
+                                            } else {
+                                                label += context.parsed.y.toLocaleString(undefined, {
+                                                    minimumFractionDigits: 0,
+                                                    maximumFractionDigits: 2
+                                                });
+                                            }
                                         }
                                         return label;
                                     }
@@ -1355,8 +1787,7 @@
                             }
                         },
                         interaction: {
-                            mode: 'nearest',
-                            axis: 'x',
+                            mode: 'index',
                             intersect: false
                         }
                     }
@@ -1416,29 +1847,26 @@
 
         function setAnalysisPreset(preset) {
             if (preset === 'quick') {
-                updateAnalysisRadius(100);
-                document.getElementById('stepsize').value = 10;
-                document.getElementById('stepsizev').textContent = 10;
+                updateAnalysisRadius(50);
             } else if (preset === 'standard') {
-                updateAnalysisRadius(300);
-                document.getElementById('stepsize').value = 30;
-                document.getElementById('stepsizev').textContent = 30;
+                updateAnalysisRadius(100);
             } else if (preset === 'detailed') {
-                updateAnalysisRadius(500);
-                document.getElementById('stepsize').value = 50;
-                document.getElementById('stepsizev').textContent = 50;
+                updateAnalysisRadius(150);
             } else if (preset === 'absolute') {
                 document.getElementById('showAbsError').checked = true;
                 document.getElementById('showRelError').checked = false;
                 document.getElementById('showBoundary').checked = false;
+                document.getElementById('showActualCount').checked = false;
             } else if (preset === 'relative') {
                 document.getElementById('showAbsError').checked = false;
                 document.getElementById('showRelError').checked = true;
                 document.getElementById('showBoundary').checked = false;
+                document.getElementById('showActualCount').checked = false;
             } else if (preset === 'boundary') {
                 document.getElementById('showAbsError').checked = false;
                 document.getElementById('showRelError').checked = false;
                 document.getElementById('showBoundary').checked = true;
+                document.getElementById('showActualCount').checked = false;
             }
             
             runAnalysis();
@@ -1870,10 +2298,10 @@
         }
 
         function toggleDark() {
-            document.body.classList.toggle('dark');
+            document.body.classList.toggle('light');
             const btn = document.getElementById('darkBtn');
-            btn.textContent = document.body.classList.contains('dark') ? 'Light Mode' : 'Dark Mode';
-            if (scene) scene.background = new THREE.Color(document.body.classList.contains('dark') ? 0x1a1a1a : 0xffffff);
+            btn.textContent = document.body.classList.contains('light') ? 'Dark Mode' : 'Light Mode';
+            if (scene) scene.background = new THREE.Color(document.body.classList.contains('light') ? 0xffffff : 0x1a1a1a);
         }
 
         function showHelp() {
@@ -1890,7 +2318,6 @@
 
         // Init
         updateTheory();
-        updateComparison();
         const tb = document.getElementById('tbl');
         for (let k = 2; k <= 12; k++) {
             const z = zeta(k);
@@ -1905,4 +2332,4 @@
         });
     </script>
 </body>
-                                                                                                               </html>
+    </html>
